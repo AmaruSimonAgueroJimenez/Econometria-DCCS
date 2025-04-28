@@ -1,1 +1,1 @@
-# Econometr-a-DCCS
+# Econometría-DCCS
