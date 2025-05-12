@@ -506,23 +506,10 @@ stargazer(modelo1.4, modelo2.4, modelo3.4, modelo4.4, modelo5.4, modelo6.4,
 ```
 
 ```{r}
-# Modelos para β_conflicto×dcc = 30 con n=300
-modelo1.3 <- lm(tiempo ~ conflicto, data = data3)
-modelo2.3 <- lm(tiempo ~ conflicto + svo, data = data3)
-modelo3.3 <- lm(tiempo ~ conflicto + dcc, data = data3)
-modelo4.3 <- lm(tiempo ~ conflicto + dcc + svo, data = data3)
-modelo5.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data3)
-modelo6.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data3)
 
-# Modelos para β_conflicto×dcc = 10 con n=300
-modelo1.4 <- lm(tiempo ~ conflicto, data = data4)
-modelo2.4 <- lm(tiempo ~ conflicto + svo, data = data4)
-modelo3.4 <- lm(tiempo ~ conflicto + dcc, data = data4)
-modelo4.4 <- lm(tiempo ~ conflicto + dcc + svo, data = data4)
-modelo5.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data4)
-modelo6.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data4)
 ```
 
+\newpage
 
 # Pregunta 6. 
 
@@ -582,7 +569,7 @@ ggplot() +
   )
 ```
 
-
+\newpage
 
 # Pregunta 7. 
 
@@ -598,6 +585,7 @@ Este [repositorio](https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS) 
 ```{r}
 #| fig-height: 4
 #| fig-width: 4
+#| fig-align: center
 #| results: 'asis'
 # URL del repositorio
 repo_url <- "https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS"
@@ -614,6 +602,7 @@ El informe .pdf se encuentra en [esta dirección](http://github.com/AmaruSimonAg
 ```{r}
 #| fig-height: 4
 #| fig-width: 4
+#| fig-align: center
 #| results: 'asis'
 # URL del repositorio
 repo_url <- "http://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Prueba1_Amaru_Aguero.pdf"
