@@ -583,18 +583,22 @@ ggplot() +
 ```
 
 
+
 # Pregunta 7. 
 
 Discutir principales resultados y plantear conclusiones del ejercicio y los modelos.
 
 
+\newpage
+
 # Repositorio GitHub y Referencias.
 
-Este [repositorio](https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS") contiene el código fuente de este ejercicio, así como los datos utilizados para la simulación y análisis. De igual manera se puede acceder con el siguiente código QR.
+Este [repositorio](https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS) contiene el código fuente de este ejercicio, así como los datos utilizados para la simulación y análisis. De igual manera se puede acceder con el siguiente código QR.
 
 ```{r}
 #| fig-height: 4
 #| fig-width: 4
+#| results: 'asis'
 # URL del repositorio
 repo_url <- "https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS"
 
@@ -605,13 +609,14 @@ qr <- qr_code(repo_url)
 plot(qr)
 ```
 
-El informe .pdf se encuentra en [esta dirección](https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Prueba1_Amaru_Aguero.pdf). De igual manera se puede acceder con el siguiente código QR.
+El informe .pdf se encuentra en [esta dirección](http://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Prueba1_Amaru_Aguero.pdf). De igual manera se puede acceder con el siguiente código QR.
 
 ```{r}
 #| fig-height: 4
 #| fig-width: 4
+#| results: 'asis'
 # URL del repositorio
-repo_url <- "https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Prueba1_Amaru_Aguero.pdf"
+repo_url <- "http://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Prueba1_Amaru_Aguero.pdf"
 
 # Generar código QR
 qr <- qr_code(repo_url)
