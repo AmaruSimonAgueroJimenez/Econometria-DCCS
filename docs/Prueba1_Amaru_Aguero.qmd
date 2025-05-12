@@ -1,0 +1,587 @@
+---
+title: |
+  \begin{center}
+    \includegraphics[height=4cm]{logo.png} \\[1cm]
+    \Large Econometría \\
+  \end{center}
+subtitle: "Prueba 1"
+author:
+  - name: "Amaru Simón Agüero Jiménez"
+    email: "aaguero@miaundes.cl"
+    orcid: "0000-0001-7336-1833"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    documentclass: article
+    fontsize: 10pt
+    mainfont: "Arial"
+    bibliography: ref.bib
+    csl: apa-numeric-superscript.csl
+    keep-tex: true
+    header-includes: |
+      % Paquetes necesarios
+      \usepackage{amsmath}
+      \usepackage{amssymb}
+      \usepackage{graphicx}
+      \usepackage{fancyhdr}
+      \usepackage{geometry}
+      \usepackage{booktabs}
+      \usepackage{dcolumn}
+      \usepackage{array}
+      \newcolumntype{d}[1]{D{.}{.}{#1}}
+      \usepackage{float}
+      \usepackage{adjustbox}
+      \renewcommand{\normalsize}{\fontsize{10pt}{12pt}\selectfont}
+      
+      % Configuración de márgenes
+      \geometry{
+        a4paper,
+        left=1.5cm,
+        right=1.5cm,
+        top=1.5cm,
+        bottom=2.5cm,
+        includeheadfoot
+      }
+
+      % Configuración de encabezado y pie de página
+      \pagestyle{fancy}
+      \fancyhf{} % Limpia encabezado y pie de página
+      
+      % Encabezado
+      \lhead{\includegraphics[height=1.5cm]{logo.png}} % Logo en el encabezado
+      \chead{}
+      \rhead{\small Econometría: Prueba 1.}
+
+      % Ajuste de separación entre encabezado y contenido
+      \setlength{\headheight}{2cm} % Altura del encabezado
+      \setlength{\headsep}{1.5cm} % Distancia entre encabezado y contenido
+
+      % Pie de página
+      \lfoot{}
+      \cfoot{\thepage} % Número de página centrado
+      \rfoot{}
+      
+      
+# Configuración de ejecución
+execute:
+  echo: false     # Mostrar código
+  warning: false  # Sin advertencias
+  message: false  # Sin mensajes
+  fig-width: 8    # Ancho de figuras
+  fig-height: 6   # Alto de figuras
+---
+
+# Paquetes de R y LaTex.
+
+```{r}
+install_and_load <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    utils::install.packages(package)
+    library(package, character.only = TRUE)
+  }
+}
+
+# Lista de paqutes
+packages <- c("knitr",
+              "kableExtra", 
+              "DT", 
+              "table1",
+              "tinytex",
+              "stargazer",
+              "gapminder",
+              "latex2exp",
+              "tidyverse",
+              "ggpubr")
+
+# función para instalar y cargar paquetes
+invisible(capture.output(sapply(packages, install_and_load)))
+
+# Install LaTeX
+# tinytex::install_tinytex()
+# tinytex::tlmgr_install(c("booktabs", "xcolor", "array"))
+```
+
+# Caso.
+
+Simular un proceso generador de datos para el tiempo que le toma a una persona, negociando sobre la venta de un artículo, llegar a un acuerdo. Nos interesa conocer los mecanismos psicológicos que operan detrás de las decisiones cooperativas de las personas frente a conflictos de interés (juegos de suma cero). Interpretaremos el tiempo como una medida inversa de cooperación —i.e., ante mayor disposición de las personas para cooperar o compartir las ganancias de la negociación, menor debería ser el tiempo necesario para llegar a un acuerdo.
+
+Creemos que las personas que perciban mayores niveles de conflicto de intereses con su contraparte implementarán tácticas de negociación menos conciliadoras y tardarán más tiempo en llegar a un acuerdo. Esperamos, por lo tanto, una relación directa entre el conflicto percibido y el tiempo para alcanzar un acuerdo en la negociación. Esperamos, que esta relación esté moderada por el rasgo de reciprocidad, donde personas con perfiles de cooperación no-condicionales tenderían a cooperar independientemente del conflicto percibido.
+
+Supondremos, para este ejercicio, que el tiempo necesario para ponerse de acuerdo (**en segundos**) es determinado **exclusivamente** por:
+
+1. La percepción de conflicto de interés (**en puntaje $z$**), de los participantes en la ronda de negociación, que medimos con la escala psicométrica Situational Interdependence Scale [@gerpott2018how].
+
+2. El rasgo de reciprocidad (**dummy**), que medimos de la clasificación de los participantes como cooperadores condicionales/no-condicionales a partir de la técnica del Strategy Method (dCC) [@fischbacher2012behavioral].
+
+3. El rasgo de pro-socialidad (**en puntaje $z$**), que medimos de la escala Social Value Orientation (SVO) [@murphy2011measuring].
+
+La **variable independiente de interés** principal es la **percepción de conflicto de interés**.
+
+
+# Proceso generador de datos
+
+Simular un proceso de generación de datos según lo que se especifica a continuación. Asumir que el tiempo, la percepción de conflicto de interés y la prosocialidad siguen distribuciones normales y que la reciprocidad sigue una distribución de Bernoulli. Utilizar los siguientes parámetros y semillas para generar los datos:
+
+- muestra: $n = 50$
+- tiempo: $\beta_0 = 350$, $\beta_{conflicto} = 20$, $\beta_{conflicto \times dcc} = 30$, $\beta_{svo} = -25$
+- error: $\mathrm{E}(u) = 0$, $\mathrm{Var}(u|x) = \sigma^2 = 80^2$, seed = 6
+- svo: $\mu_{svo} = 0$, $\sigma_{svo} = 1$, seed = 5
+- conflicto: $\mu_{conflicto} = 0 - 0.5 \times svo$, $\sigma_{conflicto} = 1$, seed = 2
+- dcc: $\mu_{dcc} = 0.7$, seed = 45
+
+```{r}
+# Generación de datos
+# muestra
+n=50
+# parámetros
+beta_0 = 350
+beta_conflicto = 20
+beta_conflicto_dcc = 30
+beta_svo = -25
+# error
+set.seed(6)
+error = rnorm(n, mean = 0, sd = 80)
+# pro-socialidad
+set.seed(5)
+svo = rnorm(n, mean = 0, sd = 1)
+# conflicto
+set.seed(2)
+conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
+# dcc
+set.seed(45)
+dcc = rbinom(n, 1, 0.7)
+# tiempo
+tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+
+data = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+  mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
+```
+
+\newpage
+
+# Pregunta 1. 
+
+Describir el comportamiento de las variables de la muestra.
+
+(a) Tomar estadísticas descriptivas de las variables. Incluir, al menos, la media, moda, mediana y el rango intercuartílico, cuando corresponda.
+   
+```{r}
+#| results: 'asis'
+# Función para la moda
+get_mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Calcular estadísticas para variables continuas
+continuous_stats <- data %>%
+  select(tiempo, conflicto, svo, error) %>%
+  summarise(
+    Variable = c("Tiempo", "Conflicto", "SVO"),
+    Media = c(mean(tiempo), mean(conflicto), mean(svo)),
+    `Desviación Estándar` = c(sd(tiempo), sd(conflicto), sd(svo)), # Agregar desviación estándar
+    Moda = c(get_mode(tiempo), get_mode(conflicto), get_mode(svo)),
+    Mediana = c(median(tiempo), median(conflicto), median(svo)),
+    IQR = c(IQR(tiempo), IQR(conflicto), IQR(svo))
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+# Calcular frecuencias y porcentajes para la variable categórica
+categorical_stats <- data %>%
+  count(dcc) %>%
+  mutate(
+    Porcentaje = n / sum(n) * 100,
+    Variable = "DCC",
+    Estadístico = paste0("Frecuencia de ", dcc),
+    Valor = paste0(n, " (", round(Porcentaje, 2), "%)")
+  ) %>%
+  select(Variable, Estadístico, Valor) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+# Combinar tablas
+final_table <- continuous_stats %>%
+  pivot_longer(cols = -Variable, names_to = "Estadístico", values_to = "Valor") %>%
+  mutate(Valor = as.character(Valor)) %>%  # Convertir a carácter
+  bind_rows(categorical_stats)
+
+# Mostrar tabla en formato LaTeX con kable
+kable(final_table, format = "latex", booktabs = TRUE, digits = 2, caption = "Estadísticas descriptivas de las variables") %>% kable_styling(latex_options = c("HOLD_position")) %>%
+  collapse_rows(columns = 1, valign = "top")
+```
+
+\newpage
+
+(b) Tomar gráficos de densidad y boxplot para variables continuas y gráfico de barras para variable categórica.
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+#| results: asis
+#| label: fig1
+#| fig-cap: "Distribución de las variables continuas y categórica"
+
+
+# Función para generar gráfico de densidad + boxplot
+plot_variable <- function(df, var_name, label = NULL, max_y = NULL) {
+  # Posición del boxplot: por encima del límite de la densidad
+  if (is.null(max_y)) {
+    dens <- density(df[[var_name]], na.rm = TRUE)
+    max_y <- max(dens$y) * 1.3
+  }
+  boxplot_position <- max_y * 1.2
+  upper_limit <- max_y * 1.3
+  
+  ggplot(df, aes_string(x = var_name)) +
+    # histograma convertido a densidad
+    geom_histogram(aes(y = ..density..),
+                   fill = "gray80", colour = "white",
+                   bins = 15) +
+    # curva de densidad
+    geom_density(colour = "blue", size = 1) +
+    # boxplot horizontal en la parte superior
+    geom_boxplot(aes(y = boxplot_position, x = .data[[var_name]]),
+                 width = max_y * 0.04,
+                 outlier.shape = 1) +
+    coord_cartesian(ylim = c(0, upper_limit)) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.02))) +
+    labs(
+      title = paste("Distribución de", ifelse(is.null(label), var_name, label)),
+      x     = ifelse(is.null(label), var_name, label),
+      y     = "Densidad"
+    ) +
+    theme_minimal()
+}
+
+# Función para generar gráfico de barras para variable categórica en escala de grises
+plot_categorical <- function(df, var_name, label = NULL) {
+  cat_data <- df %>%
+    count(!!sym(var_name)) %>%
+    mutate(Porcentaje = n / sum(n) * 100,
+           Etiqueta = paste0(round(Porcentaje, 1), "%"))
+  ggplot(cat_data, aes(x = !!sym(var_name), y = Porcentaje, fill = !!sym(var_name))) +
+    geom_bar(stat = "identity", width = 0.6) +
+    geom_text(aes(label = Etiqueta), vjust = -0.5, size = 4, color = "black") +
+    scale_fill_grey(start = 0.4, end = 0.7) +  # Escala de grises
+    labs(
+      title = paste("Distribución de", ifelse(is.null(label), var_name, label)),
+      x = ifelse(is.null(label), var_name, label),
+      y = "Porcentaje (%)"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          text = element_text(color = "black"),
+          axis.text = element_text(color = "gray20")) +
+    ylim(0, max(cat_data$Porcentaje) * 1.1)  # Espacio para las etiquetas
+}
+
+# Generamos cada plot
+p1 <- plot_variable(data, "tiempo", "Tiempo")
+p2 <- plot_variable(data, "conflicto", "Conflicto")
+p3 <- plot_variable(data, "svo", "SVO")
+p4 <- plot_categorical(data, "dcc", "dCC (Cooperador Condicional)")
+
+# Unirlos con ggarrange - ahora con 4 gráficos
+ggarrange(p1, p2, p3, p4, 
+          ncol = 2, nrow = 2, 
+          labels = c("A", "B", "C", "D"))
+
+```
+
+\newpage  
+
+# Pregunta 2. 
+
+Ajustar los 6 modelos lineales que se detallan a continuación, exportar tabla con `stargazer()` e interpretar coeficientes y resultados de cada modelo. Comparar y explicar diferencias entre los modelos.
+
+   (a) $tiempo \sim conflicto$
+
+   (b) $tiempo \sim conflicto + svo$
+
+   (c) $tiempo \sim conflicto + dcc$
+
+   (d) $tiempo \sim conflicto + dcc + svo$
+
+   (e) $tiempo \sim conflicto + conflicto \times dcc + dcc$
+
+   (f) $tiempo \sim conflicto + conflicto \times dcc + dcc + svo$
+
+
+```{r}
+#| results: asis
+modelo1 <- lm(tiempo ~ conflicto, data = data)
+modelo2 <- lm(tiempo ~ conflicto + svo, data = data)
+modelo3 <- lm(tiempo ~ conflicto + dcc, data = data)
+modelo4 <- lm(tiempo ~ conflicto + dcc + svo, data = data)
+modelo5 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data)
+modelo6 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data)
+
+# Crear tabla con stargazer en formato LaTeX
+
+stargazer(modelo1, modelo2, modelo3, modelo4, modelo5, modelo6,
+          type = "latex",
+          title = "Resultados de los modelos lineales ajustados",
+          dep.var.labels = "Tiempo (segundos)",
+          column.labels = c("Modelo 1", "Modelo 2", "Modelo 3", "Modelo 4", "Modelo 5", "Modelo 6"),
+          covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
+          digits = 2,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          model.numbers = FALSE,
+          header = FALSE,
+          font.size = "scriptsize",    # Reduce el tamaño de la fuente
+          no.space = TRUE,        # Elimina espacios adicionales
+          single.row = TRUE,      # Coloca los coeficientes y errores estándar en una sola fila
+          table.placement = "H")  # Fuerza la ubicación de la tabla
+
+```
+
+
+# Pregunta 3. 
+
+¿Cuál modelo cree que especifica correctamente la hipótesis a probar y por qué?
+
+# Pregunta 4. 
+
+Repetir punto 2 volviendo a tomar una muestra de tiempo con $\beta_{conflicto \times dcc} = 10$.
+
+```{r}
+#| results: asis
+# parámetros
+beta_0 = 350
+beta_conflicto = 20
+beta_conflicto_dcc = 10
+beta_svo = -25
+# error
+set.seed(6)
+error = rnorm(n, mean = 0, sd = 80)
+# pro-socialidad
+set.seed(5)
+svo = rnorm(n, mean = 0, sd = 1)
+# conflicto
+set.seed(2)
+conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
+# dcc
+set.seed(45)
+dcc = rbinom(n, 1, 0.7)
+# tiempo
+tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+
+data2 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+  mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
+
+modelo1.2 <- lm(tiempo ~ conflicto, data = data2)
+modelo2.2 <- lm(tiempo ~ conflicto + svo, data = data2)
+modelo3.2 <- lm(tiempo ~ conflicto + dcc, data = data2)
+modelo4.2 <- lm(tiempo ~ conflicto + dcc + svo, data = data2)
+modelo5.2 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data2)
+modelo6.2 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data2)
+
+
+# Crear tabla con stargazer en formato LaTeX
+
+stargazer(modelo1.2, modelo2.2, modelo3.2, modelo4.2, modelo5.2, modelo6.2,
+          type = "latex",
+          title = "Resultados de los modelos lineales ajustados $\\beta_{conflicto \\times dcc}$ = 10",
+          dep.var.labels = "Tiempo (segundos)",
+          column.labels = c("Modelo 1.2", "Modelo 2.2", "Modelo 3.2", "Modelo 4.2", "Modelo 5.2", "Modelo 6.2"),
+          covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
+          digits = 2,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          model.numbers = FALSE,
+          header = FALSE,
+          font.size = "scriptsize",   
+          no.space = TRUE,   
+          single.row = TRUE,    
+          table.placement = "H")  
+
+```
+
+
+# Pregunta 5. 
+
+Repetir la simulación incrementando el tamaño de la muestra a 300 observaciones, tanto para $\beta_{conflicto \times dcc} = 30$ como para $\beta_{conflicto \times dcc} = 10$ (en total en la prueba hay 4 escenarios, 2 tamaño de muestra $\ast$ 2 $\beta_{conflicto \times dcc}$). Comparar con resultados anteriores y explicar posibles causas de las diferencias.
+
+```{r}
+# Para n=300 con β_conflicto×dcc = 30
+n_grande = 300
+# parámetros
+beta_0 = 350
+beta_conflicto = 20
+beta_conflicto_dcc = 30  # Primer escenario
+beta_svo = -25
+# error
+set.seed(6)
+error = rnorm(n_grande, mean = 0, sd = 80)
+# pro-socialidad
+set.seed(5)
+svo = rnorm(n_grande, mean = 0, sd = 1)
+# conflicto
+set.seed(2)
+conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
+# dcc
+set.seed(45)
+dcc = rbinom(n_grande, 1, 0.7)
+# tiempo
+tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+
+data3 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+  mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
+
+# Luego para n=300 con β_conflicto×dcc = 10
+# parámetros
+beta_0 = 350
+beta_conflicto = 20
+beta_conflicto_dcc = 10  # Segundo escenario
+beta_svo = -25
+# error
+set.seed(6)
+error = rnorm(n_grande, mean = 0, sd = 80)
+# pro-socialidad
+set.seed(5)
+svo = rnorm(n_grande, mean = 0, sd = 1)
+# conflicto
+set.seed(2)
+conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
+# dcc
+set.seed(45)
+dcc = rbinom(n_grande, 1, 0.7)
+# tiempo
+tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+
+data4 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+  mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
+```
+
+```{r}
+# Modelos para β_conflicto×dcc = 30 con n=300
+modelo1.3 <- lm(tiempo ~ conflicto, data = data3)
+modelo2.3 <- lm(tiempo ~ conflicto + svo, data = data3)
+modelo3.3 <- lm(tiempo ~ conflicto + dcc, data = data3)
+modelo4.3 <- lm(tiempo ~ conflicto + dcc + svo, data = data3)
+modelo5.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data3)
+modelo6.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data3)
+
+# Modelos para β_conflicto×dcc = 10 con n=300
+modelo1.4 <- lm(tiempo ~ conflicto, data = data4)
+modelo2.4 <- lm(tiempo ~ conflicto + svo, data = data4)
+modelo3.4 <- lm(tiempo ~ conflicto + dcc, data = data4)
+modelo4.4 <- lm(tiempo ~ conflicto + dcc + svo, data = data4)
+modelo5.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data4)
+modelo6.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data4)
+```
+
+```{r}
+#| results: asis
+# Crear tabla con stargazer en formato LaTeX para n=300 y β_conflicto×dcc = 30
+stargazer(modelo1.3, modelo2.3, modelo3.3, modelo4.3, modelo5.3, modelo6.3,
+          type = "latex",
+          title = "Resultados de los modelos lineales ajustados ($n$=300, $\\beta_{conflicto \\times dcc}$ = 30)",
+          dep.var.labels = "Tiempo (segundos)",
+          column.labels = c("Modelo 1", "Modelo 2", "Modelo 3", "Modelo 4", "Modelo 5", "Modelo 6"),
+          covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
+          digits = 2,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          model.numbers = FALSE,
+          header = FALSE,
+          font.size = "tiny",  
+          no.space = TRUE, 
+          single.row = TRUE,      
+          table.placement = "H")  
+
+# Crear tabla con stargazer en formato  para n=300 y B_conflicto×dcc = 10
+stargazer(modelo1.4, modelo2.4, modelo3.4, modelo4.4, modelo5.4, modelo6.4,
+          type = "latex",
+          title = "Resultados de los modelos lineales ajustados ($n$=300, $\\beta_{conflicto \\times dcc}$ = 10)",
+          dep.var.labels = "Tiempo (segundos)",
+          column.labels = c("Modelo 1", "Modelo 2", "Modelo 3", "Modelo 4", "Modelo 5", "Modelo 6"),
+          covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
+          digits = 2,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          model.numbers = FALSE,
+          header = FALSE,
+          font.size = "tiny",    
+          no.space = TRUE,        
+          single.row = TRUE,      
+          table.placement = "H")  
+```
+\newpage
+
+# Pregunta 6. 
+
+Graficar la interacción entre conflicto y reciprocidad para $n = 300$ y $\beta_{conflicto \times dcc} = 30$ e interpretar gráfico.
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+#| results: asis
+#| label: fig2
+#| fig-cap: "Interacción entre conflicto y reciprocidad para $n$ = 300 y $\\beta_{conflicto \\times dcc}$ = 30"
+
+
+# Crear un nuevo dataframe para la predicción
+new_data <- expand.grid(
+  conflicto = seq(min(data3$conflicto), max(data3$conflicto), length.out = 100),
+  dcc = levels(data3$dcc),
+  svo = mean(data3$svo)  # Usar la media de SVO
+)
+
+# Predecir con intervalos de confianza
+pred_with_ci <- predict(modelo6.3, newdata = new_data, interval = "confidence")
+predictions <- cbind(new_data, pred_with_ci)
+names(predictions)[4:6] <- c("tiempo", "lower", "upper")
+
+# Graficar la interacción
+ggplot() +
+  # Agregar puntos de datos originales
+  geom_point(data = data3, aes(x = conflicto, y = tiempo, color = dcc), 
+             alpha = 0.3, size = 1.5) +
+  # Agregar bandas de confianza con el mismo color que las líneas
+  geom_ribbon(data = predictions, 
+              aes(x = conflicto, ymin = lower, ymax = upper, fill = dcc), 
+              alpha = 0.2) +
+  # Agregar líneas de predicción
+  geom_line(data = predictions, 
+            aes(x = conflicto, y = tiempo, color = dcc), 
+            size = 1.2) +
+  # Etiquetas y tema
+  labs(
+    title = "Interacción entre Conflicto y Reciprocidad",
+    subtitle = "n = 300, β(conflicto × dcc) = 30",
+    x = "Conflicto (puntuación z)",
+    y = "Tiempo de Negociación (segundos)",
+    color = "Reciprocidad",
+    fill = "Reciprocidad"
+  ) +
+  theme_minimal() +
+  # Usar escala de grises para compatibilidad con publicaciones
+  scale_color_grey(start = 0.2, end = 0.8) +
+  scale_fill_grey(start = 0.2, end = 0.8) +
+  # Mejorar legibilidad
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    text = element_text(size = 12)
+  )
+```
+
+
+# Pregunta 7. 
+
+Discutir principales resultados y plantear conclusiones del ejercicio y los modelos.
+
+# Repositorio GitHub.
+
+Esta dirección contiene el código fuente de este ejercicio, así como los datos utilizados para la simulación y análisis.
+
+De igual manera se puede acceder con el siguiente código QR.
+
+```{r}
+
+```
+
+
+
+
+
