@@ -67,14 +67,10 @@ format:
       
 # Configuración de ejecución
 execute:
-  echo: false     # Mostrar código
+  echo: false     # No mostrar código
   warning: false  # Sin advertencias
   message: false  # Sin mensajes
-  fig-width: 8    # Ancho de figuras
-  fig-height: 6   # Alto de figuras
 ---
-
-# Paquetes de R y LaTex.
 
 ```{r}
 install_and_load <- function(package) {
@@ -84,7 +80,7 @@ install_and_load <- function(package) {
   }
 }
 
-# Lista de paqutes
+# lista de paqutes
 packages <- c("knitr",
               "kableExtra", 
               "DT", 
@@ -95,42 +91,43 @@ packages <- c("knitr",
               "latex2exp",
               "tidyverse",
               "ggpubr",
-              "qrcode")
+              "qrcode",
+              "Hmisc")
 
-# función para instalar y cargar paquetes
+# funcion para instalar y cargar paquetes
 invisible(capture.output(sapply(packages, install_and_load)))
 
-# Install LaTeX
+# instalar despues de tinitex
 # tinytex::install_tinytex()
 # tinytex::tlmgr_install(c("booktabs", "xcolor", "array"))
 ```
 
 # Caso.
 
-Simular un proceso generador de datos para el tiempo que le toma a una persona, negociando sobre la venta de un artículo, llegar a un acuerdo. Nos interesa conocer los mecanismos psicológicos que operan detrás de las decisiones cooperativas de las personas frente a conflictos de interés (juegos de suma cero). Interpretaremos el tiempo como una medida inversa de cooperación —i.e., ante mayor disposición de las personas para cooperar o compartir las ganancias de la negociación, menor debería ser el tiempo necesario para llegar a un acuerdo.
+Simular un proceso generador de datos para el tiempo que le toma a una persona, negociando sobre la venta de un artículo, llegar a un acuerdo. Nos interesa conocer los mecanismos psicológicos que operan detrás de las decisiones cooperativas de las personas frente a Conflictos de interés (juegos de suma cero). Interpretaremos el tiempo como una medida inversa de cooperación —i.e., ante mayor disposición de las personas para cooperar o compartir las ganancias de la negociación, menor debería ser el tiempo necesario para llegar a un acuerdo.
 
-Creemos que las personas que perciban mayores niveles de conflicto de intereses con su contraparte implementarán tácticas de negociación menos conciliadoras y tardarán más tiempo en llegar a un acuerdo. Esperamos, por lo tanto, una relación directa entre el conflicto percibido y el tiempo para alcanzar un acuerdo en la negociación. Esperamos, que esta relación esté moderada por el rasgo de reciprocidad, donde personas con perfiles de cooperación no-condicionales tenderían a cooperar independientemente del conflicto percibido.
+Creemos que las personas que perciban mayores niveles de Conflicto de intereses con su contraparte implementarán tácticas de negociación menos conciliadoras y tardarán más tiempo en llegar a un acuerdo. Esperamos, por lo tanto, una relación directa entre el Conflicto percibido y el tiempo para alcanzar un acuerdo en la negociación. Esperamos, que esta relación esté moderada por el rasgo de reciprocidad, donde personas con perfiles de cooperación no-condicionales tenderían a cooperar independientemente del Conflicto percibido.
 
 Supondremos, para este ejercicio, que el tiempo necesario para ponerse de acuerdo (**en segundos**) es determinado **exclusivamente** por:
 
-1. La percepción de conflicto de interés (**en puntaje $z$**), de los participantes en la ronda de negociación, que medimos con la escala psicométrica Situational Interdependence Scale [@gerpott2018how].
+1. La percepción de Conflicto de interés (**en puntaje $z$**), de los participantes en la ronda de negociación, que medimos con la escala psicométrica Situational Interdependence Scale [@gerpott2018how].
 
 2. El rasgo de reciprocidad (**dummy**), que medimos de la clasificación de los participantes como cooperadores condicionales/no-condicionales a partir de la técnica del Strategy Method (dCC) [@fischbacher2012behavioral].
 
 3. El rasgo de pro-socialidad (**en puntaje $z$**), que medimos de la escala Social Value Orientation (SVO) [@murphy2011measuring].
 
-La **variable independiente de interés** principal es la **percepción de conflicto de interés**.
+La **variable independiente de interés** principal es la **percepción de Conflicto de interés**.
 
 
-# Proceso generador de datos
+# Proceso generador de datos.
 
-Simular un proceso de generación de datos según lo que se especifica a continuación. Asumir que el tiempo, la percepción de conflicto de interés y la prosocialidad siguen distribuciones normales y que la reciprocidad sigue una distribución de Bernoulli. Utilizar los siguientes parámetros y semillas para generar los datos:
+Simular un proceso de generación de datos según lo que se especifica a continuación. Asumir que el tiempo, la percepción de Conflicto de interés y la prosocialidad siguen distribuciones normales y que la reciprocidad sigue una distribución de Bernoulli. Utilizar los siguientes parámetros y semillas para generar los datos:
 
 - muestra: $n = 50$
-- tiempo: $\beta_0 = 350$, $\beta_{conflicto} = 20$, $\beta_{conflicto \times dcc} = 30$, $\beta_{svo} = -25$
+- tiempo: $\beta_0 = 350$, $\beta_{Conflicto} = 20$, $\beta_{Conflicto \times dCC} = 30$, $\beta_{svo} = -25$
 - error: $\mathrm{E}(u) = 0$, $\mathrm{Var}(u|x) = \sigma^2 = 80^2$, seed = 6
 - svo: $\mu_{svo} = 0$, $\sigma_{svo} = 1$, seed = 5
-- conflicto: $\mu_{conflicto} = 0 - 0.5 \times svo$, $\sigma_{conflicto} = 1$, seed = 2
+- Conflicto: $\mu_{Conflicto} = 0 - 0.5 \times svo$, $\sigma_{Conflicto} = 1$, seed = 2
 - dcc: $\mu_{dcc} = 0.7$, seed = 45
 
 ```{r}
@@ -139,8 +136,8 @@ Simular un proceso de generación de datos según lo que se especifica a continu
 n=50
 # parámetros
 beta_0 = 350
-beta_conflicto = 20
-beta_conflicto_dcc = 30
+beta_Conflicto = 20
+beta_Conflicto_dcc = 30
 beta_svo = -25
 # error
 set.seed(6)
@@ -148,16 +145,16 @@ error = rnorm(n, mean = 0, sd = 80)
 # pro-socialidad
 set.seed(5)
 svo = rnorm(n, mean = 0, sd = 1)
-# conflicto
+# Conflicto
 set.seed(2)
-conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
+Conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
 # dcc
 set.seed(45)
 dcc = rbinom(n, 1, 0.7)
 # tiempo
-tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+tiempo = beta_0 + beta_Conflicto * Conflicto + beta_Conflicto_dcc * Conflicto * dcc + beta_svo * svo + error
 
-data = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+data = data.frame(tiempo, Conflicto, dcc, svo, error) %>%
   mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
 ```
 
@@ -171,26 +168,26 @@ Describir el comportamiento de las variables de la muestra.
    
 ```{r}
 #| results: 'asis'
-# Función para la moda
+# funcion para la moda
 get_mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
 
-# Calcular estadísticas para variables continuas
+# calcular estadisticas para variables continuas
 continuous_stats <- data %>%
-  select(tiempo, conflicto, svo, error) %>%
+  select(tiempo, Conflicto, svo, error) %>%
   summarise(
     Variable = c("Tiempo", "Conflicto", "SVO"),
-    Media = c(mean(tiempo), mean(conflicto), mean(svo)),
-    `Desviación Estándar` = c(sd(tiempo), sd(conflicto), sd(svo)), # Agregar desviación estándar
-    Moda = c(get_mode(tiempo), get_mode(conflicto), get_mode(svo)),
-    Mediana = c(median(tiempo), median(conflicto), median(svo)),
-    IQR = c(IQR(tiempo), IQR(conflicto), IQR(svo))
+    Media = c(mean(tiempo), mean(Conflicto), mean(svo)),
+    `Desviación Estándar` = c(sd(tiempo), sd(Conflicto), sd(svo)), 
+    Moda = c(get_mode(tiempo), get_mode(Conflicto), get_mode(svo)),
+    Mediana = c(median(tiempo), median(Conflicto), median(svo)),
+    IQR = c(IQR(tiempo), IQR(Conflicto), IQR(svo))
   ) %>%
   mutate(across(where(is.numeric), ~ round(.x, 2)))
 
-# Calcular frecuencias y porcentajes para la variable categórica
+# calcular frecuencias y porcentajes para la variable categorica
 categorical_stats <- data %>%
   count(dcc) %>%
   mutate(
@@ -202,13 +199,13 @@ categorical_stats <- data %>%
   select(Variable, Estadístico, Valor) %>%
   mutate(across(where(is.numeric), ~ round(.x, 2)))
 
-# Combinar tablas
+# combinar tablas
 final_table <- continuous_stats %>%
   pivot_longer(cols = -Variable, names_to = "Estadístico", values_to = "Valor") %>%
-  mutate(Valor = as.character(Valor)) %>%  # Convertir a carácter
+  mutate(Valor = as.character(Valor)) %>% 
   bind_rows(categorical_stats)
 
-# Mostrar tabla en formato LaTeX con kable
+# mostrar tabla en formato LaTeX con kable
 kable(final_table, format = "latex", booktabs = TRUE, digits = 2, caption = "Estadísticas descriptivas de las variables") %>% kable_styling(latex_options = c("HOLD_position")) %>%
   collapse_rows(columns = 1, valign = "top")
 ```
@@ -221,13 +218,12 @@ kable(final_table, format = "latex", booktabs = TRUE, digits = 2, caption = "Est
 #| fig-height: 8
 #| fig-width: 10
 #| results: asis
-#| label: fig1
+#| label: fig-fig1
 #| fig-cap: "Distribución de las variables continuas y categórica"
 
 
-# Función para generar gráfico de densidad + boxplot
+# funcion para generar gráfico de densidad + boxplot
 plot_variable <- function(df, var_name, label = NULL, max_y = NULL) {
-  # Posición del boxplot: por encima del límite de la densidad
   if (is.null(max_y)) {
     dens <- density(df[[var_name]], na.rm = TRUE)
     max_y <- max(dens$y) * 1.3
@@ -236,13 +232,10 @@ plot_variable <- function(df, var_name, label = NULL, max_y = NULL) {
   upper_limit <- max_y * 1.3
   
   ggplot(df, aes_string(x = var_name)) +
-    # histograma convertido a densidad
     geom_histogram(aes(y = ..density..),
                    fill = "gray80", colour = "white",
                    bins = 15) +
-    # curva de densidad
     geom_density(colour = "blue", size = 1) +
-    # boxplot horizontal en la parte superior
     geom_boxplot(aes(y = boxplot_position, x = .data[[var_name]]),
                  width = max_y * 0.04,
                  outlier.shape = 1) +
@@ -256,7 +249,7 @@ plot_variable <- function(df, var_name, label = NULL, max_y = NULL) {
     theme_minimal()
 }
 
-# Función para generar gráfico de barras para variable categórica en escala de grises
+# funcion para generar grafico de barras para variable categorica
 plot_categorical <- function(df, var_name, label = NULL) {
   cat_data <- df %>%
     count(!!sym(var_name)) %>%
@@ -265,7 +258,7 @@ plot_categorical <- function(df, var_name, label = NULL) {
   ggplot(cat_data, aes(x = !!sym(var_name), y = Porcentaje, fill = !!sym(var_name))) +
     geom_bar(stat = "identity", width = 0.6) +
     geom_text(aes(label = Etiqueta), vjust = -0.5, size = 4, color = "black") +
-    scale_fill_grey(start = 0.4, end = 0.7) +  # Escala de grises
+    scale_fill_grey(start = 0.4, end = 0.7) + 
     labs(
       title = paste("Distribución de", ifelse(is.null(label), var_name, label)),
       x = ifelse(is.null(label), var_name, label),
@@ -275,19 +268,63 @@ plot_categorical <- function(df, var_name, label = NULL) {
     theme(legend.position = "none",
           text = element_text(color = "black"),
           axis.text = element_text(color = "gray20")) +
-    ylim(0, max(cat_data$Porcentaje) * 1.1)  # Espacio para las etiquetas
+    ylim(0, max(cat_data$Porcentaje) * 1.1) 
 }
 
-# Generamos cada plot
+# generamos cada plot
 p1 <- plot_variable(data, "tiempo", "Tiempo")
-p2 <- plot_variable(data, "conflicto", "Conflicto")
+p2 <- plot_variable(data, "Conflicto", "Conflicto")
 p3 <- plot_variable(data, "svo", "SVO")
 p4 <- plot_categorical(data, "dcc", "dCC (Cooperador Condicional)")
 
-# Unirlos con ggarrange - ahora con 4 gráficos
+# unirlos con ggarrange
 ggarrange(p1, p2, p3, p4, 
           ncol = 2, nrow = 2, 
           labels = c("A", "B", "C", "D"))
+
+```
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+#| results: asis
+#| label: fig-fig2
+#| fig-cap: "Correlación entre variables númericas"
+
+# Función para crear gráfico de correlación con anotaciones
+plot_correlation <- function(df, var1, var2, var1_label = NULL, var2_label = NULL) {
+  if(is.null(var1_label)) var1_label <- var1
+  if(is.null(var2_label)) var2_label <- var2
+  cor_test <- cor.test(df[[var1]], df[[var2]])
+  r_value <- cor_test$estimate
+  p_value <- cor_test$p.value
+  sig_label <- ifelse(p_value < 0.001, "***", 
+                     ifelse(p_value < 0.01, "**",
+                           ifelse(p_value < 0.05, "*", "ns")))
+  
+  cor_label <- sprintf("r = %.2f %s", r_value, sig_label)
+  
+  ggplot(df, aes_string(x = var1, y = var2)) +
+    geom_point(alpha = 0.6, color = "gray40") +
+    geom_smooth(method = "lm", color = "blue", fill = "lightblue", alpha = 0.3) +
+    annotate("text", x = min(df[[var1]]), y = max(df[[var2]]), 
+             label = cor_label, hjust = 0, vjust = 1, 
+             fontface = "bold", size = 4) +
+    labs(
+      title = paste("Correlación entre", var1_label, "y", var2_label),
+      x = var1_label,
+      y = var2_label
+    ) +
+    theme_minimal()
+}
+
+p5 <- plot_correlation(data, "tiempo", "Conflicto", "Tiempo", "Conflicto")
+p6 <- plot_correlation(data, "tiempo", "svo", "Tiempo", "SVO")
+p7 <- plot_correlation(data, "Conflicto", "svo", "Conflicto", "SVO")
+
+ggarrange(p5, p6, p7, 
+          ncol = 2, nrow = 2, 
+          labels = c("A", "B", "C"))
 
 ```
 
@@ -295,35 +332,48 @@ ggarrange(p1, p2, p3, p4,
 
 # Pregunta 2. 
 
-Ajustar los 6 modelos lineales que se detallan a continuación, exportar tabla con `stargazer()` e interpretar coeficientes y resultados de cada modelo. Comparar y explicar diferencias entre los modelos.
+Ajustar los 6 Modelos lineales que se detallan a continuación, exportar tabla con `stargazer()` e interpretar coeficientes y resultados de cada Modelo. Comparar y explicar diferencias entre los Modelos.
 
-   (a) $tiempo \sim conflicto$
+   (a) $tiempo \sim Conflicto$
 
-   (b) $tiempo \sim conflicto + svo$
+   (b) $tiempo \sim Conflicto + svo$
 
-   (c) $tiempo \sim conflicto + dcc$
+   (c) $tiempo \sim Conflicto + dcc$
 
-   (d) $tiempo \sim conflicto + dcc + svo$
+   (d) $tiempo \sim Conflicto + dcc + svo$
 
-   (e) $tiempo \sim conflicto + conflicto \times dcc + dcc$
+   (e) $tiempo \sim Conflicto + Conflicto \times dcc + dcc$
 
-   (f) $tiempo \sim conflicto + conflicto \times dcc + dcc + svo$
+   (f) $tiempo \sim Conflicto + Conflicto \times dcc + dcc + svo$
 
+En base a lo anterior se formulan los siguiente Modelos
+
+- $Modelo\;1:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ u_i$
+
+- $Modelo\;2:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i+ u_i$
+
+- $Modelo \; 3:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{dCC}}\times\text{dCC}_i+ u_i$
+
+- $Modelo\;4:\; \text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ \beta_{\text{SVO}}\times\text{SVO}_i+ \beta_{\text{dCC}}\times\text{dCC}_i+ u_i$
+
+- $Modelo\;5:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\;      \times(\text{Conflicto}_i\times\text{dCC}_i) + u_i$
+
+- $Modelo\;6:\; \text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\times(\text{Conflicto}_i\times\text{dCC}_i) + u_i$
 
 ```{r}
 #| results: asis
-modelo1 <- lm(tiempo ~ conflicto, data = data)
-modelo2 <- lm(tiempo ~ conflicto + svo, data = data)
-modelo3 <- lm(tiempo ~ conflicto + dcc, data = data)
-modelo4 <- lm(tiempo ~ conflicto + dcc + svo, data = data)
-modelo5 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data)
-modelo6 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data)
+Modelo1 <- lm(tiempo ~ Conflicto, data = data)
+Modelo2 <- lm(tiempo ~ Conflicto + svo, data = data)
+Modelo3 <- lm(tiempo ~ Conflicto + dcc, data = data)
+Modelo4 <- lm(tiempo ~ Conflicto + dcc + svo, data = data)
+Modelo5 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc, data = data)
+Modelo6 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc + svo, data = data)
 
-# Crear tabla con stargazer en formato LaTeX
+# crear tabla con stargazer en formato latex
 
-stargazer(modelo1, modelo2, modelo3, modelo4, modelo5, modelo6,
+stargazer(Modelo1, Modelo2, Modelo3, Modelo4, Modelo5, Modelo6,
           type = "latex",
-          title = "Resultados de los modelos lineales ajustados",
+          title = "Resultados de los Modelos lineales ajustados",
           dep.var.labels = "Tiempo (segundos)",
           column.labels = c("Modelo 1", "Modelo 2", "Modelo 3", "Modelo 4", "Modelo 5", "Modelo 6"),
           covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
@@ -331,60 +381,90 @@ stargazer(modelo1, modelo2, modelo3, modelo4, modelo5, modelo6,
           star.cutoffs = c(0.05, 0.01, 0.001),
           model.numbers = FALSE,
           header = FALSE,
-          font.size = "scriptsize",    # Reduce el tamaño de la fuente
-          no.space = TRUE,        # Elimina espacios adicionales
-          single.row = TRUE,      # Coloca los coeficientes y errores estándar en una sola fila
-          table.placement = "H")  # Fuerza la ubicación de la tabla
+          font.size = "scriptsize",
+          no.space = TRUE,
+          single.row = TRUE,  
+          table.placement = "H")
 
 ```
+En la Tabla 2 se observan los resultados de los Modelos lineales con método de estimación Ordinary Least Squares (OLS), bajo el contraste de hipótesis en donde $H_0:\beta_i=0$ y $H_1:\beta_i\neq0$. Todos los Modelos poseen un $R^2$ estadisticamente distinto al Modelo nulo, indicando un aumento de la capacidad predictiva al ingresar las variables independientes.
+
+En el **Modelo 1** el intercepto o $\hat{\beta}_0$ es de 356.99 segundos y significativo (*p*<0.001), representando el tiempo promedio estimado cuando el Conflicto está en su valor medio (0 en escala *z*).  El coeficiente $\hat{\beta}_{\text{Conflicto}}$ es positivo (52.72) y significativo (*p*<0.001), lo que indica que existe un aumento de 52.72 segundos en el tiempo de negociación por cada desviación estándar que aumenta la percepción de Conflicto. De forma análoga, se espera una disminución de 52.72 segundos si la percepción de Conflicto disminuye en una desviación estándar. Respecto a los estadísticos $R^2 = 0.31$ y $R^2_{\text{ajustado}} = 0.30$ muestran que el Conflicto por sí solo explica aproximadamente 31 % de la variabilidad del tiempo de negociación, un aporte considerable para un único predictor.
+
+En el **Modelo 2** el intercepto o $\hat{\beta}_0$ es 359.00 segundos y significativo (*p*<0.001), representando el tiempo promedio estimado cuando el Conflicto y SVO están en su valor medio (0 en escala *z*). El coeficiente $\hat{\beta}_{\text{Conflicto}}$ se reduce a 45.90 (*p*<0.001), manteniendo su efecto positivo. El coeficiente de prosocialidad $\hat{\beta}_{\text{SVO}}$ es –27.13 y significativo (*p*<0.05), lo que implica se acorta el tiempo de negociación en 27.13 segundos por cada desviación estándar adicional en SVO, reflejando que individuos más prosociales cooperan más rápido. El ajuste mejora a $R^2 = 0.38$ y $R^2_{\text{ajustado}} = 0.35$, indicando que SVO incrementa la varianza explicada en siete puntos porcentuales respecto al **Modelo 1**.
+
+Al comparar $\hat{\beta}_{\text{Conflicto}}$ en ambos Modelos, con la correlacion negativa observada en la @fig-fig2 y dada la siguiente relación en la Tabla 3.
+
+Table: Dirección del sesgo en la estimación del coeficiente de SVO según la correlación con la variable Conflicto
+
+|   | $\text{Corr}(x_{Conflicto}, x_{SVO}) > 0$ | $\text{Corr}(x_{Conflicto}, x_{SVO}) < 0$ |
+|------------------|:-------------------------:|:-------------------------:|
+| $\hat\beta_{SVO} > 0$ | Positive bias | Negative bias |
+| $\hat\beta_{SVO} < 0$ | Negative bias | **Positive bias** |
+
+En el **Modelo 3** el intercepto, $\hat{\beta}_0$ es de 393.48 segundos (*p*<0.001), representa el tiempo promedio de negociación estimado para un participante no condicional (dCC=0) cuando la percepción de Conflicto se encuentra en su valor medio (0 en escala *z*). El $\hat{\beta}_{\text{Conflicto}}$ aumenta en comparacion al **Modelo 2** (dado el sesgo positivo por omitir SVO) y mantiene su significancia estadistica (*p*<0.001). Esto indica que el tiempo de negociación se incrementa en 54.98 segundos , cuando la percepción de Conflicto aumenta en una desviación estándar; de forma análoga, disminuye en la misma magnitud si la percepción de Conflicto cae una desviación estándar. En este Modelo tambien se observa una reducción de 44.60 segundos cuando hay reciporcidad pero como el $\hat{\beta}_{dCC}$ es no signicativo (*p*>0.05), este coeficiente tiene una probabilidad que su valor sea 0 o incluso positivo (dado su intervalo de confianza). Por último el Modelo explica un 34% de la variabilidad del tiempo ($R^2 = 0.34$, $R^2_{\text{ajustado}} = 0.31$), solo presenta una mejora modesta respecto al **Modelo 1**.
+
+En el **Modelo 4** el intercepto $\hat{\beta}_0$ es de 395.09 segundos (*p*<0.001) e indica el tiempo esperado para un participante no condicional (dCC = 0), con valores medios de Conflicto y SVO (0 en escala *z*). El coeficiente $\hat{\beta}_{\text{Conflicto}}$ se reduce nuevamente a 48.16 (*p*<0.001) (Por sesgo positivo de SVO sobre Conflicto). Esto indica el tiempo aumenta en 48.16 segundos por Un aumento de una desviación estándar en Conflicto. Por otra parte, el coeficiente de prosocialidad $\hat{\beta}_{\text{SVO}}$ es –27.02 y significativo (*p*<0.05), reduciendo el tiempo de negociación en 27.02 segundos por cada desviación estándar adicional en orientación prosocial (SVO). Esto nuevamente refleja que los individuos más prosociales cooperan con mayor rapidez. El coeficiente asociado a la reciprocidad $\hat{\beta}_{dCC}$ sigue siendo negativo (–44.12 segundos) pero no significativo. Con $R^2 = 0.40$ y $R^2_{\text{ajustado}} = 0.36$, este Modelo incrementa la varianza explicada hasta el 40%, subrayando la importancia conjunta del Conflicto y la prosocialidad.
+
+En el **Modelo 5** se incorpora la interacción Conflicto × dCC. El intercepto, $\hat{\beta}_0 = 383.19$ segundos (*p*<0.001), corresponde al tiempo promedio para un participante no condicional cuando la percepción de Conflicto tiene promedio 0 (0 en escala *z*). El ingreso de la interación provoca la perdida de la significancia del coeficiente  $\hat{\beta}_{\text{Conflicto}}$, mantiene la no significancia del coeficiente $\hat{\beta}_{dCC}$ y la interación con el coeficiente $\hat{\beta}_{Conflicto \times dCC}$ tambien es no significativa. Respecto al ajuste global ($R^2 = 0.35$, $R^2_{\text{ajustado}} = 0.31$) permanece por debajo del obtenido cuando se incluye SVO (**Modelo 4**).
+
+En el **Modelo 6**, que combina Conflicto, SVO, dCC y su interacción, el intercepto se estima en $\hat{\beta}_0 = 384.38$ segundos (*p*<0.001)e indica el tiempo esperado para un participante no condicional con valores medios de Conflicto y SVO (0 en escala *z*) y  dCC: No. Entre los participantes no condicionales, el Conflicto muestra un coeficiente de 15.42 segundos por desviación estándar, sin significancia estadística. La orientación prosocial mantiene un efecto negativo robusto: El tiempo de negociación se reduce en 27.35 segundos (*p* <0.05) por cada desviación estándar extra en SVO. Ni el coeficiente principal de reciprocidad $\hat\beta_{dCC}$  (–34.03 segundos) ni el coeficiente de interacción $\hat{\beta}_{Conflicto \times dCC}$ (38.12 segundos) resultan significativos. Pese a ello, el Modelo muestra el mayor ajuste global, explicando el 42 % de la variación observada ($R^2 = 0.42$, $R^2_{\text{ajustado}} = 0.37$); la ganancia respecto al **Modelo 4** es modesta y se atribuye principalmente a la mayor flexibilidad del Modelo más que a evidencia estadística de un efecto de moderación.
+
+En conjunto, estos resultados reafirman el tiempo de negociación se incrementa con un aumento en la percepción de Conflicto y que la orientación prosocial lo reduce, mientras que los efectos vinculados a la reciprocidad y su interacción con el Conflicto no son significativos con la muestra actual.
 
 
 # Pregunta 3. 
 
-¿Cuál modelo cree que especifica correctamente la hipótesis a probar y por qué?
+¿Cuál Modelo cree que especifica correctamente la hipótesis a probar y por qué?
+
+
+La hipótesis planteada sostiene que **el tiempo de negociación es infleunciado por la percepción de Conflicto** y que este **efecto se ve moderado por el tipo de cooperador** (dCC: cooperador condicional = 0, cooperador incondicional = 1).
+
+Formalmente: $H_0:\;\beta_{\text{Conflicto}\times\text{dCC}} = 0$ frente a $H_1:\;\beta_{\text{Conflicto}\times\text{dCC}} \neq 0$. 
+
+Para operacionalizarla, el Modelo que incluye todos los términos necesarios es el **Modelo 6**: $\text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\times(\text{Conflicto}_i\times\text{dCC}_i) + u_i$
+Al estimar el **Modelo 6** ninguno de los coeficientes asociados a la moderación de conflcito es estadísticamente significativo (*p*>0,05). Esta pérdida de significancia en comapracion a los **Modelos 1 , 2, 3 y 4** se explica, en gran medida, por dos factores: la multicolinealidad inducida entre *Conflicto* y el término de interacción, que eleva los errores estándar de $\beta_{\text{Conflicto}}$ y $\beta_{\text{Conflicto}\times\text{dCC}}$, y el tamaño muestral reducido (n = 50), que limita la potencia para detectar efectos moderadores de magnitud moderada.
+
+Aunque **Modelo 6** captura fielmente la hipótesis teórica, su leve ganancia de ajuste ($\Delta R^2 = 0,01$) no compensa la mayor complejidad ni el aumento en la varianza de los estimadores. Por el contrario, el Modelo **Modelo 4**: $\text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ \beta_{\text{SVO}}\times\text{SVO}_i+ \beta_{\text{dCC}}\times\text{dCC}_i+ u_i$ presenta coeficientes $\beta_{\text{Conflicto}}$, $\beta_{\text{SVO}}$ y $\beta_{\text{dCC}}$ significativos, evita la colinealidad excesiva, evita el sesgo positivio de variable omitida de SVO y conserva la parsimonia, ofreciendo una interpretación más estable y directa del efecto principal de Conflicto controlando por SVO y dCC.
 
 # Pregunta 4. 
 
-Repetir punto 2 volviendo a tomar una muestra de tiempo con $\beta_{conflicto \times dcc} = 10$.
+Repetir punto 2 volviendo a tomar una muestra de tiempo con $\beta_{Conflicto \times dCC} = 10$.
 
 ```{r}
 #| results: asis
-# parámetros
+# parametros
 beta_0 = 350
-beta_conflicto = 20
-beta_conflicto_dcc = 10
+beta_Conflicto = 20
+beta_Conflicto_dcc = 10
 beta_svo = -25
-# error
 set.seed(6)
 error = rnorm(n, mean = 0, sd = 80)
-# pro-socialidad
 set.seed(5)
 svo = rnorm(n, mean = 0, sd = 1)
-# conflicto
 set.seed(2)
-conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
-# dcc
+Conflicto = rnorm(n, mean = 0 - 0.5 * svo, sd = 1)
 set.seed(45)
 dcc = rbinom(n, 1, 0.7)
 # tiempo
-tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+tiempo = beta_0 + beta_Conflicto * Conflicto + beta_Conflicto_dcc * Conflicto * dcc + beta_svo * svo + error
 
-data2 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+data2 = data.frame(tiempo, Conflicto, dcc, svo, error) %>%
   mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
 
-modelo1.2 <- lm(tiempo ~ conflicto, data = data2)
-modelo2.2 <- lm(tiempo ~ conflicto + svo, data = data2)
-modelo3.2 <- lm(tiempo ~ conflicto + dcc, data = data2)
-modelo4.2 <- lm(tiempo ~ conflicto + dcc + svo, data = data2)
-modelo5.2 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data2)
-modelo6.2 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data2)
+Modelo1.2 <- lm(tiempo ~ Conflicto, data = data2)
+Modelo2.2 <- lm(tiempo ~ Conflicto + svo, data = data2)
+Modelo3.2 <- lm(tiempo ~ Conflicto + dcc, data = data2)
+Modelo4.2 <- lm(tiempo ~ Conflicto + dcc + svo, data = data2)
+Modelo5.2 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc, data = data2)
+Modelo6.2 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc + svo, data = data2)
 
 
-# Crear tabla con stargazer en formato LaTeX
+# tabla con stargazer en formato latex
 
-stargazer(modelo1.2, modelo2.2, modelo3.2, modelo4.2, modelo5.2, modelo6.2,
+stargazer(Modelo1.2, Modelo2.2, Modelo3.2, Modelo4.2, Modelo5.2, Modelo6.2,
           type = "latex",
-          title = "Resultados de los modelos lineales ajustados $\\beta_{conflicto \\times dcc}$ = 10",
+          title = "Resultados de los Modelos lineales ajustados $\\beta_{Conflicto \\times dcc}$ = 10",
           dep.var.labels = "Tiempo (segundos)",
           column.labels = c("Modelo 1.2", "Modelo 2.2", "Modelo 3.2", "Modelo 4.2", "Modelo 5.2", "Modelo 6.2"),
           covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si."),
@@ -399,49 +479,62 @@ stargazer(modelo1.2, modelo2.2, modelo3.2, modelo4.2, modelo5.2, modelo6.2,
 
 ```
 
+En la Tabla 4 se observa los resutados de los Modelos lineales ajustados con el nuevo valor de $\beta_{Conflicto \times dCC}$ = 10. Todos los Modelos poseen un $R^2$ estadisticamente distinto al Modelo nulo, indicando un aumento de la capacidad predictiva al ingresar las variables independientes, pero hay Modelos con coeficientes menos significativos como el **Modelo 5.2**. 
+
+Ahora en particular para el **Modelo 1.2**, se observa que tanto el intercepto ($\hat{\beta}_{0}$ = 355.69) como el coeficiente para Conflicto ($\hat{\beta}_{Conflicto}$) son significativos. Este Modelo, con un $R^2 = 0.18$ y $R^2_{ajustado} = 0.16$, menor que el **Modelo 1** con un $\beta_{Conflicto \times dCC}$ = 30, (disminución del efecto de la interacción). Este Modelo tambien indica que hay un aumento de tiempo de negociación por un aumento en una desvision estadar de la percepción de Conflicto.
+
+En el **Modelo 2.2**, los coeficientes para el intercepto ($\hat{\beta}_{0}$ = 357.71), Conflicto ($\hat{\beta}_{Conflicto}$ = 29.00^) y SVO ($\hat{\beta}_{SVO}$ = -27.29) son todos significativos. El Modelo presenta un $R^2 = 0.26$ y un $R^2_{ajustado} = 0.23$, tambien menor que el **Modelo 2** . Estos resultados sugieren que mientras el Conflicto incrementa el tiempo de negociación, una mayor orientación al valor social (SVO o prosocialidad) lo disminuye de forma significativa, mejorando el ajuste general en comparación con el **Modelo 1.2**.
+
+El **Modelo 3.2** muestra coeficientes significativos para el intercepto ($\hat{\beta}_{0}$ = 387.85) y para Conflicto ($\hat{\beta}_{Conflicto}$ = 37.85^). Sin embargo, el coeficiente para la variable dCC (ser cooperador condicional, $\hat{\beta}_{dCC}$ = -38.83) no resulta estadísticamente significativo. El Modelo tiene un $R^2 = 0.20$ y un $R^2_{ajustado}$ = 0.17, indicando que el tipo de cooperador dCC no tiene un impacto discernible en el tiempo de negociación en este Modelo.
+
+Respecto al **Modelo 4.2**, este presenta coeficientes significativos para el intercepto ($\hat{\beta}_{0}$ = 389.47), Conflicto ($\hat{\beta}_{Conflicto}$ = 30.99) y SVO ($\hat{\beta}_{SVO}$ = -27.19). Al igual que en el Modelo anterior, el coeficiente para dCC Si ($\hat{\beta}_{dCC}$ = -39.31) no es significativo. Con un $R^2 = 0.28$ y un $R^2_{ajustado} = 0.24$, este Modelo ofrece un buen balance, mostrando que el Conflicto aumenta el tiempo y SVO lo disminuye, sin un efecto claro de dCC.
+
+Para el **Modelo 5.2**, únicamente el intercepto ($\hat{\beta}_{0}$ = 383.19) es significativo. Los coeficientes para Conflicto ($\hat{\beta}_{Conflicto}$ = 23.65), dCC Si ($\hat{\beta}_{dCC}$ = -34.93) y la interacción Conflicto x dCC Si ($\hat{\beta}_{Conflicto \times dCC}$ = 16.57) no son estadísticamente significativos. El $R^2 = 0.21$ y el $R^2_{ajustado} = 0.15$ sugieren que la inclusión de la interacción, en estas condiciones, no mejora la comprensión del fenómeno y reduce el ajuste en comparación con Modelos más simples que incluyen SVO.
+
+En el **Modelo 6.2**, los coeficientes significativos son el intercepto ($\hat{\beta}_{0}$ = 384.38) y SVO ($\hat{\beta}_{SVO}$ = -27.35). Los términos para Conflicto ($\hat{\beta}_{Conflicto}$ = 15.42), dCC Si ($\hat{\beta}_{dCC}$ = -34.03) y la interacción Conflicto x dCC Si ($\hat{\beta}_{Conflicto \times dCC}$ = 18.12) no resultan significativos. Aunque este Modelo completo presenta el $R^2$ más alto (0.29), su $R^2_{ajustado}$ (0.22) es superado por el **Modelo 4.2**, indicando que la complejidad adicional no se justifica por la mejora en el ajuste.
+
+La reducción del parámetro $\beta_{Conflicto \times dCC}$ de un valor hipotético mayor (ej. 30, como en la primera parte del ejercicio del documento) a 10 en el proceso generador de datos, tiene implicaciones para la interpretación de los Modelos, especialmente considerando un tamaño muestral de $n=50$. En ambas tablas SVO es significativo y  refleja un sesgo postivo sobre Conflicto. Otro aspecto en la comparación es la significancia y magnitud del término de interacción ($\hat{\beta}_{Conflicto \times dCC}$). En la Tabla 2, con $\beta_{Conflicto \times dCC} = 30$, el Modelo 6, presentó un coeficiente estimado para la interacción $\hat\beta_{Conflicto \times dCC}$ de 38.12. Notablemente, a pesar de la considerable magnitud del efecto real simulado (30), este término no resultó estadísticamente significativo con $n=50$. Se sugiere que esta falta de significancia podría atribuirse, en parte, a la multicolinealidad y al tamaño muestral reducido, que limita la potencia estadística. En la Tabla 4, con $\beta_{Conflicto \times dCC}$ = 10), en el Modelo 6.2 (equivalente al Modelo 6 del escenario anterior), el coeficiente estimado para la misma interacción fue $\hat{\beta}_{Conflicto \times dCC}$ = 18.12 , y este término tampoco resultó estadísticamente significativo. Al comparar ambos escenarios, se evidencia que la no significancia estadística del término de interacción es un resultado consistente para $n=50$, lo que subraya la dificultad de detectar efectos de interacción con muestras pequeñas.
+
 # Pregunta 5. 
 
-Repetir la simulación incrementando el tamaño de la muestra a 300 observaciones, tanto para $\beta_{conflicto \times dcc} = 30$ como para $\beta_{conflicto \times dcc} = 10$ (en total en la prueba hay 4 escenarios, 2 tamaño de muestra $\ast$ 2 $\beta_{conflicto \times dcc}$). Comparar con resultados anteriores y explicar posibles causas de las diferencias.
+Repetir la simulación incrementando el tamaño de la muestra a 300 observaciones, tanto para $\beta_{Conflicto \times dCC} = 30$ como para $\beta_{Conflicto \times dCC} = 10$ (en total en la prueba hay 4 escenarios, 2 tamaño de muestra $\ast$ 2 $\beta_{Conflicto \times dCC}$). Comparar con resultados anteriores y explicar posibles causas de las diferencias.
 
 ```{r}
 #| results: asis
-# Generación de datos para n=300 con β_conflicto×dcc = 30
+# generacion de datos para n=300 con B_Conflicto×dcc = 30
 n_grande = 300
-# parámetros
+# parametros
 beta_0 = 350
-beta_conflicto = 20
-beta_conflicto_dcc = 30  # Primer escenario
+beta_Conflicto = 20
+beta_Conflicto_dcc = 30
 beta_svo = -25
-# error
 set.seed(6)
 error = rnorm(n_grande, mean = 0, sd = 80)
-# pro-socialidad
 set.seed(5)
 svo = rnorm(n_grande, mean = 0, sd = 1)
-# conflicto
 set.seed(2)
-conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
+Conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
 # dcc
 set.seed(45)
 dcc = rbinom(n_grande, 1, 0.7)
 # tiempo
-tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+tiempo = beta_0 + beta_Conflicto * Conflicto + beta_Conflicto_dcc * Conflicto * dcc + beta_svo * svo + error
 
-data3 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+data3 = data.frame(tiempo, Conflicto, dcc, svo, error) %>%
   mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
 
-# Modelos para n=300 con β_conflicto×dcc = 30
-modelo1.3 <- lm(tiempo ~ conflicto, data = data3)
-modelo2.3 <- lm(tiempo ~ conflicto + svo, data = data3)
-modelo3.3 <- lm(tiempo ~ conflicto + dcc, data = data3)
-modelo4.3 <- lm(tiempo ~ conflicto + dcc + svo, data = data3)
-modelo5.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data3)
-modelo6.3 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data3)
+# Modelos para n=300 con B_Conflicto×dcc = 30
+Modelo1.3 <- lm(tiempo ~ Conflicto, data = data3)
+Modelo2.3 <- lm(tiempo ~ Conflicto + svo, data = data3)
+Modelo3.3 <- lm(tiempo ~ Conflicto + dcc, data = data3)
+Modelo4.3 <- lm(tiempo ~ Conflicto + dcc + svo, data = data3)
+Modelo5.3 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc, data = data3)
+Modelo6.3 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc + svo, data = data3)
 
-# Crear tabla con stargazer en formato LaTeX
-stargazer(modelo1.3, modelo2.3, modelo3.3, modelo4.3, modelo5.3, modelo6.3,
+# tabla con stargazer en formato latex
+stargazer(Modelo1.3, Modelo2.3, Modelo3.3, Modelo4.3, Modelo5.3, Modelo6.3,
           type = "latex",
-          title = "Resultados de los modelos lineales ajustados (n=300, $\\beta_{conflicto \\times dcc} = 30$)",
+          title = "Resultados de los Modelos lineales ajustados (n=300, $\\beta_{Conflicto \\times dcc} = 30$)",
           dep.var.labels = "Tiempo (segundos)",
           column.labels = c("Modelo 1.3", "Modelo 2.3", "Modelo 3.3", "Modelo 4.3", "Modelo 5.3", "Modelo 6.3"),
           covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si"),
@@ -456,42 +549,45 @@ stargazer(modelo1.3, modelo2.3, modelo3.3, modelo4.3, modelo5.3, modelo6.3,
 ```
 
 
+
+Al contrastar los resultados de la Tabla 2 (Modelos con $n=50$) y la Tabla 5 (Modelos con $n=300$), ambas generadas con un parámetro de interacción $\beta_{Conflicto \times dCC}$ = 30, se aprecian cambios significativos atribuibles al aumento en el tamaño muestral. Una de las diferencias más importantes se manifiesta en el coeficiente $\hat\beta_{Conflicto \times dCC:Si}$ de interacción. Mientras que con $n=50$, esta interacción no resultaba estadísticamente significativa en los Modelos más completos (por ejemplo, en el Modelo 6 de Tabla 2, el coeficiente $\hat{\beta}_{Conflicto \times dCC:Si}$ era 38.12, no significativo), con $n=300$ (Tabla 5), este término se vuelve claramente significativo y su valor se aproxima más al parámetro real (por ejemplo, en el Modelo 6.3, $\hat{\beta}_{Conflicto \times dCC:Si}$ es 32.56, *p* < 0.001). Este cambio es crucial, pues con una muestra mayor, el Modelo adquiere la potencia necesaria para detectar el efecto de moderación que teóricamente se esperaba. De forma similar, el efecto principal de Conflicto en el Modelo completo (Modelo 6.3 de Tabla 5) ahora también alcanza significancia estadística ($\hat{\beta}_{Conflicto}$ es 20.82, *p* < 0.01), a diferencia de cuando $n=50$, donde no era significativo en el mismo Modelo (Modelo 6 de Tabla 2, $\hat{\beta}_{Conflicto}$ era 15.42, no significativo). En contraste, la variable SVO mantiene su significancia estadística en ambos tamaños muestrales; su coeficiente estimado permanece relativamente estable (alrededor de -27 en los Modelos completos) y su nivel de significancia se robustece con $n=300$ (generalmente *p* < 0.001). El efecto principal de $\hat\beta_{dCC:Si}$ (ser cooperador condicional) sigue siendo no significativo incluso con $n=300$ en la mayoría de los Modelos (por ejemplo, en el Modelo 6.3 de Tabla 5, $\hat{\beta}_{dCC:Si}$ es -4.66, no significativo), aunque el valor absoluto de su coeficiente disminuye considerablemente en comparación con las estimaciones obtenidas con $n=50$ (-34.03 en Modelo 6 de Tabla 2). El ajuste general de los Modelos, medido por el $R^2_{ajustado}$, también tiende a mejorar con la muestra mayor; por ejemplo, el Modelo 6.3 ($n=300$) alcanza un $R^2_{ajustado}$ de 0.43, superior al 0.37 del Modelo 6 ($n=50$).
+
+
+
 ```{r}
 #| results: asis
-# Generación de datos para n=300 con β_conflicto×dcc = 10
-# Mantenemos el mismo n_grande = 300
-# parámetros
+# generacion de datos para n=300 con B_Conflicto×dcc = 10
+# parametros
 beta_0 = 350
-beta_conflicto = 20
-beta_conflicto_dcc = 10  # Segundo escenario
+beta_Conflicto = 20
+beta_Conflicto_dcc = 10  # Segundo escenario
 beta_svo = -25
-# Usamos las mismas semillas para comparabilidad
 set.seed(6)
 error = rnorm(n_grande, mean = 0, sd = 80)
 set.seed(5)
 svo = rnorm(n_grande, mean = 0, sd = 1)
 set.seed(2)
-conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
+Conflicto = rnorm(n_grande, mean = 0 - 0.5 * svo, sd = 1)
 set.seed(45)
 dcc = rbinom(n_grande, 1, 0.7)
 # tiempo
-tiempo = beta_0 + beta_conflicto * conflicto + beta_conflicto_dcc * conflicto * dcc + beta_svo * svo + error
+tiempo = beta_0 + beta_Conflicto * Conflicto + beta_Conflicto_dcc * Conflicto * dcc + beta_svo * svo + error
 
-data4 = data.frame(tiempo, conflicto, dcc, svo, error) %>%
+data4 = data.frame(tiempo, Conflicto, dcc, svo, error) %>%
   mutate(dcc = factor(dcc, levels = c(0, 1), labels = c("No Cooperador Condicional", "Cooperador Condicional")))
 
-# Modelos para n=300 con β_conflicto×dcc = 10
-modelo1.4 <- lm(tiempo ~ conflicto, data = data4)
-modelo2.4 <- lm(tiempo ~ conflicto + svo, data = data4)
-modelo3.4 <- lm(tiempo ~ conflicto + dcc, data = data4)
-modelo4.4 <- lm(tiempo ~ conflicto + dcc + svo, data = data4)
-modelo5.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc, data = data4)
-modelo6.4 <- lm(tiempo ~ conflicto + conflicto * dcc + dcc + svo, data = data4)
+# Modelos para n=300 con B_Conflicto×dcc = 10
+Modelo1.4 <- lm(tiempo ~ Conflicto, data = data4)
+Modelo2.4 <- lm(tiempo ~ Conflicto + svo, data = data4)
+Modelo3.4 <- lm(tiempo ~ Conflicto + dcc, data = data4)
+Modelo4.4 <- lm(tiempo ~ Conflicto + dcc + svo, data = data4)
+Modelo5.4 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc, data = data4)
+Modelo6.4 <- lm(tiempo ~ Conflicto + Conflicto * dcc + dcc + svo, data = data4)
 
-# Crear tabla con stargazer en formato LaTeX
-stargazer(modelo1.4, modelo2.4, modelo3.4, modelo4.4, modelo5.4, modelo6.4,
+# tabla con stargazer en formato latex
+stargazer(Modelo1.4, Modelo2.4, Modelo3.4, Modelo4.4, Modelo5.4, Modelo6.4,
           type = "latex",
-          title = "Resultados de los modelos lineales ajustados (n=300, $\\beta_{conflicto \\times dcc} = 10$)",
+          title = "Resultados de los Modelos lineales ajustados (n=300, $\\beta_{Conflicto \\times dcc} = 10$)",
           dep.var.labels = "Tiempo (segundos)",
           column.labels = c("Modelo 1.4", "Modelo 2.4", "Modelo 3.4", "Modelo 4.4", "Modelo 5.4", "Modelo 6.4"),
           covariate.labels = c("Conflicto", "SVO", "dCC Si", "Conflicto $\\times$ dCC Si"),
@@ -505,63 +601,57 @@ stargazer(modelo1.4, modelo2.4, modelo3.4, modelo4.4, modelo5.4, modelo6.4,
           table.placement = "H")
 ```
 
-```{r}
+Al comparar los resultados de la Tabla 4 (Modelos con $n=50$) y la Tabla 6 (Modelos con $n=300$), ambas generadas con un parámetro de interacción más débil $\beta_{Conflicto \times dCC}=10$, también se observa el impacto del incremento en el tamaño muestral, aunque con matices respecto al escenario anterior. El término de interacción $\hat\beta_{Conflicto \times dCC:Si}$, que no era significativo con $n=50$ (por ejemplo, en el Modelo 6.2 de Tabla 4, $\hat{\beta}_{Conflicto \times dCC:Si}$ era 18.12, no significativo), sigue sin ser estadísticamente significativo incluso con $n=300$ (por ejemplo, en el Modelo 6.4 de Tabla 6, $\hat{\beta}_{Conflicto \times dCC:Si}$ es 12.56, no significativo). Aunque el coeficiente estimado con $n=300$ se acerca al valor verdadero de 10 y su error estándar disminuye, la magnitud del efecto es tan pequeña que la muestra de 300 observaciones aún no proporciona suficiente potencia para detectarlo de manera concluyente como distinto de cero. No obstante, al igual que en el escenario con interacción fuerte, el efecto principal de Conflicto en el Modelo completo (Modelo 6.4 de Tabla 6) sí gana significancia estadística con $n=300$ ($\hat{\beta}_{Conflicto}$ es 20.82, *p* < 0.01), en contraste con $n=50$ (Modelo 6.2 de Tabla 4, $\hat{\beta}_{Conflicto}$ era 15.42, no significativo). La variable `SVO` continúa demostrando ser un predictor robusto y significativo en ambos tamaños de muestra, con coeficientes estables (alrededor de -27 en los Modelos completos) y una significancia que se consolida con $n=300$ (generalmente *p* < 0.001). Similar al caso anterior, el efecto principal de `dCC Si` permanece no significativo con la muestra mayor, y su coeficiente también muestra una reducción considerable en magnitud (por ejemplo, en el Modelo 6.4 de Tabla 6, $\hat{\beta}_{dCC:Si}$ es -4.66, no significativo, comparado con -34.03 en Modelo 6.2 de Tabla 4). El ajuste de los Modelos también mejora al aumentar el tamaño de la muestra; por ejemplo, el Modelo 6.4 ($n=300$) presenta un $R^2_{ajustado}$ de 0.30, superior al 0.22 del Modelo 6.2 ($n=50$).
 
-```
+Las diferencias en los resultados entre las estimaciones con $n=50$ y $n=300$ se deben fundamentalmente al incremento de la potencia estadística y a la mayor precisión de las estimaciones que se obtiene con un tamaño muestral más grande. Al disponer de más observaciones, los errores estándar asociados a los coeficientes estimados tienden a ser menores. Esto implica que las estimaciones de los coeficientes son más precisas y se concentran más cercanamente alrededor de los verdaderos valores poblacionales de los parámetros. Como consecuencia, aquellos efectos que son realmente distintos de cero en la población, pero que no pudieron ser detectados como estadísticamente significativos con una muestra pequeña (debido a que sus errores estándar eran grandes en relación con la magnitud del coeficiente), pueden volverse estadísticamente significativos cuando la muestra es mayor. Este fenómeno explica por qué el término de interacción $Conflicto \times dCC Si$ se vuelve significativo con $n=300$ cuando el $\beta_{Conflicto \times dCC}$ subyacente es 30, y por qué el efecto principal de `Conflicto` gana significancia en los Modelos completos con $n=300$ en ambos escenarios de $\beta_{Conflicto \times dCC}$. No obstante, si el efecto verdadero en la población es muy pequeño (como parece ser la interacción cuando $\beta_{Conflicto \times dCC}=10$), incluso una muestra de $n=300$ podría no ser suficiente para que el efecto alcance significancia estadística, aunque la estimación del coeficiente se vuelva más precisa (es decir, el error estándar se reduce, pero el coeficiente sigue siendo pequeño en relación con este error). La consistencia en la significancia y el valor del coeficiente de `SVO` a través de los diferentes tamaños muestrales y escenarios de interacción sugiere que su efecto es lo suficientemente robusto y de una magnitud tal que puede ser detectado incluso con muestras más pequeñas. La persistente no significancia del efecto principal de `dCC Si` en la mayoría de los Modelos, a pesar del cambio en la magnitud de su coeficiente estimado (que se acerca más a cero con $n=300$), sugiere que su impacto directo sobre el tiempo de negociación, una vez controlados otros factores, es probablemente nulo o muy cercano a cero en la población.
 
 \newpage
 
 # Pregunta 6. 
 
-Graficar la interacción entre conflicto y reciprocidad para $n = 300$ y $\beta_{conflicto \times dcc} = 30$ e interpretar gráfico.
+Graficar la interacción entre Conflicto y reciprocidad para $n = 300$ y $\beta_{Conflicto \times dCC} = 30$ e interpretar gráfico.
 
 ```{r}
 #| fig-height: 8
 #| fig-width: 10
 #| results: asis
-#| label: fig2
-#| fig-cap: "Interacción entre conflicto y reciprocidad"
+#| label: fig-fig3
+#| fig-cap: "Interacción entre Conflicto y reciprocidad"
 
 
-# Crear un nuevo dataframe para la predicción
+# crear un nuevo dataframe para la prediccion
 new_data <- expand.grid(
-  conflicto = seq(min(data3$conflicto), max(data3$conflicto), length.out = 100),
+  Conflicto = seq(min(data3$Conflicto), max(data3$Conflicto), length.out = 100),
   dcc = levels(data3$dcc),
   svo = mean(data3$svo)  # Usar la media de SVO
 )
 
-# Predecir con intervalos de confianza
-pred_with_ci <- predict(modelo6.3, newdata = new_data, interval = "confidence")
+# predecir con intervalos de confianza
+pred_with_ci <- predict(Modelo6.3, newdata = new_data, interval = "confidence")
 predictions <- cbind(new_data, pred_with_ci)
 names(predictions)[4:6] <- c("tiempo", "lower", "upper")
 
-# Graficar la interacción
+# graficar la interaccion
 ggplot() +
-  # Agregar puntos de datos originales
-  geom_point(data = data3, aes(x = conflicto, y = tiempo, color = dcc), 
+  geom_point(data = data3, aes(x = Conflicto, y = tiempo, color = dcc), 
              alpha = 0.3, size = 1.5) +
-  # Agregar bandas de confianza con el mismo color que las líneas
   geom_ribbon(data = predictions, 
-              aes(x = conflicto, ymin = lower, ymax = upper, fill = dcc), 
+              aes(x = Conflicto, ymin = lower, ymax = upper, fill = dcc), 
               alpha = 0.2) +
-  # Agregar líneas de predicción
   geom_line(data = predictions, 
-            aes(x = conflicto, y = tiempo, color = dcc), 
+            aes(x = Conflicto, y = tiempo, color = dcc), 
             size = 1.2) +
-  # Etiquetas y tema
   labs(
     title = "Interacción entre Conflicto y Reciprocidad",
-    subtitle = "n = 300, β(conflicto × dcc) = 30",
+    subtitle = "n = 300, β(Conflicto × dcc) = 30",
     x = "Conflicto (puntuación z)",
     y = "Tiempo de Negociación (segundos)",
     color = "Reciprocidad",
     fill = "Reciprocidad"
   ) +
   theme_minimal() +
-  # Usar escala de grises para compatibilidad con publicaciones
   scale_color_grey(start = 0.2, end = 0.8) +
   scale_fill_grey(start = 0.2, end = 0.8) +
-  # Mejorar legibilidad
   theme(
     legend.position = "top",
     panel.grid.minor = element_blank(),
@@ -573,7 +663,7 @@ ggplot() +
 
 # Pregunta 7. 
 
-Discutir principales resultados y plantear conclusiones del ejercicio y los modelos.
+Discutir principales resultados y plantear conclusiones del ejercicio y los Modelos.
 
 
 \newpage

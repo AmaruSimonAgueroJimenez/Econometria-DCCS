@@ -274,7 +274,7 @@
 \makeatother
 \subtitle{Prueba 1}
 \author{Amaru Simón Agüero Jiménez}
-\date{2025-05-12}
+\date{2025-05-13}
 \begin{document}
 \maketitle
 
@@ -285,27 +285,25 @@
 \tableofcontents
 }
 
-\section{Paquetes de R y LaTex.}\label{paquetes-de-r-y-latex.}
-
 \section{Caso.}\label{caso.}
 
 Simular un proceso generador de datos para el tiempo que le toma a una
 persona, negociando sobre la venta de un artículo, llegar a un acuerdo.
 Nos interesa conocer los mecanismos psicológicos que operan detrás de
-las decisiones cooperativas de las personas frente a conflictos de
+las decisiones cooperativas de las personas frente a Conflictos de
 interés (juegos de suma cero). Interpretaremos el tiempo como una medida
 inversa de cooperación ---i.e., ante mayor disposición de las personas
 para cooperar o compartir las ganancias de la negociación, menor debería
 ser el tiempo necesario para llegar a un acuerdo.
 
-Creemos que las personas que perciban mayores niveles de conflicto de
+Creemos que las personas que perciban mayores niveles de Conflicto de
 intereses con su contraparte implementarán tácticas de negociación menos
 conciliadoras y tardarán más tiempo en llegar a un acuerdo. Esperamos,
-por lo tanto, una relación directa entre el conflicto percibido y el
+por lo tanto, una relación directa entre el Conflicto percibido y el
 tiempo para alcanzar un acuerdo en la negociación. Esperamos, que esta
 relación esté moderada por el rasgo de reciprocidad, donde personas con
 perfiles de cooperación no-condicionales tenderían a cooperar
-independientemente del conflicto percibido.
+independientemente del Conflicto percibido.
 
 Supondremos, para este ejercicio, que el tiempo necesario para ponerse
 de acuerdo (\textbf{en segundos}) es determinado \textbf{exclusivamente}
@@ -314,7 +312,7 @@ por:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  La percepción de conflicto de interés (\textbf{en puntaje \(z\)}), de
+  La percepción de Conflicto de interés (\textbf{en puntaje \(z\)}), de
   los participantes en la ronda de negociación, que medimos con la
   escala psicométrica Situational Interdependence
   Scale\textsuperscript{1}.
@@ -329,12 +327,12 @@ por:
 \end{enumerate}
 
 La \textbf{variable independiente de interés} principal es la
-\textbf{percepción de conflicto de interés}.
+\textbf{percepción de Conflicto de interés}.
 
-\section{Proceso generador de datos}\label{proceso-generador-de-datos}
+\section{Proceso generador de datos.}\label{proceso-generador-de-datos.}
 
 Simular un proceso de generación de datos según lo que se especifica a
-continuación. Asumir que el tiempo, la percepción de conflicto de
+continuación. Asumir que el tiempo, la percepción de Conflicto de
 interés y la prosocialidad siguen distribuciones normales y que la
 reciprocidad sigue una distribución de Bernoulli. Utilizar los
 siguientes parámetros y semillas para generar los datos:
@@ -344,16 +342,16 @@ siguientes parámetros y semillas para generar los datos:
 \item
   muestra: \(n = 50\)
 \item
-  tiempo: \(\beta_0 = 350\), \(\beta_{conflicto} = 20\),
-  \(\beta_{conflicto \times dcc} = 30\), \(\beta_{svo} = -25\)
+  tiempo: \(\beta_0 = 350\), \(\beta_{Conflicto} = 20\),
+  \(\beta_{Conflicto \times dCC} = 30\), \(\beta_{svo} = -25\)
 \item
   error: \(\mathrm{E}(u) = 0\), \(\mathrm{Var}(u|x) = \sigma^2 = 80^2\),
   seed = 6
 \item
   svo: \(\mu_{svo} = 0\), \(\sigma_{svo} = 1\), seed = 5
 \item
-  conflicto: \(\mu_{conflicto} = 0 - 0.5 \times svo\),
-  \(\sigma_{conflicto} = 1\), seed = 2
+  Conflicto: \(\mu_{Conflicto} = 0 - 0.5 \times svo\),
+  \(\sigma_{Conflicto} = 1\), seed = 2
 \item
   dcc: \(\mu_{dcc} = 0.7\), seed = 45
 \end{itemize}
@@ -429,13 +427,28 @@ Variable & Estadístico & Valor\\
   gráfico de barras para variable categórica.
 \end{enumerate}
 
-\begin{figure}[H]
+\begin{figure}
 
-{\centering \pandocbounded{\includegraphics[keepaspectratio]{Prueba1_Amaru_Aguero_files/figure-pdf/fig1-1.pdf}}
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Prueba1_Amaru_Aguero_files/figure-pdf/fig-fig1-1.pdf}}
 
 }
 
-\caption{Distribución de las variables continuas y categórica}
+\caption{\label{fig-fig1}Distribución de las variables continuas y
+categórica}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Prueba1_Amaru_Aguero_files/figure-pdf/fig-fig2-1.pdf}}
+
+}
+
+\caption{\label{fig-fig2}Correlación entre variables númericas}
 
 \end{figure}%
 
@@ -443,28 +456,45 @@ Variable & Estadístico & Valor\\
 
 \section{Pregunta 2.}\label{pregunta-2.}
 
-Ajustar los 6 modelos lineales que se detallan a continuación, exportar
+Ajustar los 6 Modelos lineales que se detallan a continuación, exportar
 tabla con \texttt{stargazer()} e interpretar coeficientes y resultados
-de cada modelo. Comparar y explicar diferencias entre los modelos.
+de cada Modelo. Comparar y explicar diferencias entre los Modelos.
 
 \begin{enumerate}
 \def\labelenumi{(\alph{enumi})}
 \item
-  \(tiempo \sim conflicto\)
+  \(tiempo \sim Conflicto\)
 \item
-  \(tiempo \sim conflicto + svo\)
+  \(tiempo \sim Conflicto + svo\)
 \item
-  \(tiempo \sim conflicto + dcc\)
+  \(tiempo \sim Conflicto + dcc\)
 \item
-  \(tiempo \sim conflicto + dcc + svo\)
+  \(tiempo \sim Conflicto + dcc + svo\)
 \item
-  \(tiempo \sim conflicto + conflicto \times dcc + dcc\)
+  \(tiempo \sim Conflicto + Conflicto \times dcc + dcc\)
 \item
-  \(tiempo \sim conflicto + conflicto \times dcc + dcc + svo\)
+  \(tiempo \sim Conflicto + Conflicto \times dcc + dcc + svo\)
 \end{enumerate}
 
+En base a lo anterior se formulan los siguiente Modelos
+
+\begin{itemize}
+\item
+  \(Modelo\;1:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ u_i\)
+\item
+  \(Modelo\;2:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i+ u_i\)
+\item
+  \(Modelo \; 3:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{dCC}}\times\text{dCC}_i+ u_i\)
+\item
+  \(Modelo\;4:\; \text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ \beta_{\text{SVO}}\times\text{SVO}_i+ \beta_{\text{dCC}}\times\text{dCC}_i+ u_i\)
+\item
+  \(Modelo\;5:\; \text{tiempo}_i= \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\;      \times(\text{Conflicto}_i\times\text{dCC}_i) + u_i\)
+\item
+  \(Modelo\;6:\; \text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\times(\text{Conflicto}_i\times\text{dCC}_i) + u_i\)
+\end{itemize}
+
 \begin{table}[H] \centering 
-  \caption{Resultados de los modelos lineales ajustados} 
+  \caption{Resultados de los Modelos lineales ajustados} 
   \label{} 
 \scriptsize 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -492,18 +522,195 @@ F Statistic & 21.69$^{***}$ (df = 1; 48) & 14.23$^{***}$ (df = 2; 47) & 11.89$^{
 \end{tabular} 
 \end{table}
 
+En la Tabla 2 se observan los resultados de los Modelos lineales con
+método de estimación Ordinary Least Squares (OLS), bajo el contraste de
+hipótesis en donde \(H_0:\beta_i=0\) y \(H_1:\beta_i\neq0\). Todos los
+Modelos poseen un \(R^2\) estadisticamente distinto al Modelo nulo,
+indicando un aumento de la capacidad predictiva al ingresar las
+variables independientes.
+
+En el \textbf{Modelo 1} el intercepto o \(\hat{\beta}_0\) es de 356.99
+segundos y significativo (\emph{p}\textless0.001), representando el
+tiempo promedio estimado cuando el Conflicto está en su valor medio (0
+en escala \emph{z}). El coeficiente \(\hat{\beta}_{\text{Conflicto}}\)
+es positivo (52.72) y significativo (\emph{p}\textless0.001), lo que
+indica que existe un aumento de 52.72 segundos en el tiempo de
+negociación por cada desviación estándar que aumenta la percepción de
+Conflicto. De forma análoga, se espera una disminución de 52.72 segundos
+si la percepción de Conflicto disminuye en una desviación estándar.
+Respecto a los estadísticos \(R^2 = 0.31\) y
+\(R^2_{\text{ajustado}} = 0.30\) muestran que el Conflicto por sí solo
+explica aproximadamente 31 \% de la variabilidad del tiempo de
+negociación, un aporte considerable para un único predictor.
+
+En el \textbf{Modelo 2} el intercepto o \(\hat{\beta}_0\) es 359.00
+segundos y significativo (\emph{p}\textless0.001), representando el
+tiempo promedio estimado cuando el Conflicto y SVO están en su valor
+medio (0 en escala \emph{z}). El coeficiente
+\(\hat{\beta}_{\text{Conflicto}}\) se reduce a 45.90
+(\emph{p}\textless0.001), manteniendo su efecto positivo. El coeficiente
+de prosocialidad \(\hat{\beta}_{\text{SVO}}\) es --27.13 y significativo
+(\emph{p}\textless0.05), lo que implica se acorta el tiempo de
+negociación en 27.13 segundos por cada desviación estándar adicional en
+SVO, reflejando que individuos más prosociales cooperan más rápido. El
+ajuste mejora a \(R^2 = 0.38\) y \(R^2_{\text{ajustado}} = 0.35\),
+indicando que SVO incrementa la varianza explicada en siete puntos
+porcentuales respecto al \textbf{Modelo 1}.
+
+Al comparar \(\hat{\beta}_{\text{Conflicto}}\) en ambos Modelos, con la
+correlacion negativa observada en la Figura~\ref{fig-fig2} y dada la
+siguiente relación en la Tabla 3.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2500}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3750}}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3750}}@{}}
+\caption{Dirección del sesgo en la estimación del coeficiente de SVO
+según la correlación con la variable Conflicto}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\(\text{Corr}(x_{Conflicto}, x_{SVO}) > 0\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\(\text{Corr}(x_{Conflicto}, x_{SVO}) < 0\)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\(\text{Corr}(x_{Conflicto}, x_{SVO}) > 0\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\(\text{Corr}(x_{Conflicto}, x_{SVO}) < 0\)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\hat\beta_{SVO} > 0\) & Positive bias & Negative bias \\
+\(\hat\beta_{SVO} < 0\) & Negative bias & \textbf{Positive bias} \\
+\end{longtable}
+
+En el \textbf{Modelo 3} el intercepto, \(\hat{\beta}_0\) es de 393.48
+segundos (\emph{p}\textless0.001), representa el tiempo promedio de
+negociación estimado para un participante no condicional (dCC=0) cuando
+la percepción de Conflicto se encuentra en su valor medio (0 en escala
+\emph{z}). El \(\hat{\beta}_{\text{Conflicto}}\) aumenta en comparacion
+al \textbf{Modelo 2} (dado el sesgo positivo por omitir SVO) y mantiene
+su significancia estadistica (\emph{p}\textless0.001). Esto indica que
+el tiempo de negociación se incrementa en 54.98 segundos , cuando la
+percepción de Conflicto aumenta en una desviación estándar; de forma
+análoga, disminuye en la misma magnitud si la percepción de Conflicto
+cae una desviación estándar. En este Modelo tambien se observa una
+reducción de 44.60 segundos cuando hay reciporcidad pero como el
+\(\hat{\beta}_{dCC}\) es no signicativo (\emph{p}\textgreater0.05), este
+coeficiente tiene una probabilidad que su valor sea 0 o incluso positivo
+(dado su intervalo de confianza). Por último el Modelo explica un 34\%
+de la variabilidad del tiempo (\(R^2 = 0.34\),
+\(R^2_{\text{ajustado}} = 0.31\)), solo presenta una mejora modesta
+respecto al \textbf{Modelo 1}.
+
+En el \textbf{Modelo 4} el intercepto \(\hat{\beta}_0\) es de 395.09
+segundos (\emph{p}\textless0.001) e indica el tiempo esperado para un
+participante no condicional (dCC = 0), con valores medios de Conflicto y
+SVO (0 en escala \emph{z}). El coeficiente
+\(\hat{\beta}_{\text{Conflicto}}\) se reduce nuevamente a 48.16
+(\emph{p}\textless0.001) (Por sesgo positivo de SVO sobre Conflicto).
+Esto indica el tiempo aumenta en 48.16 segundos por Un aumento de una
+desviación estándar en Conflicto. Por otra parte, el coeficiente de
+prosocialidad \(\hat{\beta}_{\text{SVO}}\) es --27.02 y significativo
+(\emph{p}\textless0.05), reduciendo el tiempo de negociación en 27.02
+segundos por cada desviación estándar adicional en orientación prosocial
+(SVO). Esto nuevamente refleja que los individuos más prosociales
+cooperan con mayor rapidez. El coeficiente asociado a la reciprocidad
+\(\hat{\beta}_{dCC}\) sigue siendo negativo (--44.12 segundos) pero no
+significativo. Con \(R^2 = 0.40\) y \(R^2_{\text{ajustado}} = 0.36\),
+este Modelo incrementa la varianza explicada hasta el 40\%, subrayando
+la importancia conjunta del Conflicto y la prosocialidad.
+
+En el \textbf{Modelo 5} se incorpora la interacción Conflicto × dCC. El
+intercepto, \(\hat{\beta}_0 = 383.19\) segundos
+(\emph{p}\textless0.001), corresponde al tiempo promedio para un
+participante no condicional cuando la percepción de Conflicto tiene
+promedio 0 (0 en escala \emph{z}). El ingreso de la interación provoca
+la perdida de la significancia del coeficiente
+\(\hat{\beta}_{\text{Conflicto}}\), mantiene la no significancia del
+coeficiente \(\hat{\beta}_{dCC}\) y la interación con el coeficiente
+\(\hat{\beta}_{Conflicto \times dCC}\) tambien es no significativa.
+Respecto al ajuste global (\(R^2 = 0.35\),
+\(R^2_{\text{ajustado}} = 0.31\)) permanece por debajo del obtenido
+cuando se incluye SVO (\textbf{Modelo 4}).
+
+En el \textbf{Modelo 6}, que combina Conflicto, SVO, dCC y su
+interacción, el intercepto se estima en \(\hat{\beta}_0 = 384.38\)
+segundos (\emph{p}\textless0.001)e indica el tiempo esperado para un
+participante no condicional con valores medios de Conflicto y SVO (0 en
+escala \emph{z}) y dCC: No.~Entre los participantes no condicionales, el
+Conflicto muestra un coeficiente de 15.42 segundos por desviación
+estándar, sin significancia estadística. La orientación prosocial
+mantiene un efecto negativo robusto: El tiempo de negociación se reduce
+en 27.35 segundos (\emph{p} \textless0.05) por cada desviación estándar
+extra en SVO. Ni el coeficiente principal de reciprocidad
+\(\hat\beta_{dCC}\) (--34.03 segundos) ni el coeficiente de interacción
+\(\hat{\beta}_{Conflicto \times dCC}\) (38.12 segundos) resultan
+significativos. Pese a ello, el Modelo muestra el mayor ajuste global,
+explicando el 42 \% de la variación observada (\(R^2 = 0.42\),
+\(R^2_{\text{ajustado}} = 0.37\)); la ganancia respecto al
+\textbf{Modelo 4} es modesta y se atribuye principalmente a la mayor
+flexibilidad del Modelo más que a evidencia estadística de un efecto de
+moderación.
+
+En conjunto, estos resultados reafirman el tiempo de negociación se
+incrementa con un aumento en la percepción de Conflicto y que la
+orientación prosocial lo reduce, mientras que los efectos vinculados a
+la reciprocidad y su interacción con el Conflicto no son significativos
+con la muestra actual.
+
 \section{Pregunta 3.}\label{pregunta-3.}
 
-¿Cuál modelo cree que especifica correctamente la hipótesis a probar y
+¿Cuál Modelo cree que especifica correctamente la hipótesis a probar y
 por qué?
+
+La hipótesis planteada sostiene que \textbf{el tiempo de negociación es
+infleunciado por la percepción de Conflicto} y que este \textbf{efecto
+se ve moderado por el tipo de cooperador} (dCC: cooperador condicional =
+0, cooperador incondicional = 1).
+
+Formalmente: \(H_0:\;\beta_{\text{Conflicto}\times\text{dCC}} = 0\)
+frente a \(H_1:\;\beta_{\text{Conflicto}\times\text{dCC}} \neq 0\).
+
+Para operacionalizarla, el Modelo que incluye todos los términos
+necesarios es el \textbf{Modelo 6}:
+\(\text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i + \beta_{\text{SVO}}\times\text{SVO}_i + \beta_{\text{dCC}}\times\text{dCC}_i + \beta_{\text{Conflicto}\times\text{dCC}}\times(\text{Conflicto}_i\times\text{dCC}_i) + u_i\)
+Al estimar el \textbf{Modelo 6} ninguno de los coeficientes asociados a
+la moderación de conflcito es estadísticamente significativo
+(\emph{p}\textgreater0,05). Esta pérdida de significancia en comapracion
+a los \textbf{Modelos 1 , 2, 3 y 4} se explica, en gran medida, por dos
+factores: la multicolinealidad inducida entre \emph{Conflicto} y el
+término de interacción, que eleva los errores estándar de
+\(\beta_{\text{Conflicto}}\) y
+\(\beta_{\text{Conflicto}\times\text{dCC}}\), y el tamaño muestral
+reducido (n = 50), que limita la potencia para detectar efectos
+moderadores de magnitud moderada.
+
+Aunque \textbf{Modelo 6} captura fielmente la hipótesis teórica, su leve
+ganancia de ajuste (\(\Delta R^2 = 0,01\)) no compensa la mayor
+complejidad ni el aumento en la varianza de los estimadores. Por el
+contrario, el Modelo \textbf{Modelo 4}:
+\(\text{tiempo}_i = \beta_0 + \beta_{\text{Conflicto}}\times\text{Conflicto}_i+ \beta_{\text{SVO}}\times\text{SVO}_i+ \beta_{\text{dCC}}\times\text{dCC}_i+ u_i\)
+presenta coeficientes \(\beta_{\text{Conflicto}}\),
+\(\beta_{\text{SVO}}\) y \(\beta_{\text{dCC}}\) significativos, evita la
+colinealidad excesiva, evita el sesgo positivio de variable omitida de
+SVO y conserva la parsimonia, ofreciendo una interpretación más estable
+y directa del efecto principal de Conflicto controlando por SVO y dCC.
 
 \section{Pregunta 4.}\label{pregunta-4.}
 
 Repetir punto 2 volviendo a tomar una muestra de tiempo con
-\(\beta_{conflicto \times dcc} = 10\).
+\(\beta_{Conflicto \times dCC} = 10\).
 
 \begin{table}[H] \centering 
-  \caption{Resultados de los modelos lineales ajustados $\beta_{conflicto \times dcc}$ = 10} 
+  \caption{Resultados de los Modelos lineales ajustados $\beta_{Conflicto \times dcc}$ = 10} 
   \label{} 
 \scriptsize 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -531,17 +738,105 @@ F Statistic & 10.33$^{**}$ (df = 1; 48) & 8.22$^{***}$ (df = 2; 47) & 5.90$^{**}
 \end{tabular} 
 \end{table}
 
+En la Tabla 4 se observa los resutados de los Modelos lineales ajustados
+con el nuevo valor de \(\beta_{Conflicto \times dCC}\) = 10. Todos los
+Modelos poseen un \(R^2\) estadisticamente distinto al Modelo nulo,
+indicando un aumento de la capacidad predictiva al ingresar las
+variables independientes, pero hay Modelos con coeficientes menos
+significativos como el \textbf{Modelo 5.2}.
+
+Ahora en particular para el \textbf{Modelo 1.2}, se observa que tanto el
+intercepto (\(\hat{\beta}_{0}\) = 355.69) como el coeficiente para
+Conflicto (\(\hat{\beta}_{Conflicto}\)) son significativos. Este Modelo,
+con un \(R^2 = 0.18\) y \(R^2_{ajustado} = 0.16\), menor que el
+\textbf{Modelo 1} con un \(\beta_{Conflicto \times dCC}\) = 30,
+(disminución del efecto de la interacción). Este Modelo tambien indica
+que hay un aumento de tiempo de negociación por un aumento en una
+desvision estadar de la percepción de Conflicto.
+
+En el \textbf{Modelo 2.2}, los coeficientes para el intercepto
+(\(\hat{\beta}_{0}\) = 357.71), Conflicto (\(\hat{\beta}_{Conflicto}\) =
+29.00\^{}) y SVO (\(\hat{\beta}_{SVO}\) = -27.29) son todos
+significativos. El Modelo presenta un \(R^2 = 0.26\) y un
+\(R^2_{ajustado} = 0.23\), tambien menor que el \textbf{Modelo 2} .
+Estos resultados sugieren que mientras el Conflicto incrementa el tiempo
+de negociación, una mayor orientación al valor social (SVO o
+prosocialidad) lo disminuye de forma significativa, mejorando el ajuste
+general en comparación con el \textbf{Modelo 1.2}.
+
+El \textbf{Modelo 3.2} muestra coeficientes significativos para el
+intercepto (\(\hat{\beta}_{0}\) = 387.85) y para Conflicto
+(\(\hat{\beta}_{Conflicto}\) = 37.85\^{}). Sin embargo, el coeficiente
+para la variable dCC (ser cooperador condicional, \(\hat{\beta}_{dCC}\)
+= -38.83) no resulta estadísticamente significativo. El Modelo tiene un
+\(R^2 = 0.20\) y un \(R^2_{ajustado}\) = 0.17, indicando que el tipo de
+cooperador dCC no tiene un impacto discernible en el tiempo de
+negociación en este Modelo.
+
+Respecto al \textbf{Modelo 4.2}, este presenta coeficientes
+significativos para el intercepto (\(\hat{\beta}_{0}\) = 389.47),
+Conflicto (\(\hat{\beta}_{Conflicto}\) = 30.99) y SVO
+(\(\hat{\beta}_{SVO}\) = -27.19). Al igual que en el Modelo anterior, el
+coeficiente para dCC Si (\(\hat{\beta}_{dCC}\) = -39.31) no es
+significativo. Con un \(R^2 = 0.28\) y un \(R^2_{ajustado} = 0.24\),
+este Modelo ofrece un buen balance, mostrando que el Conflicto aumenta
+el tiempo y SVO lo disminuye, sin un efecto claro de dCC.
+
+Para el \textbf{Modelo 5.2}, únicamente el intercepto
+(\(\hat{\beta}_{0}\) = 383.19) es significativo. Los coeficientes para
+Conflicto (\(\hat{\beta}_{Conflicto}\) = 23.65), dCC Si
+(\(\hat{\beta}_{dCC}\) = -34.93) y la interacción Conflicto x dCC Si
+(\(\hat{\beta}_{Conflicto \times dCC}\) = 16.57) no son estadísticamente
+significativos. El \(R^2 = 0.21\) y el \(R^2_{ajustado} = 0.15\)
+sugieren que la inclusión de la interacción, en estas condiciones, no
+mejora la comprensión del fenómeno y reduce el ajuste en comparación con
+Modelos más simples que incluyen SVO.
+
+En el \textbf{Modelo 6.2}, los coeficientes significativos son el
+intercepto (\(\hat{\beta}_{0}\) = 384.38) y SVO (\(\hat{\beta}_{SVO}\) =
+-27.35). Los términos para Conflicto (\(\hat{\beta}_{Conflicto}\) =
+15.42), dCC Si (\(\hat{\beta}_{dCC}\) = -34.03) y la interacción
+Conflicto x dCC Si (\(\hat{\beta}_{Conflicto \times dCC}\) = 18.12) no
+resultan significativos. Aunque este Modelo completo presenta el \(R^2\)
+más alto (0.29), su \(R^2_{ajustado}\) (0.22) es superado por el
+\textbf{Modelo 4.2}, indicando que la complejidad adicional no se
+justifica por la mejora en el ajuste.
+
+La reducción del parámetro \(\beta_{Conflicto \times dCC}\) de un valor
+hipotético mayor (ej. 30, como en la primera parte del ejercicio del
+documento) a 10 en el proceso generador de datos, tiene implicaciones
+para la interpretación de los Modelos, especialmente considerando un
+tamaño muestral de \(n=50\). En ambas tablas SVO es significativo y
+refleja un sesgo postivo sobre Conflicto. Otro aspecto en la comparación
+es la significancia y magnitud del término de interacción
+(\(\hat{\beta}_{Conflicto \times dCC}\)). En la Tabla 2, con
+\(\beta_{Conflicto \times dCC} = 30\), el Modelo 6, presentó un
+coeficiente estimado para la interacción
+\(\hat\beta_{Conflicto \times dCC}\) de 38.12. Notablemente, a pesar de
+la considerable magnitud del efecto real simulado (30), este término no
+resultó estadísticamente significativo con \(n=50\). Se sugiere que esta
+falta de significancia podría atribuirse, en parte, a la
+multicolinealidad y al tamaño muestral reducido, que limita la potencia
+estadística. En la Tabla 4, con \(\beta_{Conflicto \times dCC}\) = 10),
+en el Modelo 6.2 (equivalente al Modelo 6 del escenario anterior), el
+coeficiente estimado para la misma interacción fue
+\(\hat{\beta}_{Conflicto \times dCC}\) = 18.12 , y este término tampoco
+resultó estadísticamente significativo. Al comparar ambos escenarios, se
+evidencia que la no significancia estadística del término de interacción
+es un resultado consistente para \(n=50\), lo que subraya la dificultad
+de detectar efectos de interacción con muestras pequeñas.
+
 \section{Pregunta 5.}\label{pregunta-5.}
 
 Repetir la simulación incrementando el tamaño de la muestra a 300
-observaciones, tanto para \(\beta_{conflicto \times dcc} = 30\) como
-para \(\beta_{conflicto \times dcc} = 10\) (en total en la prueba hay 4
+observaciones, tanto para \(\beta_{Conflicto \times dCC} = 30\) como
+para \(\beta_{Conflicto \times dCC} = 10\) (en total en la prueba hay 4
 escenarios, 2 tamaño de muestra \(\ast\) 2
-\(\beta_{conflicto \times dcc}\)). Comparar con resultados anteriores y
+\(\beta_{Conflicto \times dCC}\)). Comparar con resultados anteriores y
 explicar posibles causas de las diferencias.
 
 \begin{table}[H] \centering 
-  \caption{Resultados de los modelos lineales ajustados (n=300, $\beta_{conflicto \times dcc} = 30$)} 
+  \caption{Resultados de los Modelos lineales ajustados (n=300, $\beta_{Conflicto \times dcc} = 30$)} 
   \label{} 
 \tiny 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -569,8 +864,44 @@ F Statistic & 163.54$^{***}$ (df = 1; 298) & 100.51$^{***}$ (df = 2; 297) & 81.5
 \end{tabular} 
 \end{table}
 
+Al contrastar los resultados de la Tabla 2 (Modelos con \(n=50\)) y la
+Tabla 5 (Modelos con \(n=300\)), ambas generadas con un parámetro de
+interacción \(\beta_{Conflicto \times dCC}\) = 30, se aprecian cambios
+significativos atribuibles al aumento en el tamaño muestral. Una de las
+diferencias más importantes se manifiesta en el coeficiente
+\(\hat\beta_{Conflicto \times dCC:Si}\) de interacción. Mientras que con
+\(n=50\), esta interacción no resultaba estadísticamente significativa
+en los Modelos más completos (por ejemplo, en el Modelo 6 de Tabla 2, el
+coeficiente \(\hat{\beta}_{Conflicto \times dCC:Si}\) era 38.12, no
+significativo), con \(n=300\) (Tabla 5), este término se vuelve
+claramente significativo y su valor se aproxima más al parámetro real
+(por ejemplo, en el Modelo 6.3,
+\(\hat{\beta}_{Conflicto \times dCC:Si}\) es 32.56, \emph{p} \textless{}
+0.001). Este cambio es crucial, pues con una muestra mayor, el Modelo
+adquiere la potencia necesaria para detectar el efecto de moderación que
+teóricamente se esperaba. De forma similar, el efecto principal de
+Conflicto en el Modelo completo (Modelo 6.3 de Tabla 5) ahora también
+alcanza significancia estadística (\(\hat{\beta}_{Conflicto}\) es 20.82,
+\emph{p} \textless{} 0.01), a diferencia de cuando \(n=50\), donde no
+era significativo en el mismo Modelo (Modelo 6 de Tabla 2,
+\(\hat{\beta}_{Conflicto}\) era 15.42, no significativo). En contraste,
+la variable SVO mantiene su significancia estadística en ambos tamaños
+muestrales; su coeficiente estimado permanece relativamente estable
+(alrededor de -27 en los Modelos completos) y su nivel de significancia
+se robustece con \(n=300\) (generalmente \emph{p} \textless{} 0.001). El
+efecto principal de \(\hat\beta_{dCC:Si}\) (ser cooperador condicional)
+sigue siendo no significativo incluso con \(n=300\) en la mayoría de los
+Modelos (por ejemplo, en el Modelo 6.3 de Tabla 5,
+\(\hat{\beta}_{dCC:Si}\) es -4.66, no significativo), aunque el valor
+absoluto de su coeficiente disminuye considerablemente en comparación
+con las estimaciones obtenidas con \(n=50\) (-34.03 en Modelo 6 de Tabla
+2). El ajuste general de los Modelos, medido por el \(R^2_{ajustado}\),
+también tiende a mejorar con la muestra mayor; por ejemplo, el Modelo
+6.3 (\(n=300\)) alcanza un \(R^2_{ajustado}\) de 0.43, superior al 0.37
+del Modelo 6 (\(n=50\)).
+
 \begin{table}[H] \centering 
-  \caption{Resultados de los modelos lineales ajustados (n=300, $\beta_{conflicto \times dcc} = 10$)} 
+  \caption{Resultados de los Modelos lineales ajustados (n=300, $\beta_{Conflicto \times dcc} = 10$)} 
   \label{} 
 \tiny 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -598,20 +929,91 @@ F Statistic & 94.12$^{***}$ (df = 1; 298) & 64.22$^{***}$ (df = 2; 297) & 46.99$
 \end{tabular} 
 \end{table}
 
+Al comparar los resultados de la Tabla 4 (Modelos con \(n=50\)) y la
+Tabla 6 (Modelos con \(n=300\)), ambas generadas con un parámetro de
+interacción más débil \(\beta_{Conflicto \times dCC}=10\), también se
+observa el impacto del incremento en el tamaño muestral, aunque con
+matices respecto al escenario anterior. El término de interacción
+\(\hat\beta_{Conflicto \times dCC:Si}\), que no era significativo con
+\(n=50\) (por ejemplo, en el Modelo 6.2 de Tabla 4,
+\(\hat{\beta}_{Conflicto \times dCC:Si}\) era 18.12, no significativo),
+sigue sin ser estadísticamente significativo incluso con \(n=300\) (por
+ejemplo, en el Modelo 6.4 de Tabla 6,
+\(\hat{\beta}_{Conflicto \times dCC:Si}\) es 12.56, no significativo).
+Aunque el coeficiente estimado con \(n=300\) se acerca al valor
+verdadero de 10 y su error estándar disminuye, la magnitud del efecto es
+tan pequeña que la muestra de 300 observaciones aún no proporciona
+suficiente potencia para detectarlo de manera concluyente como distinto
+de cero. No obstante, al igual que en el escenario con interacción
+fuerte, el efecto principal de Conflicto en el Modelo completo (Modelo
+6.4 de Tabla 6) sí gana significancia estadística con \(n=300\)
+(\(\hat{\beta}_{Conflicto}\) es 20.82, \emph{p} \textless{} 0.01), en
+contraste con \(n=50\) (Modelo 6.2 de Tabla 4,
+\(\hat{\beta}_{Conflicto}\) era 15.42, no significativo). La variable
+\texttt{SVO} continúa demostrando ser un predictor robusto y
+significativo en ambos tamaños de muestra, con coeficientes estables
+(alrededor de -27 en los Modelos completos) y una significancia que se
+consolida con \(n=300\) (generalmente \emph{p} \textless{} 0.001).
+Similar al caso anterior, el efecto principal de \texttt{dCC\ Si}
+permanece no significativo con la muestra mayor, y su coeficiente
+también muestra una reducción considerable en magnitud (por ejemplo, en
+el Modelo 6.4 de Tabla 6, \(\hat{\beta}_{dCC:Si}\) es -4.66, no
+significativo, comparado con -34.03 en Modelo 6.2 de Tabla 4). El ajuste
+de los Modelos también mejora al aumentar el tamaño de la muestra; por
+ejemplo, el Modelo 6.4 (\(n=300\)) presenta un \(R^2_{ajustado}\) de
+0.30, superior al 0.22 del Modelo 6.2 (\(n=50\)).
+
+Las diferencias en los resultados entre las estimaciones con \(n=50\) y
+\(n=300\) se deben fundamentalmente al incremento de la potencia
+estadística y a la mayor precisión de las estimaciones que se obtiene
+con un tamaño muestral más grande. Al disponer de más observaciones, los
+errores estándar asociados a los coeficientes estimados tienden a ser
+menores. Esto implica que las estimaciones de los coeficientes son más
+precisas y se concentran más cercanamente alrededor de los verdaderos
+valores poblacionales de los parámetros. Como consecuencia, aquellos
+efectos que son realmente distintos de cero en la población, pero que no
+pudieron ser detectados como estadísticamente significativos con una
+muestra pequeña (debido a que sus errores estándar eran grandes en
+relación con la magnitud del coeficiente), pueden volverse
+estadísticamente significativos cuando la muestra es mayor. Este
+fenómeno explica por qué el término de interacción
+\(Conflicto \times dCC Si\) se vuelve significativo con \(n=300\) cuando
+el \(\beta_{Conflicto \times dCC}\) subyacente es 30, y por qué el
+efecto principal de \texttt{Conflicto} gana significancia en los Modelos
+completos con \(n=300\) en ambos escenarios de
+\(\beta_{Conflicto \times dCC}\). No obstante, si el efecto verdadero en
+la población es muy pequeño (como parece ser la interacción cuando
+\(\beta_{Conflicto \times dCC}=10\)), incluso una muestra de \(n=300\)
+podría no ser suficiente para que el efecto alcance significancia
+estadística, aunque la estimación del coeficiente se vuelva más precisa
+(es decir, el error estándar se reduce, pero el coeficiente sigue siendo
+pequeño en relación con este error). La consistencia en la significancia
+y el valor del coeficiente de \texttt{SVO} a través de los diferentes
+tamaños muestrales y escenarios de interacción sugiere que su efecto es
+lo suficientemente robusto y de una magnitud tal que puede ser detectado
+incluso con muestras más pequeñas. La persistente no significancia del
+efecto principal de \texttt{dCC\ Si} en la mayoría de los Modelos, a
+pesar del cambio en la magnitud de su coeficiente estimado (que se
+acerca más a cero con \(n=300\)), sugiere que su impacto directo sobre
+el tiempo de negociación, una vez controlados otros factores, es
+probablemente nulo o muy cercano a cero en la población.
+
 \newpage
 
 \section{Pregunta 6.}\label{pregunta-6.}
 
-Graficar la interacción entre conflicto y reciprocidad para \(n = 300\)
-y \(\beta_{conflicto \times dcc} = 30\) e interpretar gráfico.
+Graficar la interacción entre Conflicto y reciprocidad para \(n = 300\)
+y \(\beta_{Conflicto \times dCC} = 30\) e interpretar gráfico.
 
-\begin{figure}[H]
+\begin{figure}
 
-{\centering \pandocbounded{\includegraphics[keepaspectratio]{Prueba1_Amaru_Aguero_files/figure-pdf/fig2-1.pdf}}
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Prueba1_Amaru_Aguero_files/figure-pdf/fig-fig3-1.pdf}}
 
 }
 
-\caption{Interacción entre conflicto y reciprocidad}
+\caption{\label{fig-fig3}Interacción entre Conflicto y reciprocidad}
 
 \end{figure}%
 
@@ -620,7 +1022,7 @@ y \(\beta_{conflicto \times dcc} = 30\) e interpretar gráfico.
 \section{Pregunta 7.}\label{pregunta-7.}
 
 Discutir principales resultados y plantear conclusiones del ejercicio y
-los modelos.
+los Modelos.
 
 \newpage
 
