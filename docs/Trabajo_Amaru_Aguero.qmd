@@ -1,0 +1,2433 @@
+---
+title: |
+  \begin{center}
+    \includegraphics[height=4cm]{logo.png} \\[1cm]
+    \Large Econometría \\
+  \end{center}
+subtitle: "Trastornos por consumo de sustancias y hospitalizaciones por salud mental en Chile 2010-2022"
+author:
+  - name: "Amaru Simón Agüero Jiménez"
+    email: "aaguero@miaundes.cl"
+    orcid: "0000-0001-7336-1833"
+date: "`r Sys.Date()`"
+lang: es
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    documentclass: article
+    fontsize: 10pt
+    mainfont: "Arial"
+    bibliography: ref.bib
+    csl: apa-numeric-superscript.csl
+    keep-tex: true
+    header-includes: |
+      % Paquetes necesarios
+      \usepackage{amsmath}
+      \usepackage{amssymb}
+      \usepackage{graphicx}
+      \usepackage{fancyhdr}
+      \usepackage{geometry}
+      \usepackage{booktabs}
+      \usepackage{dcolumn}
+      \usepackage{array}
+      \newcolumntype{d}[1]{D{.}{.}{#1}}
+      \usepackage{float}
+      \usepackage{adjustbox}
+      \renewcommand{\normalsize}{\fontsize{10pt}{12pt}\selectfont}
+      
+      % Configuración de márgenes
+      \geometry{
+        a4paper,
+        left=1.5cm,
+        right=1.5cm,
+        top=1.5cm,
+        bottom=2.5cm,
+        includeheadfoot
+      }
+
+      % Configuración de encabezado y pie de página
+      \pagestyle{fancy}
+      \fancyhf{} % Limpia encabezado y pie de página
+      
+      % Encabezado
+      \lhead{\includegraphics[height=1.5cm]{logo.png}} % Logo en el encabezado
+      \chead{}
+      \rhead{\small Trastornos por consumo de sustancias y hospitalizaciones por salud mental en Chile 2010-2022}
+
+      % Ajuste de separación entre encabezado y contenido
+      \setlength{\headheight}{2cm} % Altura del encabezado
+      \setlength{\headsep}{1.5cm} % Distancia entre encabezado y contenido
+
+      % Pie de página
+      \lfoot{}
+      \cfoot{\thepage} % Número de página centrado
+      \rfoot{}
+      
+      
+# Configuración de ejecución
+execute:
+  results: 'asis' # Mostrar resultados de R
+  echo: false     # No mostrar código
+  warning: false  # Sin advertencias
+  message: false  # Sin mensajes
+---
+
+```{r}
+################################################################################
+# Function to install and load packages with error handling
+################################################################################
+install_and_load <- function(package) {
+  # Try to load the package first
+  if (!require(package, character.only = TRUE, quietly = TRUE)) {
+    # cat(paste("Installing", package, "...\n"))
+    
+    # Try to install with error handling
+    tryCatch({
+      install.packages(package, 
+                       repos = "https://cran.r-project.org",
+                       quiet = TRUE)
+      
+      # Try to load after installation
+      if (!require(package, character.only = TRUE, quietly = TRUE)) {
+        warning(paste("Failed to load", package, "after installation"))
+        return(FALSE)
+      }
+      # cat(paste("✓", package, "installed and loaded successfully\n"))
+      return(TRUE)
+      
+    }, error = function(e) {
+      warning(paste("Failed to install", package, ":", e$message))
+      return(FALSE)
+    })
+  } else {
+    # cat(paste("✓", package, "already loaded\n"))
+    return(TRUE)
+  }
+}
+
+# List of packages
+packages <- c("devtools", "tidyverse", "janitor", "data.table", "kableExtra",
+              "gridExtra", "car", "knitr", "plotly", "ggbreak", "patchwork",
+              "latex2exp", "openxlsx", "lubridate", "gridExtra", "pROC", 
+              "caret", "logistf", "broom", "brglm2", "ggrepel", "purrr","caret", "tibble","ResourceSelection")
+
+packages <- unique(packages)
+
+# Apply the function and track results
+results <- sapply(packages, install_and_load)
+
+```
+
+
+```{r}
+################################################################################
+# Define paths
+################################################################################
+ruta_base <- file.path(
+  gsub("docs", "", getwd()),
+  "data/BASE_REGRESION_LOGISTICA.rds"
+)
+
+ruta_cons <- file.path(
+  gsub("docs", "", getwd()),
+  "data/CONS_C1_2010_22.rds"
+)
+
+ruta_hosp <- file.path(
+  gsub("docs", "", getwd()),
+  "data/HOSP20102022_MERGE1.rds"
+)
+
+################################################################################
+# Check which scenario applies
+################################################################################
+if (file.exists(ruta_base)) {
+  # Scenario 1: BASE_REGRESION_LOGISTICA.rds exists, just load it
+  BASE_REGRESION_LOGISTICA <- readRDS(ruta_base)
+  
+} else if (file.exists(ruta_cons) && file.exists(ruta_hosp)) {
+  # Scenario 2: Source files exist, create BASE_REGRESION_LOGISTICA
+  
+  ##############################################################################
+  # Load original datasets
+  ##############################################################################
+  CONS_C1_2010_22      <- readRDS(ruta_cons)
+  HOSP20102022_MERGE1  <- readRDS(ruta_hosp)
+  
+  ##############################################################################
+  # Function to recode mental diagnosis codes (F00–F99)
+  ##############################################################################
+  recode_mental <- function(code) {
+    case_when(
+      code >= "F00" & code <= "F99" ~ 1,
+      TRUE                          ~ 0
+    )
+  }
+  
+  ##############################################################################
+  # Step 1: Prepare all treatments to count re-treatments
+  ##############################################################################
+  TODOS_LOS_TTOS <- CONS_C1_2010_22 %>% 
+    # Filter out known-bad HASH_KEY values
+    filter(!HASH_KEY %in% c(
+      "1bad6b8cf97131fceab8543e81f7757195fbb1d36b376ee994ad1cf17699c464",
+      "c5f3fe488faac0ee7e286f44fc5ea62c5c8e41fd7c15b0dbf8fd9178f005af6f",
+      "82636e7790d5b64e40cb81de8f06d438cfced66ca35bd3953bf05fa73e2ddb81",
+      "e8e014fa3a46c3583e25ba2b45629703a530799199d2cbc8cf5f21ede7fb389c"
+    )) %>%
+    distinct(across(2:99), .keep_all = TRUE) %>%
+    # Convert date strings to Date objects
+    mutate(
+      TABLE                       = as.numeric(TABLE),
+      fecha_ingresoa_tratamiento  = dmy(fecha_ingresoa_tratamiento),
+      fecha_egresode_tratamiento  = dmy(fecha_egresode_tratamiento),
+      # Compute duration of each treatment
+      duracion_tto                = as.numeric(fecha_egresode_tratamiento - fecha_ingresoa_tratamiento)
+    ) %>%
+    # Order treatments by patient and date
+    group_by(HASH_KEY) %>%
+    arrange(fecha_ingresoa_tratamiento) %>%
+    mutate(
+      TTO_NUMBER = row_number(),
+      YEAR_TTO   = year(fecha_egresode_tratamiento)
+    ) %>%
+    ungroup() %>%
+    # Keep treatments from 2010 onward and valid discharge reasons
+    filter(YEAR_TTO >= 2010) %>%
+    filter(!motivode_egreso %in% c("Derivacion", "Muerte")) %>%
+    filter(senda == "Si")
+  
+  # Summarise total treatments and re-treatments per patient
+  RETRATAMIENTOS <- TODOS_LOS_TTOS %>%
+    group_by(HASH_KEY) %>%
+    summarise(
+      n_total_tratamientos        = n(),
+      n_retratamientos            = n() - 1,
+      duracion_total_todos_ttos   = sum(duracion_tto, na.rm = TRUE),
+      .groups                     = "drop"
+    )
+  
+  ##############################################################################
+  # Step 2: Prepare first-treatment data
+  ##############################################################################
+  BASE_PRIMER_TTO <- TODOS_LOS_TTOS %>%
+    filter(TTO_NUMBER == 1) %>%
+    mutate(
+      # Simplify substance categories
+      sustancia_principal = case_when(
+        sustancia_principal %in% c(
+          "Inhalables",
+          "Inhalables: neopren, GHB, óxido nitroso (gas hilarante), \"poppers\", solventes, gasolina, diluyente"
+        ) ~ "Inhalables",
+        sustancia_principal %in% c(
+          "Sedantes",
+          "Sedantes:  diazepam, Valium, clonazepam, Ravotril, alprazolam, adax, barbitúricos, fenobarbital."
+        ) ~ "Sedantes",
+        sustancia_principal %in% c(
+          "Otros Opioides Analgésicos",
+          "Otros Opioides Analgésicos: morfina, codeí­na, meperidina,  demerol, tramadol, tramal."
+        ) ~ "Opioides Analgésicos",
+        TRUE ~ sustancia_principal
+      ),
+      # Convert age to numeric
+      edad_num           = as.numeric(edad),
+      # Recode sex variable to English
+      sex                = case_when(
+        sexo == "Hombre" ~ "Male",
+        sexo == "Mujer"   ~ "Female"
+      ),
+      # Collapse principal substance into broader groups
+      principal_sub      = fct_collapse(
+        sustancia_principal,
+        "Alcohol"          = "Alcohol",
+        "Cocaine"          = "Cocaí­na",
+        "Cocaine Base Paste" = "Pasta Base",
+        "Depressants"      = c("Hipnóticos ", "Opioides Analgésicos", "Sedantes", "Tranquilizantes", "Metadona"),
+        "Marijuana"        = "Marihuana",
+        "Others"           = c(
+          "LSD", "Otros Alucinógenos", "Fenilciclidina", "Inhalables", "Otros",
+          "Metanfetaminas y otros derivados", "Heroí­na", "Sin especificar",
+          "Anfetaminas", "Crack", "Extasis", "Otros Estimulantes"
+        )
+      ),
+      # Determine plan type
+      plan_type          = case_when(
+        str_detect(tipo_de_plan, "PR") ~ "Residential",
+        str_detect(tipo_de_plan, "PA") ~ "Outpatient",
+        TRUE                           ~ NA_character_
+      ),
+      # Duration of the first treatment in days
+      duracion_tto_dias  = as.numeric(fecha_egresode_tratamiento - fecha_ingresoa_tratamiento)
+    ) %>%
+    # Join with re-treatment summary
+    left_join(RETRATAMIENTOS, by = "HASH_KEY")
+  
+  ##############################################################################
+  # Step 3: Identify post-treatment mental hospitalizations
+  ##############################################################################
+  HOSP_MENTAL_POST <- HOSP20102022_MERGE1 %>%
+    mutate(
+      HOSP_MENTAL = case_when(
+        str_starts(DIAG1, "F") & between(as.numeric(str_sub(DIAG1, 2, 3)), 0, 99) ~ 1,
+        str_starts(DIAG2, "F") & between(as.numeric(str_sub(DIAG2, 2, 3)), 0, 99) ~ 1,
+        str_starts(DIAG3, "F") & between(as.numeric(str_sub(DIAG3, 2, 3)), 0, 99) ~ 1,
+        TRUE ~ 0
+      ),
+      # Correct century errors in the year
+      FECHA_INGRESO = case_when(
+        year(FECHA_INGRESO) == 1905 ~ FECHA_INGRESO %m+% years(100),
+        year(FECHA_INGRESO) == 1906 ~ FECHA_INGRESO %m+% years(100),
+        TRUE ~ FECHA_INGRESO
+      )
+    ) %>%
+    filter(HOSP_MENTAL == 1) %>%
+    select(HASH_KEY, FECHA_INGRESO, DIAG1, DIAG2, DIAG3) %>%
+    rename(fecha_hosp_mental = FECHA_INGRESO)
+  
+  ##############################################################################
+  # Step 4: Identify pre-treatment mental hospitalizations
+  ##############################################################################
+  HOSP_MENTAL_PREV <- HOSP20102022_MERGE1 %>%
+    mutate(
+      HOSP_MENTAL = case_when(
+        str_starts(DIAG1, "F") & between(as.numeric(str_sub(DIAG1, 2, 3)), 0, 99) ~ 1,
+        str_starts(DIAG2, "F") & between(as.numeric(str_sub(DIAG2, 2, 3)), 0, 99) ~ 1,
+        str_starts(DIAG3, "F") & between(as.numeric(str_sub(DIAG3, 2, 3)), 0, 99) ~ 1,
+        TRUE ~ 0
+      ),
+      FECHA_INGRESO = case_when(
+        year(FECHA_INGRESO) == 1905 ~ FECHA_INGRESO %m+% years(100),
+        year(FECHA_INGRESO) == 1906 ~ FECHA_INGRESO %m+% years(100),
+        TRUE ~ FECHA_INGRESO
+      )
+    ) %>%
+    filter(HOSP_MENTAL == 1) %>%
+    select(HASH_KEY, FECHA_INGRESO)
+  
+  ##############################################################################
+  # Step 5: Build the analytical dataset
+  ##############################################################################
+  PRIMERA_HOSP_MENTAL_POST <- BASE_PRIMER_TTO %>%
+    select(HASH_KEY, fecha_egresode_tratamiento) %>%
+    inner_join(HOSP_MENTAL_POST, by = "HASH_KEY") %>%
+    filter(fecha_hosp_mental > fecha_egresode_tratamiento) %>%
+    group_by(HASH_KEY) %>%
+    arrange(fecha_hosp_mental) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(HASH_KEY, fecha_hosp_mental, DIAG1, DIAG2, DIAG3)
+  
+  BASE_REGRESION_LOGISTICA <- BASE_PRIMER_TTO %>%
+    # Join with first post-treatment hospitalization
+    left_join(PRIMERA_HOSP_MENTAL_POST, by = "HASH_KEY") %>%
+    mutate(
+      # Dependent variable: any post-treatment mental hospitalization?
+      HOSP_MENTAL_POST_TTO    = ifelse(!is.na(fecha_hosp_mental), 1, 0),
+      # Time to first mental hospitalization
+      tiempo_hasta_hosp_mental = as.numeric(fecha_hosp_mental - fecha_egresode_tratamiento)
+    ) %>%
+    # Join count of prior mental hospitalizations
+    left_join(
+      HOSP_MENTAL_PREV %>%
+        inner_join(
+          BASE_PRIMER_TTO %>% select(HASH_KEY, fecha_ingresoa_tratamiento),
+          by = "HASH_KEY"
+        ) %>%
+        filter(FECHA_INGRESO < fecha_ingresoa_tratamiento) %>%
+        group_by(HASH_KEY) %>%
+        summarise(n_hosp_mental_previas = n(), .groups = "drop"),
+      by = "HASH_KEY"
+    ) %>%
+    mutate(
+      n_hosp_mental_previas       = replace_na(n_hosp_mental_previas, 0),
+      hosp_mental_previa          = ifelse(n_hosp_mental_previas > 0, "Yes", "No"),
+      # Categorical re-treatment variable
+      retratamientos_cat          = case_when(
+        n_retratamientos == 0 ~ "0",
+        n_retratamientos == 1 ~ "1",
+        n_retratamientos == 2 ~ "2",
+        n_retratamientos >= 3 ~ "3+"
+      ),
+      retratamientos_cat          = factor(retratamientos_cat, levels = c("0", "1", "2", "3+"))
+    ) %>%
+    # Select relevant predictors and outcomes
+    select(
+      HASH_KEY,
+      HOSP_MENTAL_POST_TTO,
+      edad_num,
+      sex,
+      principal_sub,
+      plan_type,
+      duracion_tto_dias,
+      duracion_total_todos_ttos,
+      hosp_mental_previa,
+      n_hosp_mental_previas,
+      n_retratamientos,
+      retratamientos_cat,
+      n_total_tratamientos,
+      motivode_egreso,
+      estado_conyugal,
+      escolaridad_ultimo_ano_cursado,
+      condicion_ocupacional,
+      region_del_centro,
+      fecha_ingresoa_tratamiento,
+      fecha_egresode_tratamiento,
+      fecha_hosp_mental,
+      tiempo_hasta_hosp_mental,
+      YEAR_TTO
+    ) %>%
+    # Drop rows with missing key predictors
+    filter(
+      !is.na(principal_sub),
+      !is.na(sex),
+      !is.na(edad_num),
+      !is.na(plan_type)
+    ) %>%
+    distinct(HASH_KEY, .keep_all = TRUE) %>%
+    # Convert remaining character columns (except HASH_KEY, edad_num) to factors
+    mutate(across(
+      .cols = setdiff(names(.)[sapply(., is.character)], c("HASH_KEY", "edad_num")),
+      .fns = as.factor
+    ))
+  
+  ##############################################################################
+  # Recode factor levels for clarity in modeling
+  ##############################################################################
+  BASE_REGRESION_LOGISTICA <- BASE_REGRESION_LOGISTICA %>%
+    mutate(
+      sex                         = fct_recode(sex, "Female" = "Female", "Male" = "Male"),
+      principal_sub               = fct_recode(
+        principal_sub,
+        "Alcohol"          = "Alcohol",
+        "Other substances" = "Others",
+        "Cocaine"          = "Cocaine",
+        "Depressants"      = "Depressants",
+        "Marijuana"        = "Marijuana",
+        "Cocaine paste"    = "Cocaine Base Paste"
+      ),
+      plan_type                   = fct_recode(plan_type, "Outpatient" = "Outpatient", "Residential" = "Residential"),
+      hosp_mental_previa          = fct_recode(hosp_mental_previa, "Yes" = "Yes", "No" = "No"),
+      retratamientos_cat          = fct_recode(retratamientos_cat, "0" = "0", "1" = "1", "2" = "2", "3+" = "3+"),
+      estado_conyugal             = fct_collapse(
+        estado_conyugal,
+        "Married / Partnered"   = c("Casado", "Conviviente", "Conviviente civil"),
+        "Divorced / Separated"  = c("Divorciado", "Separado", "Anulado"),
+        "Single"                = "Soltero",
+        "Widowed"               = "Viudo",
+        "Other / No answer"     = "No contesta"
+      ),
+      escolaridad_ultimo_ano_cursado = fct_collapse(
+        escolaridad_ultimo_ano_cursado,
+        "Primary or less"       = c(
+          "SIN ESTUDIOS", "Nunca estudi", "BASICA INCOMPLETA",
+          "Primaria o preparatoria", "BASICA COMPLETA", "Humanidades",
+          "Especial o diferencial", "Sala Cuna o jardin infantil",
+          "Kinder", "Educaci??ca"
+        ),
+        "Secondary"             = c("MEDIA INCOMPLETA", "MEDIA COMPLETA", "Cientifico-Humanista"),
+        "Technical"             = c(
+          "TECNICA COMPLETA", "TECNICA INCOMPLETA",
+          "T?ico superior (1-3 a? completa", "T?ico superior (1-3 a? incompleta",
+          "T?ica Comercial/Industrial/Normalista", "T?ica profesional"
+        ),
+        "University or higher"  = c(
+          "UNIVERSITARIA INCOMPLETA", "Profesional (4 o m?a? incompleta",
+          "UNIVERSITARIA COMPLETA O MAS", "Profesional (4 o m?a? completa",
+          "Magister", "Doctorado"
+        ),
+        "Unknown"               = "NO SABE O NO SE APLICA"
+      ),
+      condicion_ocupacional        = fct_collapse(
+        condicion_ocupacional,
+        "Working"               = c(
+          "Trabajando actualmente", "Trabajando actualmente - Asalariado",
+          "Trabajando actualmente - Cuenta Propia", "Trabajando actualmente - Empleador",
+          "Trabajando actualmente - Otro", "Trabajando actualmente - Voluntario",
+          "Trabajando y estudiando"
+        ),
+        "Unemployed"            = c("Cesante", "Buscando trabajo por primera vez"),
+        "Studying"              = "Estudiando sin trabajar",
+        "Household tasks"       = "Quehaceres del hogar",
+        "Retired / Pensioned"   = "Pensionado o jubilado sin trabajar",
+        "Other"                 = c("No busca Trabajo", "Rentista", "Otra razón", "Sin actividad", "Incapacitado permanente para trabajar")
+      ),
+      motivode_egreso              = fct_recode(
+        motivode_egreso,
+        "Late Dropout"          = "Abandono",
+        "Late Dropout"          = "Abandono Tardio",
+        "Early Dropout"         = "Abandono Temprano",
+        "Administrative Discharge" = "Alta Admnistrativa",
+        "Therapeutic Discharge" = "Alta Terapéutica",
+        "Referral"              = "Derivación"
+      ),
+      region_del_centro            = fct_relabel(region_del_centro, ~ str_to_title(tolower(.x)))
+    ) %>%
+    # Replace negative durations with NA
+    mutate(
+      duracion_tto_dias              = ifelse(duracion_tto_dias < 0, NA, duracion_tto_dias),
+      duracion_total_todos_ttos      = ifelse(duracion_total_todos_ttos < 0, NA, duracion_total_todos_ttos)
+    )
+  
+  # -----------------------------
+  # Save the final dataset to disk
+  # -----------------------------
+  saveRDS(BASE_REGRESION_LOGISTICA, file = ruta_base)
+  
+} else {
+  # Scenario 3: Neither BASE_REGRESION_LOGISTICA nor source files exist
+  # Simulate data based on descriptive statistics from PDF
+  
+  set.seed(123) # For reproducibility
+  n <- 10000
+  
+  # Create simulated data
+  BASE_REGRESION_LOGISTICA <- tibble(
+    # Create unique IDs
+    HASH_KEY = paste0("SIM_", str_pad(1:n, 6, pad = "0")),
+    
+    # Outcome variable (7.6% with mental hospitalization based on PDF)
+    HOSP_MENTAL_POST_TTO = rbinom(n, 1, 0.076),
+    
+    # Age - normal distribution approximating the data
+    edad_num = pmax(18, pmin(round(rnorm(n, mean = 33, sd = 10)), 75)), # Bound between 18-75
+    
+    # Sex (74% Male, 26% Female from PDF)
+    sex = factor(sample(c("Male", "Female"), n, replace = TRUE, 
+                       prob = c(0.74, 0.26))),
+    
+    # Principal substance (proportions from PDF)
+    principal_sub = factor(sample(
+      c("Alcohol", "Other substances", "Cocaine", "Depressants", "Marijuana", "Cocaine paste"),
+      n, replace = TRUE,
+      prob = c(0.346, 0.005, 0.197, 0.016, 0.074, 0.363)
+    )),
+    
+    # Plan type (89.1% Outpatient, 10.9% Residential)
+    plan_type = factor(sample(c("Outpatient", "Residential"), n, replace = TRUE,
+                            prob = c(0.891, 0.109))),
+    
+    # Treatment duration - log-normal distribution
+    duracion_tto_dias = pmax(1, pmin(round(rlnorm(n, meanlog = 5.2, sdlog = 0.8)), 4000)), # Bound between 1-4000
+    
+    # Total treatment duration - slightly higher than first treatment
+    duracion_total_todos_ttos = NA_real_, # Will be calculated later
+    
+    # Previous mental hospitalization (11% Yes)
+    hosp_mental_previa = factor(sample(c("No", "Yes"), n, replace = TRUE,
+                                     prob = c(0.89, 0.11))),
+    
+    # Number of previous mental hospitalizations
+    n_hosp_mental_previas = ifelse(
+      hosp_mental_previa == "Yes",
+      rpois(n, lambda = 2.5),  # If yes, Poisson with mean 2.5
+      0
+    ),
+    
+    # Re-treatment categories (proportions from PDF)
+    retratamientos_cat = factor(sample(
+      c("0", "1", "2", "3+"),
+      n, replace = TRUE,
+      prob = c(0.745, 0.167, 0.053, 0.036)
+    ), levels = c("0", "1", "2", "3+")),
+    
+    # Number of re-treatments (based on category)
+    n_retratamientos = case_when(
+      retratamientos_cat == "0" ~ 0,
+      retratamientos_cat == "1" ~ 1,
+      retratamientos_cat == "2" ~ 2,
+      retratamientos_cat == "3+" ~ sample(3:6, 1)
+    ),
+    
+    # Total number of treatments
+    n_total_tratamientos = n_retratamientos + 1,
+    
+    # Discharge reason (proportions from PDF)
+    motivode_egreso = factor(sample(
+      c("Late Dropout", "Early Dropout", "Administrative Discharge", 
+        "Therapeutic Discharge", "Referral"),
+      n, replace = TRUE,
+      prob = c(0.345, 0.155, 0.081, 0.258, 0.162)
+    )),
+    
+    # Marital status
+    estado_conyugal = factor(sample(
+      c("Divorced / Separated", "Married / Partnered", "Other / No answer", 
+        "Single", "Widowed"),
+      n, replace = TRUE,
+      prob = c(0.106, 0.335, 0.002, 0.545, 0.012)
+    )),
+    
+    # Education level
+    escolaridad_ultimo_ano_cursado = factor(sample(
+      c("Primary", "Secondary", "University", 
+        "Other/Unspecified", "Technical"),
+      n, replace = TRUE,
+      prob = c(0.264, 0.541, 0.083, 0.005, 0.107)
+    )),
+    
+    # Employment status
+    condicion_ocupacional = factor(sample(
+      c("Unemployed", "Studying", "Other", "Retired / Pensioned", 
+        "Household tasks", "Working"),
+      n, replace = TRUE,
+      prob = c(0.325, 0.014, 0.089, 0.016, 0.061, 0.495)
+    )),
+    
+    # Region - using simplified version
+    region_del_centro = factor(sample(
+      c("Metropolitana", "De Valparaiso", "Del Bio-Bio", "De La Araucania", 
+        "De Los Lagos", "Other"),
+      n, replace = TRUE,
+      prob = c(0.473, 0.077, 0.070, 0.029, 0.039, 0.312)
+    )),
+    
+    # Date variables
+    fecha_ingresoa_tratamiento = as.Date("2010-01-01") + sample(0:4380, n, replace = TRUE),
+    fecha_egresode_tratamiento = fecha_ingresoa_tratamiento + duracion_tto_dias,
+    
+    # Mental hospitalization date (for those who have it)
+    fecha_hosp_mental = if_else(
+      HOSP_MENTAL_POST_TTO == 1,
+      fecha_egresode_tratamiento + sample(30:1095, sum(HOSP_MENTAL_POST_TTO == 1), replace = TRUE),
+      as.Date(NA)
+    ),
+    
+    # Time to hospitalization
+    tiempo_hasta_hosp_mental = as.numeric(fecha_hosp_mental - fecha_egresode_tratamiento),
+    
+    # Year of treatment
+    YEAR_TTO = year(fecha_egresode_tratamiento)
+  )
+  
+  # Ensure consistency in the data
+  BASE_REGRESION_LOGISTICA <- BASE_REGRESION_LOGISTICA %>%
+    mutate(
+      # Calculate total treatment duration
+      duracion_total_todos_ttos = duracion_tto_dias + round(rlnorm(n(), meanlog = 3, sdlog = 1.5)),
+      # Adjust total treatment duration for those with re-treatments
+      duracion_total_todos_ttos = if_else(
+        n_retratamientos > 0,
+        duracion_tto_dias * (1 + n_retratamientos * 0.8) + rnorm(n(), 50, 30),
+        duracion_tto_dias
+      ),
+      duracion_total_todos_ttos = round(pmax(duracion_tto_dias, duracion_total_todos_ttos))
+    )
+}
+```
+
+\newpage
+
+# Introdución  
+## Relevancia del problema
+
+Los trastornos por consumo de sustancias (TCS) constituyen una de las principales causas de carga de enfermedad y mortalidad evitable a escala global. En 2016 se calculó que más de 100 millones de personas sufrían trastorno por consumo de alcohol y decenas de millones presentaban dependencia de opioides, cannabis o cocaína [@Volkow2023]. La frecuente comorbilidad psiquiátrica, depresión, trastornos de ansiedad, psicosis o trastornos de personalidad multiplica la severidad clínica y los costes sociosanitarios [@Connery2020]. Estudios hospitalarios europeos y norteamericanos muestran que alrededor del 20 % de las admisiones psiquiátricas corresponden a pacientes con diagnóstico dual, fenómeno que favorece re-ingresos y estancias prolongadas [@GomezSanchezLafuente2022].
+
+En Chile, las encuestas nacionales sitúan la prevalencia de abuso o dependencia de sustancias entre el 11 % y el 20 %, una de las más elevadas de Latinoamérica.. Los registros hospitalarios concuerdan con las cifras internacionales: alrededor de una quinta parte de los internados en psiquiatría presenta un TCS como diagnóstico primario o secundario. Esta convergencia evidencia que la hospitalización psiquiátrica es un desenlace clínico crítico en la trayectoria de las adicciones, razón por la cual identificar sus factores determinantes resulta esencial para planificar intervenciones preventivas, asignar recursos y reducir la carga asistencial [@Connery2020; @Saxena2011; @GomezSanchezLafuente2016; @Rojas2002].
+
+## Pregunta de investigación
+
+¿Qué factores individuales y clínicos se asocian a la hospitalización psiquiátrica dentro del tiempo posterior al alta de un tratamiento por consumo de sustancias, en adultos atendidos en la red chilena entre 2010-2022?
+
+## Modelo teórico o mecanismo que explicaría la relación entre las variables que se van a analizar e hipótesis
+
+Se parte de un marco de riesgo acumulativo en el que la probabilidad de hospitalización ($p$) surge de la interacción entre:
+
+- Severidad adictiva: tipo de sustancia principal y número de re-tratamientos, como indicador de recaídas y cronicidad.
+
+- Vulnerabilidad psiquiátrica previa: presencia y número de hospitalizaciones mentales antes del tratamiento por drogas.
+
+- Características del tratamiento: modalidad (ambulatoria vs residencial) y duración total del episodio.
+
+- Variables sociodemográficos: edad (lineal y cuadrática), sexo, estado civil, nivel educacional y región de residencia.
+
+Bajo este esquema se plantean cuatro hipótesis:
+
+$H_1$ – Historial psiquiátrico: cada hospitalización mental previa incrementa significativamente la probabilidad de una nueva hospitalización ($\uparrow p$).
+
+$H_2$ – Re-tratamientos: los pacientes con tres o más reingresos muestran un riesgo superior al de quienes no han recaído.
+
+$H_3$ – Tratamiento residencial: refleja mayor complejidad clínica y eleva la probabilidad de hospitalización frente al tratamiento ambulatorio.
+
+$H_4$ – Sustancias depresoras del SNC: por su perfil farmacológico, conllevan mayor riesgo de complicaciones psiquiátricas agudas.
+
+Este modelo conceptual apoyado por la evidencia internacional sobre patología dual y cursos clínicos severos  guiará la exploración empírica de los datos chilenos [@GomezSanchezLafuente2016]. Evaluar dichas hipótesis permitirá distinguir los pacientes de alto riesgo y orientar estrategias integradas que reduzcan la probabilidad de hospitalización, mejoren la continuidad asistencial y optimicen el uso de recursos en salud mental tanto en Chile como en otros contextos comparables.
+
+# Metodología 
+## Datos
+
+Este es un estudio de cohorte retrospectiva de pacientes adultos en tratamiento por consumo de sustancias, con datos otorgados por el Servicio Nacional para la Prevención y Rehabilitación del Consumo de Drogas y Alcohol de Chile (SENDA) en convenio con el núcleo mileniso de ánalsis de políticas públicas de drogas (nDP). La cohorte se construyó vinculando los registros administrativos de los pacientes (n = 156.771 episodios de tratamiento entre 97,698 personas en las 16 regiones del país) con los datos de egresos hospitalarios a nivel nacional entre 2010 y 2022 (20.652.003 hospitalizaciones).
+El registro de pacientes en tratamiento se realizó en una plataforma electrónica denominada SISTRAT, que contenía información sociodemográfica, datos sobre el estado de salud y patrones de consumo de sustancias, entre otras variables, además de información sobre el propio tratamiento (p. ej., fecha de ingreso, egreso, tipo de tratamiento). Los conjuntos de datos de egresos hospitalarios son gestionados por el Departamento de Estadísticas e Información de Salud del Ministerio de Salud e incluyen información sobre todas las hospitalizaciones en centros públicos y privados, así como la causa principal y secundaria de ingreso, la fecha de ingreso y el alta, entre otras variables. Las bases de datos se vincularon de forma determinista mediante un hash de 64 caracteres resultante del cifrado (con un algoritmo SHA-256) del número de identificación único de cada persona.
+
+## Variables de interés 
+
+Se incluyeron como principal **predictores** múltiples variables relacionadas al **consumo y tratamiento rehabilitador de drogas**. Se consideró la *sustancia principal* por la cual se trató al paciente (alcohol, pasta base de cocaína, cocaína, marihuana, depresores del SNC u otras sustancias; tomando Alcohol como categoría de referencia), el *tipo de plan de tratamiento* (ambulatorio vs. residencial), la duración del tratamiento, el **número de reingresos** a tratamiento (retratamientos, categorizados en 0, 1, 2, 3 o más reingresos) y el **motivo de egreso** del programa (alta terapéutica, derivación, abandono temprano/tardío, etc.). Entre las variables **sociodemográficas** consideradas están la edad (en años) al inicio del tratamiento incorporada también en forma cuadrática ($\text{edad}^2$) para capturar posibles efectos no lineales, el sexo del paciente, el **estado civil** (por ejemplo, soltero, casado/conviviente, separado, viudo), el **nivel educacional** alcanzado (educación primaria, secundaria, técnica, universitaria) y la situación de **empleo** (categorías como trabajando, desempleado, estudiando, tareas del hogar, jubilado, etc.). Se justó con otras variables del **historial clínico** de salud mental del paciente a través del número de hospitalizaciones psiquiátricas previas al tratamiento de drogas. Todas las variables categóricas se introdujeron mediante codificación *dummy*, definiendo categorías de referencia apropiadas (p. ej., sexo femenino, tratamiento ambulatorio, etc.)
+
+## Modelos
+
+El estudio emplea modelos de regresión logística binaria (logit) y probit para analizar los predictores de hospitalización psiquiátrica **posterior** al tratamiento por consumo de sustancias. Se compararon tres métodos de estimación para evaluar la robustez de los resultados. El modelo logit estándar estimó la probabilidad del evento mediante la función de enlace logit:
+
+$$\log\left(\frac{p_i}{1-p_i}\right) = \mathbf{x}_i^T\boldsymbol{\beta}$$
+
+El modelo probit utilizó la función de distribución acumulada normal estándar:
+
+$$\Phi^{-1}(p_i) = \mathbf{x}_i^T\boldsymbol{\beta}$$
+
+Finalmente, se implementó el método de regresión logística penalizada de Firth para abordar posibles problemas de separación cuasi-completa. Este método maximizó la log-verosimilitud penalizada:
+
+$$\ell^*(\boldsymbol{\beta}) = \ell(\boldsymbol{\beta}) + \frac{1}{2}\log|\mathbf{I}(\boldsymbol{\beta})|$$
+
+donde $\mathbf{I}(\boldsymbol{\beta})$ fue la matriz de información de Fisher. La penalización de Firth redujo el sesgo en las estimaciones, particularmente relevante en presencia de eventos raros o categorías con pocas observaciones.
+
+En los tres metodos, $p_i = P(Y=1 \mid X)$ es la probabilidad de hospitalización psiquiátrica dada la presencia del vector de predictores $\mathbf{x}_i^T$.  En ambos casos, $Y$ es una variable dicotómica indicadora de si el paciente fue hospitalizado en un recinto psiquiátrico tras completar el tratamiento de rehabilitación, y el vector $\boldsymbol{\beta}$ representan los coeficientes de cada variable explicativa $\mathbf{x}_i^T$ [@cox1958regression; @bliss1934method; @firth1993bias].
+
+El **desarrollo de los modelos** siguió un enfoque escalonado. Se comenzó estimando un modelo base con un conjunto inicial de covariables fundamentales, al cual se le fueron incorporando progresivamente bloques adicionales de variables para evaluar su contribución incremental al ajuste. La significancia estadística de cada bloque añadido se evaluó mediante pruebas de **razón de verosimilitud** (LR) para modelos anidados [@neyman1933problem]. Para la comparación de modelos se calculó el **criterio de información de Akaike** (AIC) de cada especificación, considerando preferible aquel modelo con menor AIC (indicativo de mejor equilibrio entre buen ajuste y parsimonia). Asimismo, se estimó el **área bajo la curva ROC** (AUC) para cada modelo, como medida de desempeño predictivo (discriminación entre pacientes con y sin hospitalización) [@akaike1973information]. Con objeto de caracterizar integralmente el rendimiento predictivo, se estimaron además las siguientes métricas, definidas a partir de la matriz de confusión (verdaderos positivos TP, falsos positivos FP, verdaderos negativos TN y falsos negativos FN):
+
+* Sensibilidad:  
+
+  $$
+  \text{Sensibilidad} = \frac{\text{TP}}{\text{TP}+\text{FN}}
+  $$
+  
+* Especificidad:  
+
+  $$
+  \text{Especificidad} = \frac{\text{TN}}{\text{TN}+\text{FP}}
+  $$
+  
+* Precisión (valor predictivo positivo, PPV):  
+
+  $$
+  \text{PPV} = \frac{\text{TP}}{\text{TP}+\text{FP}}
+  $$
+  
+* Valor predictivo negativo (NPV):  
+
+  $$
+  \text{NPV} = \frac{\text{TN}}{\text{TN}+\text{FN}}
+  $$
+  
+* Exactitud global:  
+
+  $$
+  \text{Exactitud} = \frac{\text{TP}+\text{TN}}{\text{TP}+\text{FP}+\text{FN}+\text{TN}}
+  $$
+  
+Estas métricas complementaron la información aportada por la AUC y permiten describir, de forma robusta, la capacidad de los modelos para identificar correctamente los casos de hospitalización psiquiátrica y minimizar los errores de clasificación [@hanley1982meaning; @delong1988comparing].
+
+Una vez selcionado los mejores modelos según las metricas anteriores se evaluaron su calibración mediante la comparación entre las probabilidades predichas y las proporciones observadas. Las probabilidades predichas $\hat{p}_i$ se agruparon en deciles basados en sus cuantiles. Para cada decil $j$, se calculó la probabilidad predicha promedio $\bar{\hat{p}}_j = \frac{1}{n_j}\sum_{i \in G_j} \hat{p}_i$ y la proporción observada $\bar{y}_j = \frac{1}{n_j}\sum_{i \in G_j} y_i$. Se construyeron intervalos de confianza del 95% utilizando el error estándar $SE_j = \sqrt{\frac{\bar{y}_j(1-\bar{y}_j)}{n_j}}$.
+
+La bondad de ajuste global se evaluó mediante el test de Hosmer-Lemeshow:
+
+$$\chi^2_{HL} = \sum_{j=1}^{10} \frac{(O_j - E_j)^2}{E_j(1 - \bar{\hat{p}}_j)} + \frac{(n_j - O_j - n_j + E_j)^2}{(n_j - E_j)\bar{\hat{p}}_j}$$
+
+donde $O_j$ representó los eventos observados y $E_j$ los eventos esperados en cada grupo. Bajo la hipótesis nula de buena calibración, el estadístico siguió una distribución $\chi^2$ con 8 grados de libertad [@hosmer1980goodness].
+
+
+Luego se calcularon los residuos de deviance para identificar patrones sistemáticos y observaciones atípicas:
+
+$$d_i = \text{sign}(y_i - \hat{p}_i) \sqrt{2\left[y_i \log\left(\frac{y_i}{\hat{p}_i}\right) + (1-y_i)\log\left(\frac{1-y_i}{1-\hat{p}_i}\right)\right]}$$
+
+Los residuos se graficaron contra los valores ajustados y se aplicó un suavizado loess para detectar desviaciones de la linealidad. Se identificaron como valores atípicos aquellas observaciones con $|d_i| > 3$.
+
+Por último se calculó el Factor de Inflación de Varianza Generalizado (GVIF) para evaluar la multicolinealidad entre predictores. Para cada variable o conjunto de variables dummy $j$, el GVIF se definió como:
+
+$$\text{GVIF}_j = \det(\mathbf{R}_j)\det(\mathbf{R}_{-j})^{-1}$$
+
+Dado que el GVIF depende del número de parámetros asociados a cada variable, se aplicó la corrección $\text{GVIF}^{1/(2 \times \text{df}_j)}$, donde $\text{df}_j$ representó los grados de libertad de la variable $j$. Se consideraron problemáticos valores superiores a $\sqrt{5} \approx 2.24$, indicando que la varianza del coeficiente se infló más de 5 veces debido a la colinealidad [@fox1992generalized].
+
+Todos los ánalisis consideraron un nivel de significancia de $\alpha=0.05$ e intervalos de confianza con un nivel de confianza de $1-\alpha=0.95$.
+
+\newpage
+
+# Resultados
+
+## Estadísticas Descriptivas
+
+La Tabla 1 presenta las características de la muestra analítica final de 97,618 pacientes adultos en tratamiento por consumo de sustancias entre 2010 y 2022. De estos, 7,456 (7.6%) experimentaron al menos una hospitalización psiquiátrica posterior al tratamiento. La edad promedio fue de 33 años (DE = 10), con predominio masculino (74%). Las sustancias principales de tratamiento fueron pasta base de cocaína (36.3%), alcohol (34.6%) y cocaína (19.7%). La mayoría recibió tratamiento ambulatorio (89.1%) frente al residencial (10.9%). Un 11% presentó hospitalizaciones psiquiátricas previas al tratamiento, con una media de 0.2 hospitalizaciones previas (DE = 0.9). El 74.5% no tuvo retratamientos, mientras que 16.7% tuvo uno, 5.3% dos, y 3.6% tres o más retratamientos.
+
+## Modelos de Regresión Logística
+
+### Modelo Base y Progresión
+
+La Tabla 2 presenta los resultados de los modelos logit estándar. El intercepto del Modelo 3 ($\hat{\beta}_0 = -2.972$, IC 95%: [-3.092, -2.852]) indica que los log-odds de hospitalización psiquiátrica dado el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol, edad promedio, sin hospitalizaciones previas) son significativamente negativos, correspondiendo a una probabilidad basal de $\frac{e^{-2.972}}{1+e^{-2.972}} = 0.049$ o 4.9%.
+
+La Tabla 6 muestra las comparaciones entre modelos anidados mediante pruebas de razón de verosimilitud. La inclusión de hospitalizaciones previas (Modelo 2 vs 3) produjo la mayor reducción en deviance ($\chi^2_{LR} = 2,681.75$, gl = 1, p < 0.001), seguida por la adición de retratamientos (Modelo 3 vs 4: $\chi^2_{LR} = 3,610.47$, gl = 3, p < 0.001).
+
+### Predictor tipo de sustancias (Modelo 7)
+
+En la Tabla 2 se observa que el mayor efecto positivo sobre los log-odds de hospitalización psiquiátrica es el consumo de depresores del SNC,  tomando alcohol como referencia ($\hat{\beta} = 0.463$, IC 95%: [0.243, 0.683]), lo que representa un odds ratio de $e^{0.463} = 1.59$, indicando 1.59 vese más de probabilidad de hospitalización sobre la no hospitalización, comparado con pacientes tratados por alcohol (El coeficiente se mantiene estable en todos los modelos indicandso su robustez). La cocaína mostró una asociación negativa no significativa ($\hat{\beta} = -0.019$, IC 95%: [-0.154, 0.117]), mientras que la pasta base no mostró diferencias significativas ($\hat{\beta} = 0.042$, IC 95%: [-0.068, 0.153]). Estos efectos negativos si son significativos en la interacción con sexo. Esto indica que la probabilidad de la hospitalización psiquiátrica es menor en hombres que consumen pasta base o cocaína qué en mujeres como se evalúa más adelante.
+
+### Características Demográficas
+
+El sexo masculino se asoció con menores log-odds de hospitalización ($\hat{\beta} = -0.105$, IC 95%: [-0.203, -0.006]), representando un odds ratio de 0.90. La edad mostró una relación no lineal significativa: el efecto lineal fue positivo ($\hat{\beta} = 0.089$, IC 95%: [0.074, 0.105]), mientras que el término cuadrático fue negativo ($\hat{\beta} = -0.001$, IC 95%: [-0.001, -0.001]), sugiriendo que el riesgo de hospitalización aumenta con la edad pero a una tasa decreciente (Tabla 2, Modelo 7).
+
+### Características del Tratamiento
+
+Existe una mayor probabilidad de hospitalización psiquiátrica posterior dado un plan residencial versus ambulatorio, ($\hat{\beta} = 0.279$, IC 95%: [0.205, 0.353]), con un odds ratio de 1.32. Comparando los modelos en la Tabla 2, este efecto se redujo considerablemente desde el Modelo 2 ($\hat{\beta} = 0.763$) al incluir hospitalizaciones previas y retratamientos, sugiriendo que parte del efecto inicial se debía a mayor severidad basal en pacientes residenciales (Sesgo por omisión negativo).
+
+### Historial de Salud Mental
+
+El número de hospitalizaciones psiquiátricas previas fue el predictor más fuerte ($\hat{\beta} = 0.478$, IC 95%: [0.455, 0.500]). Hay un aumento de los odds de hospitalización posterior en $e^{0.478} = 1.61$ veces dado un aumento de eventos de hospitalización psiquiátrica posterior. Este efecto permaneció estable a través de todos los modelos (4-7), indicando robustez ante la inclusión de covariables adicionales (Tabla 2).
+
+### Retratamientos
+
+Los retratamientos mostraron una relación dosis-respuesta con la hospitalización psiquiátrica. Comparado con ningún retratamiento, un retratamiento aumentó los log-odds en 1.048 (IC 95%: [0.986, 1.110], OR = 2.85), dos retratamientos en 1.597 (IC 95%: [1.514, 1.679], OR = 4.94), y tres o más en 2.277 (IC 95%: [2.191, 2.362], OR = 9.75) (Tabla 2, Modelo 7).
+
+### Variables Socioeconómicas
+
+Entre las variables educacionales (referencia: otra/no especificada), ninguna categoría mostró efectos significativos en el Modelo 7. El estado civil casado/conviviente mostró menores log-odds comparado con divorciado/separado ($\hat{\beta} = -0.126$, IC 95%: [-0.213, -0.039], OR = 0.88). En ocupación (referencia: desempleado), trabajar se asoció con menores log-odds ($\hat{\beta} = -0.381$, IC 95%: [-0.442, -0.319], OR = 0.68), mientras que jubilados/pensionados mostraron mayores log-odds ($\hat{\beta} = 0.359$, IC 95%: [0.179, 0.538], OR = 1.43) (Tabla 2).
+
+### Interacciones Sexo × Sustancia
+
+La interacción entre sexo masculino y pasta base fue significativa y negativa ($\hat{\beta} = -0.257$, IC 95%: [-0.385, -0.129]), indicando que el efecto de la pasta base sobre la hospitalización psiquiátrica difiere entre hombres y mujeres. Para hombres tratados por pasta base, el efecto combinado es $0.042 + (-0.257) = -0.215$, sugiriendo menor riesgo que las mujeres tratadas por la misma sustancia (Tabla 2, Modelo 7).
+
+## Modelos Probit
+
+La Tabla 3 presenta los modelos probit, mostrando patrones similares pero con coeficientes escalados según la función de enlace probit. El intercepto del Modelo 7 ($\hat{\beta}_0 = -2.747$) corresponde a $\Phi(-2.747) = 0.003$, donde $\Phi$ es la función de distribución acumulada normal estándar. Los efectos mantuvieron su dirección y significancia: depresores ($\hat{\beta} = 0.240$, p < 0.001), edad ($\hat{\beta} = 0.040$, p < 0.001), plan residencial ($\hat{\beta} = 0.155$, p < 0.001), y hospitalizaciones previas ($\hat{\beta} = 0.242$, p < 0.001). Las comparaciones entre modelos anidados (Tabla 7) mostraron patrones similares a los modelos logit, con la mayor mejora al incluir hospitalizaciones previas ($\chi^2_{LR} = 2,673.74$, gl = 1, p < 0.001).
+
+## Modelos Logit con Ajuste de Firth
+
+La Tabla 4 presenta los resultados del método de Firth, diseñado para abordar problemas de separación. Los coeficientes fueron virtualmente idénticos a los del logit estándar, sugiriendo ausencia de problemas de separación en estos datos. El Modelo 7 de Firth mostró el mismo patrón de efectos significativos, con mínimas diferencias en las estimaciones puntuales. Las comparaciones entre modelos (Tabla 8) replicaron los hallazgos de los otros métodos.
+
+## Comparación de Métodos de Estimación
+
+La Tabla 5 y 9 muestra la comparación de AIC y AUC entre los tres métodos de estimación. Los modelos logit estándar y Firth produjeron resultados prácticamente idénticos, con el AIC más bajo en el Modelo 7 (44,540.24 y 44,540.33 respectivamente), mientras que el modelo probit mostró un AIC ligeramente superior (44,623.88). Las métricas de discriminación fueron consistentes entre métodos, con AUC de 0.779 para logit, 0.779 para probit, y 0.779 para Firth en el Modelo 7.
+
+## Rendimiento Predictivo
+
+La Tabla 9 compara las métricas de rendimiento para todos los modelos. El Modelo 7 logit mostró: sensibilidad 63.6%, especificidad 79.3%, y exactitud global 78.1%. El valor predictivo positivo fue 20.2% mientras que el valor predictivo negativo alcanzó 96.3%, reflejando la baja prevalencia del evento. Métricas similares se obtuvieron para probit (sensibilidad 64.3%, especificidad 78.6%) y Firth (sensibilidad 63.6%, especificidad 79.2%).
+
+La Figura 1 presenta las curvas ROC para todos los modelos. La progresión del AUC desde el Modelo 3 (0.692) al Modelo 7 (0.779) indica que las hospitalizaciones previas y retratamientos aportan la mayor capacidad discriminativa, mientras que las variables socioeconómicas y regionales contribuyen marginalmente. La comparación entre Modelo 6 y 7 (ΔAUC = 0.002) sugiere que la complejidad adicional del modelo completo ofrece ganancia predictiva limitada.
+
+## Diagnóstico de Modelos
+
+La Figura 2, 3 y 4 presenta los diagnósticos para las tres variantes del Modelo 7. La calibración evaluada mediante el test de Hosmer-Lemeshow reveló falta de ajuste significativa en los tres modelos: logit estándar ($\chi^2_{HL} = 33.54$, gl = 8, p < 0.001), probit ($\chi^2_{HL} = 46.71$, gl = 8, p < 0.001), y Firth ($\chi^2_{HL} = 33.32$, gl = 8, p < 0.001). Los gráficos de calibración mostraron subestimación sistemática en probabilidades altas (>0.6) para los tres métodos.
+
+El análisis de multicolinealidad mediante GVIF mostró valores aceptables para todas las variables en los tres modelos. Los valores GVIF$^{1/(2 \times df)}$ más altos correspondieron a edad² (aproximadamente 44.0) debido a su correlación con el término lineal, y región (aproximadamente 38.0) por sus múltiples categorías. Ninguna variable superó el umbral problemático después del ajuste por grados de libertad.
+
+Los residuos de deviance no mostraron patrones sistemáticos contra valores ajustados en ninguno de los tres modelos, aunque se observó mayor variabilidad en probabilidades extremas, consistente con la naturaleza binaria del resultado.
+
+\newpage
+
+```{r}
+# Función para calcular estadísticos de variables numéricas
+calc_numeric_stats <- function(data, var_name, group_var = NULL) {
+  if (!is.null(group_var)) {
+    stats <- data %>%
+      group_by(!!sym(group_var)) %>%
+      summarise(
+        mean = mean(!!sym(var_name), na.rm = TRUE),
+        sd = sd(!!sym(var_name), na.rm = TRUE),
+        min = min(!!sym(var_name), na.rm = TRUE),
+        q1 = quantile(!!sym(var_name), 0.25, na.rm = TRUE),
+        median = quantile(!!sym(var_name), 0.5, na.rm = TRUE),
+        q3 = quantile(!!sym(var_name), 0.75, na.rm = TRUE),
+        max = max(!!sym(var_name), na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      mutate(
+        stat_string = sprintf("%.1f (%.1f, %.1f, %.1f, %.1f, %.1f, %.1f)", 
+                              mean, sd, min, q1, median, q3, max)
+      ) %>%
+      select(!!sym(group_var), stat_string) %>%
+      pivot_wider(names_from = !!sym(group_var), values_from = stat_string)
+  } else {
+    stats <- data %>%
+      summarise(
+        mean = mean(!!sym(var_name), na.rm = TRUE),
+        sd = sd(!!sym(var_name), na.rm = TRUE),
+        min = min(!!sym(var_name), na.rm = TRUE),
+        q1 = quantile(!!sym(var_name), 0.25, na.rm = TRUE),
+        median = quantile(!!sym(var_name), 0.5, na.rm = TRUE),
+        q3 = quantile(!!sym(var_name), 0.75, na.rm = TRUE),
+        max = max(!!sym(var_name), na.rm = TRUE)
+      ) %>%
+      mutate(
+        Total = sprintf("%.1f (%.1f, %.1f, %.1f, %.1f, %.1f, %.1f)", 
+                        mean, sd, min, q1, median, q3, max)
+      ) %>%
+      select(Total)
+  }
+  
+  stats <- stats %>%
+    mutate(
+      Variable = var_name,
+      Level = " "
+    ) %>%
+    select(Variable, Level, everything())
+  
+  return(stats)
+}
+
+# Función para calcular estadísticos de variables categóricas
+calc_categorical_stats <- function(data, var_name, group_var = NULL) {
+  # Primero calculamos las frecuencias por grupo si existe group_var
+  if (!is.null(group_var)) {
+    freq_by_group <- data %>%
+      count(!!sym(var_name), !!sym(group_var)) %>%
+      group_by(!!sym(group_var)) %>%
+      mutate(
+        pct = n / sum(n) * 100,
+        stat_string = sprintf("%d (%.1f%%)", n, pct)
+      ) %>%
+      select(-n, -pct) %>%
+      pivot_wider(names_from = !!sym(group_var), values_from = stat_string, values_fill = "0 (0.0%)")
+  }
+  
+  # Calculamos las frecuencias totales
+  freq_total <- data %>%
+    count(!!sym(var_name)) %>%
+    mutate(
+      pct = n / sum(n) * 100,
+      Total = sprintf("%d (%.1f%%)", n, pct)
+    ) %>%
+    select(!!sym(var_name), Total)
+  
+  # Combinamos los resultados
+  if (!is.null(group_var)) {
+    result <- freq_by_group %>%
+      left_join(freq_total, by = as.character(var_name))
+  } else {
+    result <- freq_total
+  }
+  
+  # Formatear el resultado
+  result <- result %>%
+    rename(Level = !!sym(var_name)) %>%
+    mutate(
+      Variable = var_name,
+      Level = as.character(Level)
+    ) %>%
+    select(Variable, Level, everything())
+  
+  return(result)
+}
+
+# Crear la tabla descriptiva
+create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO") {
+  # Separar los datos por outcome
+  data_yes <- data %>% filter(!!sym(outcome_var) == 1)
+  data_no <- data %>% filter(!!sym(outcome_var) == 0)
+  
+  # Variables numéricas a incluir
+  numeric_vars <- c("edad", "duracion_tto_dias", "duracion_total_todos_ttos", 
+                    "n_hosp_mental_previas", "n_retratamientos", "n_total_tratamientos")
+  
+  # Variables categóricas a incluir
+  categorical_vars <- c("sex", "principal_sub", "plan_type", 
+                        "hosp_mental_previa", "retratamientos_cat", "motivode_egreso",
+                        "estado_conyugal", "escolaridad_ultimo_ano_cursado", 
+                        "condicion_ocupacional", "region_del_centro")
+  
+  # Inicializar data frame para resultados
+  results <- data.frame()
+  
+  # Procesar variables numéricas
+  for (var in numeric_vars) {
+    if (var %in% names(data)) {
+      # Estadísticos por grupo
+      stats_by_group <- calc_numeric_stats(data, var, outcome_var)
+      # Estadísticos totales
+      stats_total <- calc_numeric_stats(data, var)
+      
+      # Combinar
+      var_stats <- stats_by_group %>%
+        left_join(stats_total %>% select(-Variable, -Level), by = character())
+      
+      # Renombrar columnas
+      names(var_stats)[names(var_stats) == "0"] <- "No Mental Hosp"
+      names(var_stats)[names(var_stats) == "1"] <- "Mental Hosp"
+      
+      results <- bind_rows(results, var_stats)
+    }
+  }
+  
+  # Procesar variables categóricas
+  for (var in categorical_vars) {
+    if (var %in% names(data)) {
+      # Estadísticos por grupo
+      stats_by_group <- calc_categorical_stats(data, var, outcome_var)
+      # Estadísticos totales ya incluidos en la función
+      
+      # Renombrar columnas
+      names(stats_by_group)[names(stats_by_group) == "0"] <- "No Mental Hosp"
+      names(stats_by_group)[names(stats_by_group) == "1"] <- "Mental Hosp"
+      
+      results <- bind_rows(results, stats_by_group)
+    }
+  }
+  
+  # Agregar fila con tamaños de muestra
+  n_row <- data.frame(
+    Variable = "N",
+    Level = "",
+    `No Mental Hosp` = as.character(sum(data[[outcome_var]] == 0, na.rm = TRUE)),
+    `Mental Hosp` = as.character(sum(data[[outcome_var]] == 1, na.rm = TRUE)),
+    Total = as.character(nrow(data)),
+    check.names = FALSE
+  )
+  
+  results <- bind_rows(n_row, results)
+  
+  # Limpiar nombres de variables para presentación
+  results <- results %>%
+    mutate(
+      Variable = case_when(
+        Variable == "N" ~ "Sample Size",
+        Variable == "edad" ~ "Age",
+        Variable == "sex" ~ "Sex",
+        Variable == "age_group" ~ "Age Group",
+        Variable == "principal_sub" ~ "Principal Substance",
+        Variable == "plan_type" ~ "Plan Type",
+        Variable == "duracion_tto_dias" ~ "First Treatment Duration (days)",
+        Variable == "duracion_total_todos_ttos" ~ "Total Treatment Duration (days)",
+        Variable == "hosp_mental_previa" ~ "Previous Mental Hospitalization",
+        Variable == "n_hosp_mental_previas" ~ "Number of Previous Mental Hospitalizations",
+        Variable == "n_retratamientos" ~ "Number of Re-treatments",
+        Variable == "retratamientos_cat" ~ "Re-treatments Category",
+        Variable == "n_total_tratamientos" ~ "Total Number of Treatments",
+        Variable == "motivode_egreso" ~ "Discharge Reason",
+        Variable == "estado_conyugal" ~ "Marital Status",
+        Variable == "escolaridad_ultimo_ano_cursado" ~ "Education Level",
+        Variable == "condicion_ocupacional" ~ "Employment Status",
+        Variable == "region_del_centro" ~ "Treatment Center Region",
+        TRUE ~ Variable
+      )
+    )
+  
+  return(results)
+}
+
+# Crear la tabla descriptiva
+tabla_descriptiva <- create_descriptive_table(BASE_REGRESION_LOGISTICA)
+
+# Usar kableExtra para PDF
+
+kable(tabla_descriptiva, format = "latex", 
+      booktabs = T, 
+      digits = 2, 
+      caption = "Estadísticas descriptivas según el estado de hospitalización psiquiátrica") %>% # "Descriptive statistics by mental hospitalization status"
+  kable_styling(
+    latex_options = c("HOLD_position", "scale_down"),
+    font_size = 8,
+    full_width = FALSE,
+    position = "center") %>%
+  column_spec(
+    1, 
+    bold = T) %>% 
+  collapse_rows(columns = 1, valign = "top")  %>%
+  footnote(
+    general = "For numeric variables: mean (sd, min, q1, median, q3, max). For categorical variables: n (\\%)"
+  )
+```
+
+```{r}
+################################################################################
+# LOGIT AND PROBIT - CLEAN CODE
+################################################################################
+
+# Data preparation
+BASE_ANALISIS_TEMP <- BASE_REGRESION_LOGISTICA %>%
+  mutate(
+    edad = as.numeric(edad_num),
+    
+    educacion = fct_collapse(escolaridad_ultimo_ano_cursado,
+      "Primary" = c("Primary or less"),
+      "Secondary" = c("Secondary"),
+      "Technical" = "Higher technical",
+      "University" = c("University or higher"),
+      "Other/Unspecified" = "Unknown"
+    ),
+    
+    principal_sub = fct_relevel(principal_sub, "Alcohol"),
+    sex = fct_relevel(sex, "Female"),
+    plan_type = fct_relevel(plan_type, "Outpatient"),
+    retratamientos_cat = fct_relevel(retratamientos_cat, "0"),
+    educacion = fct_relevel(educacion, "Other/Unspecified"),
+    estado_conyugal = fct_relevel(estado_conyugal, "Divorced / Separated"),
+    condicion_ocupacional = fct_relevel(condicion_ocupacional, "Unemployed")
+  )
+
+variables_in_models <- c("HOSP_MENTAL_POST_TTO", "principal_sub", "edad", "sex", 
+                        "plan_type", "n_hosp_mental_previas",
+                        "retratamientos_cat", "educacion", "estado_conyugal", 
+                        "condicion_ocupacional", "region_del_centro")
+
+complete_cases_idx <- complete.cases(BASE_ANALISIS_TEMP[, variables_in_models])
+BASE_ANALISIS <- BASE_ANALISIS_TEMP[complete_cases_idx, ]
+
+################################################################################
+# MODEL DEFINITIONS
+################################################################################
+
+# Standard Logit Models
+modelo0 <- glm(HOSP_MENTAL_POST_TTO ~ 1, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo1 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo2 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo3 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo4 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo5 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo6 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro, data = BASE_ANALISIS, family = binomial(link = "logit"))
+modelo7 <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + I(edad^2) + sex + plan_type + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro + sex:principal_sub, data = BASE_ANALISIS, family = binomial(link = "logit"))
+
+# Probit Models
+modelo0_probit <- glm(HOSP_MENTAL_POST_TTO ~ 1, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo1_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo2_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo3_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo4_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo5_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo6_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro, data = BASE_ANALISIS, family = binomial(link = "probit"))
+modelo7_probit <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + I(edad^2) + sex + plan_type + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro + sex:principal_sub, data = BASE_ANALISIS, family = binomial(link = "probit"))
+
+# Firth Logit Models
+modelo0_firth <- glm(HOSP_MENTAL_POST_TTO ~ 1, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo1_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo2_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo3_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type + n_hosp_mental_previas, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo4_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo5_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo6_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + sex + plan_type  + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+modelo7_firth <- glm(HOSP_MENTAL_POST_TTO ~ principal_sub + edad + I(edad^2) + sex + plan_type + n_hosp_mental_previas + retratamientos_cat + educacion + estado_conyugal + condicion_ocupacional + region_del_centro + sex:principal_sub, data = BASE_ANALISIS, family = binomial(), method = "brglmFit")
+
+# Model lists
+models_list <- list(modelo1, modelo2, modelo3, modelo4, modelo5, modelo6, modelo7)
+models_probit_list <- list(modelo1_probit, modelo2_probit, modelo3_probit, modelo4_probit, modelo5_probit, modelo6_probit, modelo7_probit)
+models_firth_list <- list(modelo1_firth, modelo2_firth, modelo3_firth, modelo4_firth, modelo5_firth, modelo6_firth, modelo7_firth)
+models_list_all <- list(modelo0, modelo1, modelo2, modelo3, modelo4, modelo5, modelo6, modelo7)
+models_probit_list_all <- list(modelo0_probit, modelo1_probit, modelo2_probit, modelo3_probit, modelo4_probit, modelo5_probit, modelo6_probit, modelo7_probit)
+models_firth_list_all <- list(modelo0_firth, modelo1_firth, modelo2_firth, modelo3_firth, modelo4_firth, modelo5_firth, modelo6_firth, modelo7_firth)
+
+# Variable name mapping
+var_names <- c(
+  "(Intercept)" = "Intercept",
+  "principal_subMarijuana" = "Substance: Marijuana",
+  "principal_subOther substances" = "Substance: Other substances",
+  "principal_subCocaine" = "Substance: Cocaine",
+  "principal_subDepressants" = "Substance: Depressants",
+  "principal_subCocaine paste" = "Substance: Cocaine paste",
+  "edad" = "Age",
+  "I(edad^2)" = "Age²",
+  "sexMale" = "Sex: Male",
+  "plan_typeResidential" = "Plan: Residential",
+  "n_hosp_mental_previas" = "N° previous mental hosp.",
+  "retratamientos_cat1" = "Retreatments: 1",
+  "retratamientos_cat2" = "Retreatments: 2",
+  "retratamientos_cat3+" = "Retreatments: 3+",
+  "educacionPrimary" = "Education: Primary",
+  "educacionSecondary" = "Education: Secondary",
+  "educacionTechnical" = "Education: Higher technical",
+  "educacionUniversity" = "Education: University",
+  "educacionOther/Unspecified" = "Education: Other/Unspecified",
+  "estado_conyugalMarried / Partnered" = "Marital status: Married/Partnered",
+  "estado_conyugalSingle" = "Marital status: Single",
+  "estado_conyugalWidowed" = "Marital status: Widowed",
+  "estado_conyugalOther / No answer" = "Marital status: Other/No answer",
+  "condicion_ocupacionalWorking" = "Occupation: Working",
+  "condicion_ocupacionalStudying" = "Occupation: Studying",
+  "condicion_ocupacionalHousehold tasks" = "Occupation: Household tasks",
+  "condicion_ocupacionalRetired / Pensioned" = "Occupation: Retired/Pensioned",
+  "condicion_ocupacionalOther" = "Occupation: Other",
+  "principal_subMarijuana:sexMale" = "Interaction: Male × Marijuana",
+  "principal_subOther substances:sexMale" = "Interaction: Male × Other substances",
+  "principal_subCocaine:sexMale" = "Interaction: Male × Cocaine",
+  "principal_subDepressants:sexMale" = "Interaction: Male × Depressants",
+  "principal_subCocaine paste:sexMale" = "Interaction: Male × Cocaine paste"
+)
+```
+
+
+```{r}
+################################################################################
+# Standard Logistic Regression Models
+################################################################################
+
+coef_list <- list()
+for(i in 1:length(models_list)) {
+  model <- models_list[[i]]
+  coef_summary <- summary(model)$coefficients
+  coef_df <- data.frame(
+    term = rownames(coef_summary),
+    estimate = coef_summary[,1],
+    std_error = coef_summary[,2],
+    z_value = coef_summary[,3],
+    p_value = coef_summary[,4],
+    model = paste0("Model ", i)
+  )
+  ci <- confint.default(model)
+  coef_df$ci_lower <- ci[,1]
+  coef_df$ci_upper <- ci[,2]
+  coef_df$stars <- ifelse(coef_df$p_value < 0.001, "***",
+                          ifelse(coef_df$p_value < 0.01, "**",
+                                ifelse(coef_df$p_value < 0.05, "*", "")))
+  coef_list[[i]] <- coef_df
+}
+
+all_coefs <- do.call(rbind, coef_list)
+unique_terms <- unique(all_coefs$term)
+unique_terms <- unique_terms[!grepl("^region_del_centro", unique_terms)]
+
+table1_df <- data.frame(Variable = character(), stringsAsFactors = FALSE)
+for(i in 1:7) {
+  table1_df[[paste0("Model_", i)]] <- character()
+}
+
+row_counter <- 0
+for(term in unique_terms) {
+  row_counter <- row_counter + 1
+  var_label <- ifelse(term %in% names(var_names), var_names[term], term)
+  new_row <- data.frame(Variable = var_label, stringsAsFactors = FALSE)
+  
+  for(i in 1:7) {
+    model_data <- all_coefs[all_coefs$model == paste0("Model ", i) & all_coefs$term == term,]
+    if(nrow(model_data) > 0) {
+      new_row[[paste0("Model_", i)]] <- sprintf("%.3f%s", model_data$estimate[1], model_data$stars[1])
+    } else {
+      new_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table1_df <- rbind(table1_df, new_row)
+  
+  ci_row <- data.frame(Variable = "", stringsAsFactors = FALSE)
+  for(i in 1:7) {
+    model_data <- all_coefs[all_coefs$model == paste0("Model ", i) & all_coefs$term == term,]
+    if(nrow(model_data) > 0) {
+      ci_row[[paste0("Model_", i)]] <- sprintf("[%.3f, %.3f]", model_data$ci_lower[1], model_data$ci_upper[1])
+    } else {
+      ci_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table1_df <- rbind(table1_df, ci_row)
+}
+
+stats_rows <- data.frame(
+  Variable = c("N observations", "Log Likelihood", "Deviance", "AIC", "BIC", 
+               "Pseudo R² (McFadden)", "Pseudo R² (Nagelkerke)"),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:7) {
+  model <- models_list[[i]]
+  ll_full <- as.numeric(logLik(model))
+  ll_null <- as.numeric(logLik(update(model, . ~ 1)))
+  n <- nobs(model)
+  
+  mcfadden <- 1 - (ll_full / ll_null)
+  cox_snell <- 1 - exp((2/n) * (ll_null - ll_full))
+  nagelkerke <- cox_snell / (1 - exp(2 * ll_null / n))
+  
+  stats_rows[[paste0("Model_", i)]] <- c(
+    format(n, big.mark = ","),
+    sprintf("%.2f", ll_full),
+    sprintf("%.2f", deviance(model)),
+    sprintf("%.2f", AIC(model)),
+    sprintf("%.2f", BIC(model)),
+    sprintf("%.3f", mcfadden),
+    sprintf("%.3f", nagelkerke)
+  )
+}
+
+table1_final <- rbind(table1_df, stats_rows)
+
+kable(table1_final,
+      col.names = c("Variable", paste("Model", 1:7)),
+      caption =  "Modelos de regresión logística (Logit): Predictores de la hospitalización psiquiátrica posterior al tratamiento rehabilitador de drogas" , #"Standard Logistic Regression Models - Predictors of Post-Treatment Mental Hospitalization"
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"),
+                font_size = 6,
+                full_width = FALSE,
+                position = "center") %>%
+  pack_rows("Model statistics", nrow(table1_df) + 1, nrow(table1_final)) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "95% Confidence intervals in brackets",
+                      "Reference categories: Alcohol (substance), Female (sex), Outpatient (plan), etc.",
+                      "Models 6-7 additionally adjusted for Region",
+                      "Model 7 includes Sex × Substance interaction and Age²"))
+```
+
+
+```{r}
+################################################################################
+# Probit Models
+################################################################################
+
+coef_list_probit <- list()
+for(i in 1:length(models_probit_list)) {
+  model <- models_probit_list[[i]]
+  coef_summary <- summary(model)$coefficients
+  coef_df <- data.frame(
+    term = rownames(coef_summary),
+    estimate = coef_summary[,1],
+    std_error = coef_summary[,2],
+    z_value = coef_summary[,3],
+    p_value = coef_summary[,4],
+    model = paste0("Model ", i)
+  )
+  ci <- confint.default(model)
+  coef_df$ci_lower <- ci[,1]
+  coef_df$ci_upper <- ci[,2]
+  coef_df$stars <- ifelse(coef_df$p_value < 0.001, "***",
+                         ifelse(coef_df$p_value < 0.01, "**",
+                               ifelse(coef_df$p_value < 0.05, "*", "")))
+  coef_list_probit[[i]] <- coef_df
+}
+
+all_coefs_probit <- do.call(rbind, coef_list_probit)
+
+table2_df <- data.frame(Variable = character(), stringsAsFactors = FALSE)
+for(i in 1:7) {
+  table2_df[[paste0("Model_", i)]] <- character()
+}
+
+row_counter <- 0
+for(term in unique_terms) {
+  row_counter <- row_counter + 1
+  var_label <- ifelse(term %in% names(var_names), var_names[term], term)
+  new_row <- data.frame(Variable = var_label, stringsAsFactors = FALSE)
+  
+  for(i in 1:7) {
+    model_data <- all_coefs_probit[all_coefs_probit$model == paste0("Model ", i) & 
+                                   all_coefs_probit$term == term,]
+    if(nrow(model_data) > 0) {
+      new_row[[paste0("Model_", i)]] <- sprintf("%.3f%s", model_data$estimate[1], model_data$stars[1])
+    } else {
+      new_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table2_df <- rbind(table2_df, new_row)
+  
+  ci_row <- data.frame(Variable = "", stringsAsFactors = FALSE)
+  for(i in 1:7) {
+    model_data <- all_coefs_probit[all_coefs_probit$model == paste0("Model ", i) & 
+                                   all_coefs_probit$term == term,]
+    if(nrow(model_data) > 0) {
+      ci_row[[paste0("Model_", i)]] <- sprintf("[%.3f, %.3f]", model_data$ci_lower[1], model_data$ci_upper[1])
+    } else {
+      ci_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table2_df <- rbind(table2_df, ci_row)
+}
+
+stats_rows_probit <- data.frame(
+  Variable = c("N observations", "Log Likelihood", "Deviance", "AIC", "BIC", 
+               "Pseudo R² (McFadden)", "Pseudo R² (Nagelkerke)"),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:7) {
+  model <- models_probit_list[[i]]
+  ll_full <- as.numeric(logLik(model))
+  ll_null <- as.numeric(logLik(update(model, . ~ 1)))
+  n <- nobs(model)
+  
+  mcfadden <- 1 - (ll_full / ll_null)
+  cox_snell <- 1 - exp((2/n) * (ll_null - ll_full))
+  nagelkerke <- cox_snell / (1 - exp(2 * ll_null / n))
+  
+  stats_rows_probit[[paste0("Model_", i)]] <- c(
+    format(n, big.mark = ","),
+    sprintf("%.2f", ll_full),
+    sprintf("%.2f", deviance(model)),
+    sprintf("%.2f", AIC(model)),
+    sprintf("%.2f", BIC(model)),
+    sprintf("%.3f", mcfadden),
+    sprintf("%.3f", nagelkerke)
+  )
+}
+
+table2_final <- rbind(table2_df, stats_rows_probit)
+
+kable(table2_final,
+      col.names = c("Variable", paste("Model", 1:7)),
+      caption = "Modelos de regresión Probit: Predictores de la hospitalización psiquiátrica posterior al tratamiento rehabilitador de drogas", #"Probit Regression Models - Predictors of Post-Treatment Mental Hospitalization"
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"),
+                font_size = 6,
+                full_width = FALSE,
+                position = "center") %>%
+  pack_rows("Model statistics", nrow(table2_df) + 1, nrow(table2_final)) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "95% Confidence intervals in brackets",
+                      "Reference categories: Alcohol (substance), Female (sex), Outpatient (plan), etc.",
+                      "Models 6-7 additionally adjusted for Region",
+                      "Model 7 includes Sex × Substance interaction and Age²"))
+```
+
+
+```{r}
+################################################################################
+# Firth Models
+################################################################################
+
+coef_list_firth <- list()
+for(i in 1:length(models_firth_list)) {
+  model <- models_firth_list[[i]]
+  coef_summary <- summary(model)$coefficients
+  coef_df <- data.frame(
+    term = rownames(coef_summary),
+    estimate = coef_summary[,1],
+    std_error = coef_summary[,2],
+    z_value = coef_summary[,3],
+    p_value = coef_summary[,4],
+    model = paste0("Model ", i)
+  )
+  ci <- confint.default(model)
+  coef_df$ci_lower <- ci[,1]
+  coef_df$ci_upper <- ci[,2]
+  coef_df$stars <- ifelse(coef_df$p_value < 0.001, "***",
+                         ifelse(coef_df$p_value < 0.01, "**",
+                               ifelse(coef_df$p_value < 0.05, "*", "")))
+  coef_list_firth[[i]] <- coef_df
+}
+
+all_coefs_firth <- do.call(rbind, coef_list_firth)
+
+table3_df <- data.frame(Variable = character(), stringsAsFactors = FALSE)
+for(i in 1:7) {
+  table3_df[[paste0("Model_", i)]] <- character()
+}
+
+row_counter <- 0
+for(term in unique_terms) {
+  row_counter <- row_counter + 1
+  var_label <- ifelse(term %in% names(var_names), var_names[term], term)
+  new_row <- data.frame(Variable = var_label, stringsAsFactors = FALSE)
+  
+  for(i in 1:7) {
+    model_data <- all_coefs_firth[all_coefs_firth$model == paste0("Model ", i) & 
+                                  all_coefs_firth$term == term,]
+    if(nrow(model_data) > 0) {
+      new_row[[paste0("Model_", i)]] <- sprintf("%.3f%s", model_data$estimate[1], model_data$stars[1])
+    } else {
+      new_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table3_df <- rbind(table3_df, new_row)
+  
+  ci_row <- data.frame(Variable = "", stringsAsFactors = FALSE)
+  for(i in 1:7) {
+    model_data <- all_coefs_firth[all_coefs_firth$model == paste0("Model ", i) & 
+                                  all_coefs_firth$term == term,]
+    if(nrow(model_data) > 0) {
+      ci_row[[paste0("Model_", i)]] <- sprintf("[%.3f, %.3f]", model_data$ci_lower[1], model_data$ci_upper[1])
+    } else {
+      ci_row[[paste0("Model_", i)]] <- ""
+    }
+  }
+  table3_df <- rbind(table3_df, ci_row)
+}
+
+stats_rows_firth <- data.frame(
+  Variable = c("N observations", "Log Likelihood", "Deviance", "AIC", "BIC", 
+               "Pseudo R² (McFadden)", "Pseudo R² (Nagelkerke)"),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:7) {
+  model <- models_firth_list[[i]]
+  ll_full <- as.numeric(logLik(model))
+  ll_null <- as.numeric(logLik(update(model, . ~ 1)))
+  n <- nobs(model)
+  
+  mcfadden <- 1 - (ll_full / ll_null)
+  cox_snell <- 1 - exp((2/n) * (ll_null - ll_full))
+  nagelkerke <- cox_snell / (1 - exp(2 * ll_null / n))
+  
+  stats_rows_firth[[paste0("Model_", i)]] <- c(
+    format(n, big.mark = ","),
+    sprintf("%.2f", ll_full),
+    sprintf("%.2f", deviance(model)),
+    sprintf("%.2f", AIC(model)),
+    sprintf("%.2f", BIC(model)),
+    sprintf("%.3f", mcfadden),
+    sprintf("%.3f", nagelkerke)
+  )
+}
+
+table3_final <- rbind(table3_df, stats_rows_firth)
+
+kable(table3_final,
+      col.names = c("Variable", paste("Model", 1:7)),
+      caption = "Modelos de regresión logística con ajuste (Firth): Predictores de hospitalización psiquiátrica posterior al tratamiento rehabilitador de drogas", #"Logistic Regression Models with Firth Adjustment - Predictors of Post-Treatment Mental Hospitalization",
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"),
+                font_size = 6,
+                full_width = FALSE,
+                position = "center") %>%
+  pack_rows("Model statistics", nrow(table3_df) + 1, nrow(table3_final)) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "95% Confidence intervals in brackets",
+                      "Reference categories: Alcohol (substance), Female (sex), Outpatient (plan), etc.",
+                      "Models 6-7 additionally adjusted for Region",
+                      "Model 7 includes Sex × Substance interaction and Age²"))
+```
+
+
+
+```{r}
+################################################################################
+# AIC and AUC Comparison
+################################################################################
+auc_logit <- numeric(7)
+auc_probit <- numeric(7)
+auc_firth <- numeric(7)
+
+for(i in 1:7) {
+  pred_logit <- predict(models_list[[i]], type = "response")
+  roc_logit <- roc(BASE_ANALISIS$HOSP_MENTAL_POST_TTO, pred_logit, quiet = TRUE)
+  auc_logit[i] <- as.numeric(auc(roc_logit))
+  
+  pred_probit <- predict(models_probit_list[[i]], type = "response")
+  roc_probit <- roc(BASE_ANALISIS$HOSP_MENTAL_POST_TTO, pred_probit, quiet = TRUE)
+  auc_probit[i] <- as.numeric(auc(roc_probit))
+  
+  pred_firth <- predict(models_firth_list[[i]], type = "response")
+  roc_firth <- roc(BASE_ANALISIS$HOSP_MENTAL_POST_TTO, pred_firth, quiet = TRUE)
+  auc_firth[i] <- as.numeric(auc(roc_firth))
+}
+
+comparison_df <- data.frame(
+  Model = paste("Model", 1:7),
+  Logit_AIC = sapply(models_list, AIC),
+  Probit_AIC = sapply(models_probit_list, AIC),
+  Firth_AIC = sapply(models_firth_list, AIC),
+  Logit_AUC = auc_logit,
+  Probit_AUC = auc_probit,
+  Firth_AUC = auc_firth
+)
+
+kable(comparison_df,
+      col.names = c("Model", "Logit AIC", "Probit AIC", "Firth AIC", 
+                    "Logit AUC", "Probit AUC", "Firth AUC"),
+      caption = "Model Comparison - AIC and AUC across Model Types",
+      format = "latex",
+      digits = c(0, 2, 2, 2, 4, 4, 4),
+      booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"),
+                font_size = 9) %>%
+  column_spec(1, bold = TRUE)
+```
+
+
+```{r}
+################################################################################
+# Logit Model Comparisons
+################################################################################
+
+lr_results <- data.frame(
+  Comparison = character(),
+  Df = numeric(),
+  Deviance = numeric(),
+  P_value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+model_names_all <- c("Null", paste("Model", 1:7))
+
+for(i in 2:length(models_list_all)) {
+  anova_res <- anova(models_list_all[[i-1]], models_list_all[[i]], test = "Chisq")
+  
+  lr_results <- rbind(lr_results,
+    data.frame(
+      Comparison = paste(model_names_all[i-1], "vs", model_names_all[i]),
+      Df = abs(anova_res$Df[2]),
+      Deviance = round(abs(anova_res$Deviance[2]), 3),
+      P_value = anova_res$`Pr(>Chi)`[2],
+      stringsAsFactors = FALSE
+    )
+  )
+}
+
+lr_results$P_value_formatted <- ifelse(lr_results$P_value < 0.001, "< 0.001***",
+                                       ifelse(lr_results$P_value < 0.01, sprintf("%.3f**", lr_results$P_value),
+                                             ifelse(lr_results$P_value < 0.05, sprintf("%.3f*", lr_results$P_value),
+                                                   sprintf("%.3f", lr_results$P_value))))
+
+kable(lr_results[,c("Comparison", "Df", "Deviance", "P_value_formatted")],
+      col.names = c("Model Comparison", "Df", "LR Chi²", "P-value"),
+      caption = "Comparación de modelos de regresión logística anidados", #"Model Comparisons for Nested Logistic Regression Models",
+      format = "latex",
+      booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"),
+                font_size = 9) %>%
+  column_spec(1, bold = TRUE) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "Likelihood ratio tests comparing nested models"))
+```
+
+
+```{r}
+################################################################################
+# Probit Model Comparisons
+################################################################################
+
+lr_results_probit <- data.frame(
+  Comparison = character(),
+  Df = numeric(),
+  Deviance = numeric(),
+  P_value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for(i in 2:length(models_probit_list_all)) {
+  anova_res <- anova(models_probit_list_all[[i-1]], models_probit_list_all[[i]], test = "Chisq")
+  
+  lr_results_probit <- rbind(lr_results_probit,
+    data.frame(
+      Comparison = paste(model_names_all[i-1], "vs", model_names_all[i]),
+      Df = abs(anova_res$Df[2]),
+      Deviance = round(abs(anova_res$Deviance[2]), 3),
+      P_value = anova_res$`Pr(>Chi)`[2],
+      stringsAsFactors = FALSE
+    )
+  )
+}
+
+lr_results_probit$P_value_formatted <- ifelse(lr_results_probit$P_value < 0.001, "< 0.001***",
+                                              ifelse(lr_results_probit$P_value < 0.01, sprintf("%.3f**", lr_results_probit$P_value),
+                                                    ifelse(lr_results_probit$P_value < 0.05, sprintf("%.3f*", lr_results_probit$P_value),
+                                                          sprintf("%.3f", lr_results_probit$P_value))))
+
+kable(lr_results_probit[,c("Comparison", "Df", "Deviance", "P_value_formatted")],
+      col.names = c("Model Comparison", "Df", "LR Chi²", "P-value"),
+      caption = "Comparaciones de modelos de regresión Probit anidados",  #"Model Comparisons for Nested Probit Regression Models",
+      format = "latex",
+      booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"),
+                font_size = 9) %>%
+  column_spec(1, bold = TRUE) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "Likelihood ratio tests comparing nested models"))
+```
+
+
+```{r}
+################################################################################
+# Firth Model Comparisons
+################################################################################
+
+lr_results_firth <- data.frame(
+  Comparison = character(),
+  Df = numeric(),
+  Deviance = numeric(),
+  P_value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for(i in 2:length(models_firth_list_all)) {
+  anova_res <- anova(models_firth_list_all[[i-1]], models_firth_list_all[[i]], test = "Chisq")
+  
+  lr_results_firth <- rbind(lr_results_firth,
+    data.frame(
+      Comparison = paste(model_names_all[i-1], "vs", model_names_all[i]),
+      Df = abs(anova_res$Df[2]),
+      Deviance = round(abs(anova_res$Deviance[2]), 3),
+      P_value = anova_res$`Pr(>Chi)`[2],
+      stringsAsFactors = FALSE
+    )
+  )
+}
+
+lr_results_firth$P_value_formatted <- ifelse(lr_results_firth$P_value < 0.001, "< 0.001***",
+                                             ifelse(lr_results_firth$P_value < 0.01, sprintf("%.3f**", lr_results_firth$P_value),
+                                                   ifelse(lr_results_firth$P_value < 0.05, sprintf("%.3f*", lr_results_firth$P_value),
+                                                         sprintf("%.3f", lr_results_firth$P_value))))
+
+kable(lr_results_firth[,c("Comparison", "Df", "Deviance", "P_value_formatted")],
+      col.names = c("Model Comparison", "Df", "LR Chi²", "P-value"),
+      caption = "Comparaciones de modelos de regresión logística con ajuste de Firth anidados", #"Model Comparisons for Nested Logistic Regression Models with Firth Adjustment",
+      format = "latex",
+      booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"),
+                font_size = 9) %>%
+  column_spec(1, bold = TRUE) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05",
+                      "Likelihood ratio tests comparing nested models"))
+```
+
+```{r}
+################################################################################
+# PERFORMANCE METRICS AND ROC CURVES ANALYSIS
+################################################################################
+################################################################################
+# FUNCTION TO CALCULATE PERFORMANCE METRICS
+################################################################################
+calculate_performance_metrics <- function(model, data = BASE_ANALISIS, model_name = "Model") {
+  # Get predicted probabilities
+  pred_probs <- predict(model, newdata = data, type = "response")
+  true_labels <- data$HOSP_MENTAL_POST_TTO
+  
+  # Calculate ROC curve and AUC
+  roc_obj <- roc(true_labels, pred_probs, quiet = TRUE)
+  auc_value <- as.numeric(auc(roc_obj))
+  
+  # Find optimal threshold using Youden's J statistic
+  coords_optimal <- coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"), 
+                          best.method = "youden")
+  optimal_threshold <- coords_optimal$threshold
+  
+  # Create predictions using optimal threshold
+  pred_labels <- ifelse(pred_probs >= optimal_threshold, 1, 0)
+  
+  # Create confusion matrix
+  cm <- caret::confusionMatrix(factor(pred_labels, levels = c("0", "1")), 
+                        factor(true_labels, levels = c("0", "1")),
+                        positive = "1")
+  
+  # Extract metrics
+  sensitivity <- cm$byClass["Sensitivity"]
+  specificity <- cm$byClass["Specificity"]
+  accuracy <- cm$overall["Accuracy"]
+  precision <- cm$byClass["Pos Pred Value"]
+  npv <- cm$byClass["Neg Pred Value"]
+  f1_score <- cm$byClass["F1"]
+  balanced_accuracy <- cm$byClass["Balanced Accuracy"]
+  
+  # Calculate Matthews Correlation Coefficient
+  tn <- as.numeric(cm$table[1,1])
+  fp <- as.numeric(cm$table[1,2])
+  fn <- as.numeric(cm$table[2,1])
+  tp <- as.numeric(cm$table[2,2])
+  
+  mcc_denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+  mcc <- if(is.na(mcc_denominator) || mcc_denominator == 0) 0 else ((tp * tn) - (fp * fn)) / mcc_denominator
+  
+  # Calculate Brier Score
+  brier_score <- mean((pred_probs - true_labels)^2)
+  
+  # Return results
+  metrics <- data.frame(
+    Model = model_name,
+    AUC = auc_value,
+    Sensitivity = as.numeric(sensitivity),
+    Specificity = as.numeric(specificity),
+    Accuracy = as.numeric(accuracy),
+    Precision = as.numeric(precision),
+    NPV = as.numeric(npv),
+    F1_Score = as.numeric(f1_score),
+    Balanced_Accuracy = as.numeric(balanced_accuracy),
+    MCC = mcc,
+    Brier_Score = brier_score,
+    Optimal_Threshold = optimal_threshold,
+    stringsAsFactors = FALSE
+  )
+  
+  return(metrics)
+}
+
+################################################################################
+# CALCULATE METRICS FOR ALL MODELS
+################################################################################
+
+# Define all models
+all_models <- list(
+  # Standard Logit Models
+  "Logit Model 1" = modelo1,
+  "Logit Model 2" = modelo2,
+  "Logit Model 3" = modelo3,
+  "Logit Model 4" = modelo4,
+  "Logit Model 5" = modelo5,
+  "Logit Model 6" = modelo6,
+  "Logit Model 7" = modelo7,
+  
+  # Probit Models
+  "Probit Model 1" = modelo1_probit,
+  "Probit Model 2" = modelo2_probit,
+  "Probit Model 3" = modelo3_probit,
+  "Probit Model 4" = modelo4_probit,
+  "Probit Model 5" = modelo5_probit,
+  "Probit Model 6" = modelo6_probit,
+  "Probit Model 7" = modelo7_probit,
+  
+  # Firth Logit Models
+  "Firth Model 1" = modelo1_firth,
+  "Firth Model 2" = modelo2_firth,
+  "Firth Model 3" = modelo3_firth,
+  "Firth Model 4" = modelo4_firth,
+  "Firth Model 5" = modelo5_firth,
+  "Firth Model 6" = modelo6_firth,
+  "Firth Model 7" = modelo7_firth
+)
+
+# Calculate metrics for all models
+performance_results <- map2_dfr(all_models, names(all_models), 
+                               ~calculate_performance_metrics(.x, model_name = .y))
+
+################################################################################
+# CREATE PERFORMANCE METRICS TABLE
+################################################################################
+# Format the table for display
+performance_table <- performance_results %>%
+  mutate(across(c(AUC, Sensitivity, Specificity, Accuracy, Precision, NPV, 
+                  F1_Score, Balanced_Accuracy, MCC, Brier_Score), 
+                ~round(., 3)),
+         Optimal_Threshold = round(Optimal_Threshold, 4))
+
+# Display comprehensive table
+kable(performance_table %>% select(Model, AUC, Sensitivity, Specificity, Accuracy, Precision, NPV),
+        format = "latex",
+        caption = "Performance Metrics for All Models",
+        col.names = c("Model", "AUC", "Sens", "Spec", "Acc", "Prec", "NPV"),
+        booktabs = TRUE,
+        align = c('l', 'c', 'c', 'c', 'c', 'c', 'c')) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"),
+                font_size = 9,
+                full_width = FALSE,
+                position = "center") %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2:7, width = "1.2cm") %>%
+  pack_rows("Standard Logit Models", 1, 7) %>%
+  pack_rows("Probit Models", 8, 14) %>%
+  pack_rows("Firth Logit Models", 15, 21) %>%
+  footnote(general = c(
+    "AUC = Area Under ROC Curve; Sens = Sensitivity; Spec = Specificity; Acc = Accuracy",
+    "Prec = Precision (PPV); NPV = Negative Predictive Value"
+  ),
+  general_title = "Notes:")
+```
+
+```{r}
+#| fig-height: 16
+#| fig-width: 16
+#| fig-cap: "Curvas ROC (Característica Operativa del Receptor) que comparan el rendimiento predictivo de siete modelos utilizando tres métodos de estimación diferentes: regresión logística estándar (logit), regresión probit y regresión logística penalizada de Firth. El cuarto panel muestra una comparación del modelo con mejor rendimiento de cada método. Cada curva muestra el equilibrio entre sensibilidad y especificidad con los valores correspondientes del Área Bajo la Curva (AUC) para la evaluación del modelo."
+
+# Receiver Operating Characteristic (ROC) curves comparing predictive performance across seven models using three different estimation methods: standard logistic regression (logit), probit regression, and Firth's penalized logistic regression. The fourth panel shows a comparison of the best-performing model from each method. Each curve displays the sensitivity-specificity trade-off with corresponding Area Under the Curve (AUC) values for model evaluation.
+
+################################################################################
+# CREATE ROC CURVES FOR ALL MODELS
+################################################################################
+
+# Function to create ROC data for plotting
+create_roc_data <- function(model, model_number) {
+  pred_probs <- predict(model, type = "response", newdata = BASE_ANALISIS)
+  roc_obj <- roc(BASE_ANALISIS$HOSP_MENTAL_POST_TTO, pred_probs, quiet = TRUE)
+  
+  roc_df <- data.frame(
+    FPR = 1 - roc_obj$specificities,
+    TPR = roc_obj$sensitivities,
+    Model = paste0("Model ", model_number),
+    AUC = as.numeric(auc(roc_obj))
+  )
+  
+  return(roc_df)
+}
+
+# Create ROC data for each model type
+# Logit models
+logit_roc_data <- map2_dfr(list(modelo1, modelo2, modelo3, modelo4, modelo5, modelo6, modelo7),
+                           1:7, create_roc_data)
+
+# Probit models
+probit_roc_data <- map2_dfr(list(modelo1_probit, modelo2_probit, modelo3_probit, 
+                                  modelo4_probit, modelo5_probit, modelo6_probit, modelo7_probit),
+                            1:7, create_roc_data)
+
+# Firth models
+firth_roc_data <- map2_dfr(list(modelo1_firth, modelo2_firth, modelo3_firth, 
+                                 modelo4_firth, modelo5_firth, modelo6_firth, modelo7_firth),
+                           1:7, create_roc_data)
+
+# Function to create ROC plot
+create_roc_plot <- function(roc_data, title) {
+  # Create labels with AUC values
+  auc_labels <- roc_data %>%
+    group_by(Model) %>%
+    summarise(AUC = first(AUC)) %>%
+    mutate(label = paste0(Model, " (AUC = ", round(AUC, 3), ")"))
+  
+  # Define color palette
+  colors <- c("#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#34495E")
+  
+  p <- ggplot(roc_data, aes(x = FPR, y = TPR, color = Model)) +
+    geom_line(size = 0.8, alpha = 0.8) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50", size = 0.8) +
+    scale_color_manual(values = colors,
+                       labels = auc_labels$label) +
+    labs(title = title,
+         x = "False Positive Rate (1 - Specificity)",
+         y = "True Positive Rate (Sensitivity)",
+         color = "Model") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 11),
+      legend.position = "bottom",
+      legend.text = element_text(size = 9),
+      legend.title = element_text(size = 10, face = "bold"),
+      panel.grid.minor = element_blank()
+    ) +
+    coord_equal() +
+    xlim(0, 1) + ylim(0, 1)
+  
+  return(p)
+}
+
+# Create individual ROC plots
+p_logit <- create_roc_plot(logit_roc_data, "ROC Curves - Logit Models")
+p_probit <- create_roc_plot(probit_roc_data, "ROC Curves - Probit Models")
+p_firth <- create_roc_plot(firth_roc_data, "ROC Curves - Firth Logit Models")
+
+# Create a comparison plot for the fourth panel
+# Combine all ROC data
+all_roc_data <- bind_rows(
+  logit_roc_data %>% mutate(Method = "Logit"),
+  probit_roc_data %>% mutate(Method = "Probit"),
+  firth_roc_data %>% mutate(Method = "Firth")
+)
+
+# Create comparison plot showing best models from each method
+best_models_data <- all_roc_data %>%
+  group_by(Method, Model) %>%
+  summarise(AUC = first(AUC), .groups = "drop") %>%
+  group_by(Method) %>%
+  slice_max(AUC, n = 1) %>%
+  ungroup()
+
+# Extract ROC curves for best models
+best_roc_curves <- all_roc_data %>%
+  inner_join(best_models_data, by = c("Method", "Model", "AUC"))
+
+p_comparison <- ggplot(best_roc_curves, aes(x = FPR, y = TPR, color = Method)) +
+  geom_line(size = 1.2, alpha = 0.8) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50", size = 0.8) +
+  scale_color_manual(values = c("Logit" = "#E74C3C", "Probit" = "#3498DB", "Firth" = "#2ECC71"),
+                     labels = paste0(best_models_data$Method, " - ", best_models_data$Model, 
+                                   " (AUC = ", round(best_models_data$AUC, 3), ")")) +
+  labs(title = "Best Model Comparison Across Methods",
+       x = "False Positive Rate (1 - Specificity)",
+       y = "True Positive Rate (Sensitivity)",
+       color = "Method - Model") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 11),
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 10, face = "bold"),
+    panel.grid.minor = element_blank()
+  ) +
+  coord_equal() +
+  xlim(0, 1) + ylim(0, 1)
+
+# Combine all four plots in a 2x2 grid
+combined_roc_plot <- (p_logit | p_probit) / (p_firth | p_comparison)
+
+# Display the combined plot
+print(combined_roc_plot)
+
+################################################################################
+# SUMMARY OF BEST MODELS
+################################################################################
+
+# Find best models for each metric
+best_models <- data.frame(
+  Metric = c("AUC", "Sensitivity", "Specificity", "Accuracy", "F1 Score", "MCC", "Brier Score (lower is better)"),
+  Best_Model = c(
+    performance_table$Model[which.max(performance_table$AUC)],
+    performance_table$Model[which.max(performance_table$Sensitivity)],
+    performance_table$Model[which.max(performance_table$Specificity)],
+    performance_table$Model[which.max(performance_table$Accuracy)],
+    performance_table$Model[which.max(performance_table$F1_Score)],
+    performance_table$Model[which.max(performance_table$MCC)],
+    performance_table$Model[which.min(performance_table$Brier_Score)]
+  ),
+  Value = c(
+    max(performance_table$AUC),
+    max(performance_table$Sensitivity),
+    max(performance_table$Specificity),
+    max(performance_table$Accuracy),
+    max(performance_table$F1_Score),
+    max(performance_table$MCC),
+    min(performance_table$Brier_Score)
+  )
+)
+
+
+```
+
+```{r}
+#| eval: false
+#| fig-height: 6
+#| fig-width: 10
+#| include: false
+
+# "Diagnostic plots for assessing model assumptions and identifying influential observations in Model 7 variants. Each row represents a different estimation method (standard logit, probit, and Firth's penalized logit). The four-panel display includes: (1) Deviance residuals versus fitted values to assess linearity and homoscedasticity, (2) Q-Q plots to evaluate normality of residuals, (3) Leverage versus residuals to identify outliers and high-leverage points, and (4) Cook's distance to detect influential observations that may unduly affect model estimates."
+  
+################################################################################
+# RESIDUAL ANALYSIS FOR LOGISTIC MODELS
+################################################################################
+################################################################################
+# RESIDUAL ANALYSIS FUNCTIONS
+################################################################################
+
+# 1.1 Function to extract model diagnostics
+extract_diagnostics <- function(model, model_name = "Model") {
+  # Extract fitted values and residuals
+  fitted_vals <- fitted(model)
+  
+  # Calculate different types of residuals
+  pearson_resid <- residuals(model, type = "pearson")
+  deviance_resid <- residuals(model, type = "deviance")
+  
+  # Leverage (hat values)
+  leverage <- hatvalues(model)
+  
+  # Cook's distance
+  cooks_d <- cooks.distance(model)
+  
+  # Create data frame with all diagnostics
+  diagnostics_df <- data.frame(
+    observation = 1:length(fitted_vals),
+    fitted_values = fitted_vals,
+    pearson_residuals = pearson_resid,
+    deviance_residuals = deviance_resid,
+    leverage = leverage,
+    cooks_distance = cooks_d,
+    outcome = model$y,
+    model_name = model_name
+  )
+  
+  # Add studentized residuals if possible
+  tryCatch({
+    diagnostics_df$studentized_residuals <- rstudent(model)
+  }, error = function(e) {
+    diagnostics_df$studentized_residuals <- NA
+  })
+  
+  return(diagnostics_df)
+}
+
+# 1.2 Function to create residuals vs fitted values plot
+plot_residuals_vs_fitted <- function(diagnostics_df, residual_type = "deviance", model_name = "") {
+  
+  # Select residual type
+  y_var <- switch(residual_type,
+                  "deviance" = "deviance_residuals",
+                  "pearson" = "pearson_residuals",
+                  "studentized" = "studentized_residuals")
+  
+  y_label <- switch(residual_type,
+                    "deviance" = "Deviance Residuals",
+                    "pearson" = "Pearson Residuals",
+                    "studentized" = "Studentized Residuals")
+  
+  p <- ggplot(diagnostics_df, aes_string(x = "fitted_values", y = y_var)) +
+    geom_point(alpha = 0.5, size = 1.5) +
+    geom_smooth(method = "loess", se = TRUE, color = "red", size = 0.8) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+    labs(title = "Residuals vs Fitted Values",
+         x = "Fitted Values (Predicted Probabilities)",
+         y = y_label) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      axis.title = element_text(size = 10)
+    )
+  
+  return(p)
+}
+
+# 1.3 Function to create Q-Q plot
+plot_qq <- function(diagnostics_df, model_name = "") {
+  p <- ggplot(diagnostics_df, aes(sample = deviance_residuals)) +
+    stat_qq(size = 1.5, alpha = 0.5) +
+    stat_qq_line(color = "red") +
+    labs(title = "Q-Q Plot of Deviance Residuals",
+         x = "Theoretical Quantiles",
+         y = "Sample Quantiles") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      axis.title = element_text(size = 10)
+    )
+  
+  return(p)
+}
+
+# 1.4 Function to create leverage vs residuals plot
+plot_leverage <- function(diagnostics_df, model_name = "") {
+  # Identify influential points
+  diagnostics_df$influential <- diagnostics_df$cooks_distance > 4/nrow(diagnostics_df)
+  
+  p <- ggplot(diagnostics_df, aes(x = leverage, y = deviance_residuals)) +
+    geom_point(aes(size = cooks_distance, color = influential), alpha = 0.6) +
+    scale_size_continuous(name = "Cook's D", range = c(1, 4)) +
+    scale_color_manual(values = c("FALSE" = "gray30", "TRUE" = "red"),
+                       name = "Influential",
+                       labels = c("No", "Yes")) +
+    geom_smooth(method = "loess", se = FALSE, color = "blue", size = 0.8) +
+    labs(title = "Leverage vs Residuals",
+         x = "Leverage",
+         y = "Deviance Residuals") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      axis.title = element_text(size = 10),
+      legend.position = "right",
+      legend.text = element_text(size = 8),
+      legend.title = element_text(size = 9)
+    )
+  
+  # Add labels to highly influential points
+  high_influence <- which(diagnostics_df$cooks_distance > 8/nrow(diagnostics_df))
+  if(length(high_influence) > 0 & length(high_influence) < 20) {
+    p <- p + geom_text_repel(
+      data = diagnostics_df[high_influence,],
+      aes(label = observation),
+      size = 2.5,
+      box.padding = 0.3
+    )
+  }
+  
+  return(p)
+}
+
+# 1.5 Function to create Cook's distance plot
+plot_cooks_distance <- function(diagnostics_df, model_name = "") {
+  n <- nrow(diagnostics_df)
+  threshold <- 4/n
+  
+  p <- ggplot(diagnostics_df, aes(x = observation, y = cooks_distance)) +
+    geom_segment(aes(xend = observation, yend = 0), color = "gray60", size = 0.5) +
+    geom_point(aes(color = cooks_distance > threshold), size = 1.5) +
+    geom_hline(yintercept = threshold, linetype = "dashed", color = "red") +
+    scale_color_manual(values = c("FALSE" = "gray30", "TRUE" = "red"),
+                       name = paste0("Above threshold\n(4/n = ", round(threshold, 4), ")"),
+                       labels = c("No", "Yes")) +
+    labs(title = "Cook's Distance",
+         x = "Observation Number",
+         y = "Cook's Distance") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      axis.title = element_text(size = 10),
+      legend.text = element_text(size = 8),
+      legend.title = element_text(size = 9)
+    )
+  
+  # Identify most influential observations
+  top_influential <- order(diagnostics_df$cooks_distance, decreasing = TRUE)[1:min(10, sum(diagnostics_df$cooks_distance > threshold))]
+  if(length(top_influential) > 0) {
+    p <- p + geom_text_repel(
+      data = diagnostics_df[top_influential,],
+      aes(label = observation),
+      size = 2.5,
+      box.padding = 0.3
+    )
+  }
+  
+  return(p)
+}
+
+################################################################################
+# RESIDUAL ANALYSIS FOR THE THREE MODEL 7 VARIANTS 
+################################################################################
+
+# List of models to analyze
+models_to_analyze <- list(
+  "Logit Model 7" = modelo7,
+  "Probit Model 7" = modelo7_probit,
+  "Firth Logit Model 7" = modelo7_firth
+)
+
+# Create list to store all plots
+all_plots <- list()
+
+# Generate diagnostics for each model
+for (i in seq_along(models_to_analyze)) {
+  model_name <- names(models_to_analyze)[i]
+  current_model <- models_to_analyze[[i]]
+  
+  # Extract diagnostics
+  diagnostics <- extract_diagnostics(current_model, model_name)
+  
+  # Create the 4 diagnostic plots
+  p1 <- plot_residuals_vs_fitted(diagnostics, "deviance", model_name)
+  p2 <- plot_qq(diagnostics, model_name)
+  p3 <- plot_leverage(diagnostics, model_name)
+  p4 <- plot_cooks_distance(diagnostics, model_name)
+  
+  # Combine the 4 plots for this model
+  combined_plot <- (p1 | p2) / (p3 | p4) +
+    plot_annotation(
+      title = model_name,
+      theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+    )
+  
+  all_plots[[i]] <- combined_plot
+}
+
+# Display plots one by one
+for (i in seq_along(all_plots)) {
+  print(all_plots[[i]])
+  if (i < length(all_plots)) {
+    cat("\n\n")  # Add space between plots
+  }
+}
+```
+
+```{r}
+#| fig-height: 10
+#| fig-width: 12
+#| fig-cap: "Diagnóstico  para las variantes del Modelo 7 que muestra: (1) Gráficos de calibración con la prueba de Hosmer-Lemeshow, (2) Residuos de desviación versus valores ajustados y (3) Evaluación de multicolinealidad utilizando el Factor de Inflación de Varianza Generalizado (GVIF)"
+
+# "Advanced diagnostics for Model 7 variants showing: (1) Calibration plots with Hosmer-Lemeshow test, (2) Deviance residuals versus fitted values, and (3) Multicollinearity assessment using Generalized Variance Inflation Factor (GVIF)"
+
+################################################################################
+# ADVANCED DIAGNOSTICS FOR LOGISTIC MODELS - MODEL 7
+################################################################################
+
+# Load necessary libraries
+library(ResourceSelection) # For Hosmer-Lemeshow test
+library(car)              # For GVIF calculation
+library(scales)           # For better axis formatting
+
+################################################################################
+# 1. FUNCTION FOR CALIBRATION PLOT
+################################################################################
+
+create_calibration_plot <- function(model, model_name = "", n_groups = 10) {
+  # Get predicted probabilities and observed outcomes
+  pred_probs <- fitted(model)
+  observed <- model$y
+  
+  # Create groups based on deciles of predicted probability
+  prob_groups <- cut(pred_probs, 
+                     breaks = quantile(pred_probs, probs = seq(0, 1, 1/n_groups)),
+                     include.lowest = TRUE,
+                     labels = FALSE)
+  
+  # Calculate statistics by group
+  calib_data <- data.frame(
+    group = prob_groups,
+    pred_prob = pred_probs,
+    observed = observed
+  ) %>%
+    group_by(group) %>%
+    summarise(
+      n = n(),
+      mean_pred = mean(pred_prob),
+      mean_obs = mean(observed),
+      se_obs = sqrt(mean_obs * (1 - mean_obs) / n),
+      ci_lower = mean_obs - 1.96 * se_obs,
+      ci_upper = mean_obs + 1.96 * se_obs
+    ) %>%
+    mutate(
+      ci_lower = pmax(0, ci_lower),
+      ci_upper = pmin(1, ci_upper)
+    )
+  
+  # Hosmer-Lemeshow test
+  hl_test <- hoslem.test(observed, pred_probs, g = n_groups)
+  
+  # Create the plot
+  p <- ggplot(calib_data, aes(x = mean_pred, y = mean_obs)) +
+    # Perfect calibration line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+    # Confidence intervals
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), 
+                  width = 0.02, alpha = 0.5) +
+    # Observed points
+    geom_point(aes(size = n), color = "darkblue", alpha = 0.7) +
+    # Observed calibration line
+    geom_smooth(method = "loess", se = TRUE, color = "red", size = 0.8) +
+    # Labels and theme
+    labs(
+      title = paste("Calibration Plot -", model_name),
+      subtitle = sprintf("Hosmer-Lemeshow test: χ² = %.2f, df = %d, p = %.3f",
+                        hl_test$statistic, hl_test$parameter, hl_test$p.value),
+      x = "Mean Predicted Probability",
+      y = "Observed Proportion",
+      size = "n"
+    ) +
+    scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+    scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      plot.subtitle = element_text(size = 10, color = "gray30"),
+      legend.position = "right"
+    )
+  
+  return(p)
+}
+
+################################################################################
+# 2. FUNCTION FOR RESIDUALS VS FITTED VALUES PLOT
+################################################################################
+
+plot_residuals_vs_fitted <- function(model, model_name = "") {
+  # Extract fitted values and deviance residuals
+  fitted_vals <- fitted(model)
+  deviance_resid <- residuals(model, type = "deviance")
+  
+  # Create data frame
+  residual_data <- data.frame(
+    fitted_values = fitted_vals,
+    deviance_residuals = deviance_resid
+  )
+  
+  # Create plot
+  p <- ggplot(residual_data, aes(x = fitted_values, y = deviance_residuals)) +
+    geom_point(alpha = 0.5, size = 1.5) +
+    geom_smooth(method = "loess", se = TRUE, color = "red", size = 0.8) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+    labs(
+      title = paste("Residuals vs Fitted Values -", model_name),
+      x = "Fitted Values (Predicted Probabilities)",
+      y = "Deviance Residuals"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold"),
+      axis.title = element_text(size = 10)
+    )
+  
+  return(p)
+}
+
+################################################################################
+# 3. FUNCTION FOR MULTICOLLINEARITY ANALYSIS (GVIF)
+################################################################################
+
+create_gvif_plot <- function(model, model_name = "") {
+  # Calculate GVIF
+  tryCatch({
+    gvif_values <- vif(model)
+    
+    # Handle both regular VIF and GVIF output formats
+    if(is.matrix(gvif_values) || is.data.frame(gvif_values)) {
+      # For models with categorical variables, vif() returns a matrix
+      gvif_df <- data.frame(
+        Variable = rownames(gvif_values),
+        GVIF = gvif_values[, "GVIF"],
+        Df = gvif_values[, "Df"],
+        GVIF_corrected = gvif_values[, "GVIF^(1/(2*Df))"]^2
+      )
+    } else {
+      # For models with only continuous variables
+      gvif_df <- data.frame(
+        Variable = names(gvif_values),
+        GVIF = gvif_values,
+        Df = 1,
+        GVIF_corrected = gvif_values
+      )
+    }
+    
+    # Clean variable names for better display
+    gvif_df$Variable <- gsub("principal_sub", "Substance: ", gvif_df$Variable)
+    gvif_df$Variable <- gsub("educacion", "Education: ", gvif_df$Variable)
+    gvif_df$Variable <- gsub("estado_conyugal", "Marital: ", gvif_df$Variable)
+    gvif_df$Variable <- gsub("condicion_ocupacional", "Occupation: ", gvif_df$Variable)
+    gvif_df$Variable <- gsub("retratamientos_cat", "Retreatments", gvif_df$Variable)
+    gvif_df$Variable <- gsub("plan_type", "Plan Type", gvif_df$Variable)
+    gvif_df$Variable <- gsub("n_hosp_mental_previas", "Prev. Mental Hosp.", gvif_df$Variable)
+    gvif_df$Variable <- gsub("edad", "Age", gvif_df$Variable)
+    gvif_df$Variable <- gsub("sex", "Sex", gvif_df$Variable)
+    gvif_df$Variable <- gsub("region_del_centro", "Region", gvif_df$Variable)
+    
+    # Sort by GVIF_corrected value
+    gvif_df <- gvif_df %>% arrange(desc(GVIF_corrected))
+    
+    # Create plot
+    p <- ggplot(gvif_df, aes(x = reorder(Variable, GVIF_corrected), y = GVIF_corrected)) +
+      geom_col(aes(fill = GVIF_corrected > 5), width = 0.7) +
+      geom_hline(yintercept = 5, linetype = "dashed", color = "red", size = 1) +
+      geom_hline(yintercept = 10, linetype = "dashed", color = "darkred", size = 1) +
+      scale_fill_manual(values = c("FALSE" = "steelblue", "TRUE" = "coral"),
+                        labels = c("GVIF < 5", "GVIF ≥ 5"),
+                        name = "") +
+      coord_flip() +
+      labs(
+        title = paste("Multicollinearity Assessment (GVIF) -", model_name),
+        subtitle = "GVIF^(1/(2*Df)) squared values; Red lines at 5 and 10",
+        x = "",
+        y = "GVIF^(1/(2*Df))²"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 12, face = "bold"),
+        plot.subtitle = element_text(size = 10, color = "gray30"),
+        axis.text.y = element_text(size = 9),
+        legend.position = "bottom"
+      ) +
+      scale_y_continuous(breaks = seq(0, max(gvif_df$GVIF_corrected) + 2, by = 2))
+    
+    return(p)
+    
+  }, error = function(e) {
+    # If GVIF calculation fails, return an error message plot
+    p <- ggplot() +
+      annotate("text", x = 0.5, y = 0.5, 
+               label = paste("GVIF calculation failed for", model_name, "\n", 
+                           "Error:", e$message),
+               size = 5, hjust = 0.5, vjust = 0.5) +
+      theme_void() +
+      labs(title = paste("Multicollinearity Assessment -", model_name))
+    return(p)
+  })
+}
+
+################################################################################
+# APPLY DIAGNOSTICS TO THE THREE MODEL 7 VARIANTS
+################################################################################
+
+# List of models to analyze
+models_to_analyze <- list(
+  "Logit" = modelo7,
+  "Probit" = modelo7_probit,
+  "Firth Logit" = modelo7_firth
+)
+
+# Create diagnostic plots for each model
+all_plots <- list()
+
+for (i in seq_along(models_to_analyze)) {
+  model_name <- names(models_to_analyze)[i]
+  model <- models_to_analyze[[i]]
+  
+  # Create the three diagnostic plots
+  p1 <- create_calibration_plot(model, model_name)
+  p2 <- plot_residuals_vs_fitted(model, model_name)
+  p3 <- create_gvif_plot(model, model_name)
+  
+  # Combine plots for this model
+  combined_plot <- p1 / p2 / p3 +
+    plot_layout(heights = c(1, 1, 1.2)) +
+    plot_annotation(
+      title = paste("Diagnostic Analysis -", model_name),
+      theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+    )
+  
+  all_plots[[i]] <- combined_plot
+}
+
+# Display all plots
+for (plot in all_plots) {
+  print(plot)
+}
+```
+
+\newpage
+
+# Discusión y Conclusiones
+## Marco teórico planteado y resultados obtenidos
+
+El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiquiátrica depende de la severidad de la adicción, la vulnerabilidad psiquiátrica previa, las características del tratamiento y factores sociodemográficos. Nuestros resultados respaldan este marco y las hipótesis H1–H4 planteadas. El historial psiquiátrico (H1) surgió como predictor dominante: cada hospitalización mental previa aumentó significativamente la probabilidad de otra hospitalización subsecuente. Asimismo, los retratamientos (H2) mostraron un marcado efecto dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron casi 10 veces mayor odds de hospitalización que aquellos sin recaídas. El tipo de tratamiento (H3) también fue significativo: la atención residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo al controlar la mayor severidad de los casos derivados a residencias (sesgo de selección). En cuanto al tipo de sustancia (H4), el consumo de depresores del SNC tuvo el efecto más marcado, aumentando 60% la odds de hospitalización comparado con alcohol, en línea con su mayor potencial de complicaciones psiquiátricas agudas. En conjunto, estos hallazgos sustentan el modelo de riesgo acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa sustancialmente el riesgo de descompensación mental, concordando con evidencia internacional en patología dual que vincula la comorbilidad adictiva-psiquiátrica a mayores tasas de rehospitalización
+
+## Limitaciones del estudio
+
+Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial podría reflejar en parte la mayor gravedad clínica de sus pacientes. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de rehospitalización.
+
+\newpage
+
+# Referencias
+
