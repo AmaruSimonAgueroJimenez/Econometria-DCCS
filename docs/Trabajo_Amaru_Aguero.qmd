@@ -110,7 +110,7 @@ install_and_load <- function(package) {
 packages <- c("devtools", "tidyverse", "janitor", "data.table", "kableExtra",
               "gridExtra", "car", "knitr", "plotly", "ggbreak", "patchwork",
               "latex2exp", "openxlsx", "lubridate", "gridExtra", "pROC", 
-              "caret", "logistf", "broom", "brglm2", "ggrepel", "purrr","caret", "tibble","ResourceSelection")
+              "caret", "logistf", "broom", "brglm2", "ggrepel", "purrr","caret", "tibble","ResourceSelection","qrcode")
 
 packages <- unique(packages)
 
@@ -2426,6 +2426,45 @@ El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiq
 ## Limitaciones del estudio
 
 Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial podría reflejar en parte la mayor gravedad clínica de sus pacientes. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de rehospitalización.
+
+\newpage
+
+# Repositorio GitHub
+
+Este código se replica autamáticamente con datos **simulados** debido al tamaño de los datos originales. El código completo de este análisis, incluyendo los modelos estadísticos, las visualizaciones y los diagnósticos, está disponible en el siguiente [repositorio GitHub](https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS). De igual manera se puede acceder con el siguiente código QR.
+
+```{r}
+#| fig-height: 3
+#| fig-width: 3
+#| fig-align: center
+#| results: 'asis'
+# URL del repositorio
+repo_url <- "https://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS"
+
+# Generar código QR
+qr <- qr_code(repo_url)
+
+# Opción 1: Plot simple
+plot(qr)
+```
+
+El informe .pdf se encuentra en [esta dirección](http://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Trabajo_Amaru_Aguero.pdf). De igual manera se puede acceder con el siguiente código QR.
+
+```{r}
+#| fig-height: 3
+#| fig-width: 3
+#| fig-align: center
+#| results: 'asis'
+# URL del repositorio
+repo_url <- "http://github.com/AmaruSimonAgueroJimenez/Econometria-DCCS/blob/main/docs/Trabajo_Amaru_Aguero.pdf"
+
+# Generar código QR
+qr <- qr_code(repo_url)
+
+# Opción 1: Plot simple
+plot(qr)
+```
+
 
 \newpage
 
