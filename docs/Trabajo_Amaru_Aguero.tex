@@ -275,7 +275,7 @@
 \subtitle{Trastornos por consumo de sustancias y hospitalizaciones por
 salud mental en Chile 2010-2022}
 \author{Amaru Simón Agüero Jiménez}
-\date{2025-06-18}
+\date{2025-06-21}
 \begin{document}
 \maketitle
 
@@ -514,8 +514,8 @@ permiten describir, de forma robusta, la capacidad de los modelos para
 identificar correctamente los casos de hospitalización psiquiátrica y
 minimizar los errores de clasificación\textsuperscript{12,13}.
 
-Una vez selcionado los mejores modelos según las metricas anteriores se
-evaluaron su calibración mediante la comparación entre las
+Una vez seleccionados los mejores modelos según las metricas anteriores
+se evaluaron su calibración mediante la comparación entre las
 probabilidades predichas y las proporciones observadas. Las
 probabilidades predichas \(\hat{p}_i\) se agruparon en deciles basados
 en sus cuantiles. Para cada decil \(j\), se calculó la probabilidad
@@ -551,8 +551,13 @@ variable o conjunto de variables dummy \(j\), el GVIF se definió como:
 
 \[\text{GVIF}_j = \det(\mathbf{R}_j)\det(\mathbf{R}_{-j})^{-1}\]
 
-Dado que el GVIF depende del número de parámetros asociados a cada
-variable, se aplicó la corrección
+donde \(\mathbf{R}j\) es la matriz de correlación del subconjunto de
+variables asociadas con el término \(j\), y \(\mathbf{R}{-j}\) es la
+matriz de correlación de todas las demás variables predictoras. El
+determinante \(\det(\mathbf{R})\) mide el volumen del elipsoide de
+correlación; un determinante cercano a cero indica alta
+multicolinealidad. Dado que el GVIF depende del número de parámetros
+asociados a cada variable, se aplicó la corrección
 \(\text{GVIF}^{1/(2 \times \text{df}_j)}\), donde \(\text{df}_j\)
 representó los grados de libertad de la variable \(j\). Se consideraron
 problemáticos valores superiores a \(\sqrt{5} \approx 2.24\), indicando
@@ -1465,7 +1470,7 @@ dirección}. De igual manera se puede acceder con el siguiente código QR.
 
 \newpage
 
-\section*{Referencias}\label{referencias}
+\section*{Referencias}\label{bibliography}
 \addcontentsline{toc}{section}{Referencias}
 
 \phantomsection\label{refs}

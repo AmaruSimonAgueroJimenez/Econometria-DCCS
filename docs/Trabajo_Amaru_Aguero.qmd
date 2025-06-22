@@ -11,6 +11,7 @@ author:
     orcid: "0000-0001-7336-1833"
 date: "`r Sys.Date()`"
 lang: es
+reference-section-title: "Referencias"
 format:
   pdf:
     toc: true
@@ -64,14 +65,14 @@ format:
       \cfoot{\thepage} % Número de página centrado
       \rfoot{}
       
-      
 # Configuración de ejecución
 execute:
-  results: 'asis' # Mostrar resultados de R
+  results: asis   # Mostrar resultados de R
   echo: false     # No mostrar código
   warning: false  # Sin advertencias
   message: false  # Sin mensajes
 ---
+
 
 ```{r}
 ################################################################################
@@ -80,7 +81,6 @@ execute:
 install_and_load <- function(package) {
   # Try to load the package first
   if (!require(package, character.only = TRUE, quietly = TRUE)) {
-    # cat(paste("Installing", package, "...\n"))
     
     # Try to install with error handling
     tryCatch({
@@ -93,7 +93,6 @@ install_and_load <- function(package) {
         warning(paste("Failed to load", package, "after installation"))
         return(FALSE)
       }
-      # cat(paste("✓", package, "installed and loaded successfully\n"))
       return(TRUE)
       
     }, error = function(e) {
@@ -101,7 +100,6 @@ install_and_load <- function(package) {
       return(FALSE)
     })
   } else {
-    # cat(paste("✓", package, "already loaded\n"))
     return(TRUE)
   }
 }
@@ -114,7 +112,6 @@ packages <- c("devtools", "tidyverse", "janitor", "data.table", "kableExtra",
 
 packages <- unique(packages)
 
-# Apply the function and track results
 results <- sapply(packages, install_and_load)
 
 ```
@@ -476,7 +473,7 @@ if (file.exists(ruta_base)) {
   
 } else {
   # Scenario 3: Neither BASE_REGRESION_LOGISTICA nor source files exist
-  # Simulate data based on descriptive statistics from PDF
+  # Simulate data based on descriptive statistics
   
   set.seed(123) # For reproducibility
   n <- 10000
@@ -486,7 +483,7 @@ if (file.exists(ruta_base)) {
     # Create unique IDs
     HASH_KEY = paste0("SIM_", str_pad(1:n, 6, pad = "0")),
     
-    # Outcome variable (7.6% with mental hospitalization based on PDF)
+    # Outcome variable (7.6% with mental hospitalization)
     HOSP_MENTAL_POST_TTO = rbinom(n, 1, 0.076),
     
     # Age - normal distribution approximating the data
@@ -496,7 +493,7 @@ if (file.exists(ruta_base)) {
     sex = factor(sample(c("Male", "Female"), n, replace = TRUE, 
                        prob = c(0.74, 0.26))),
     
-    # Principal substance (proportions from PDF)
+    # Principal substance 
     principal_sub = factor(sample(
       c("Alcohol", "Other substances", "Cocaine", "Depressants", "Marijuana", "Cocaine paste"),
       n, replace = TRUE,
@@ -524,14 +521,14 @@ if (file.exists(ruta_base)) {
       0
     ),
     
-    # Re-treatment categories (proportions from PDF)
+    # Re-treatment categories
     retratamientos_cat = factor(sample(
       c("0", "1", "2", "3+"),
       n, replace = TRUE,
       prob = c(0.745, 0.167, 0.053, 0.036)
     ), levels = c("0", "1", "2", "3+")),
     
-    # Number of re-treatments (based on category)
+    # Number of re-treatments
     n_retratamientos = case_when(
       retratamientos_cat == "0" ~ 0,
       retratamientos_cat == "1" ~ 1,
@@ -542,7 +539,7 @@ if (file.exists(ruta_base)) {
     # Total number of treatments
     n_total_tratamientos = n_retratamientos + 1,
     
-    # Discharge reason (proportions from PDF)
+    # Discharge reason 
     motivode_egreso = factor(sample(
       c("Late Dropout", "Early Dropout", "Administrative Discharge", 
         "Therapeutic Discharge", "Referral"),
@@ -586,7 +583,7 @@ if (file.exists(ruta_base)) {
     fecha_ingresoa_tratamiento = as.Date("2010-01-01") + sample(0:4380, n, replace = TRUE),
     fecha_egresode_tratamiento = fecha_ingresoa_tratamiento + duracion_tto_dias,
     
-    # Mental hospitalization date (for those who have it)
+    # Mental hospitalization date 
     fecha_hosp_mental = if_else(
       HOSP_MENTAL_POST_TTO == 1,
       fecha_egresode_tratamiento + sample(30:1095, sum(HOSP_MENTAL_POST_TTO == 1), replace = TRUE),
@@ -715,7 +712,7 @@ El **desarrollo de los modelos** siguió un enfoque escalonado. Se comenzó esti
   
 Estas métricas complementaron la información aportada por la AUC y permiten describir, de forma robusta, la capacidad de los modelos para identificar correctamente los casos de hospitalización psiquiátrica y minimizar los errores de clasificación [@hanley1982meaning; @delong1988comparing].
 
-Una vez selcionado los mejores modelos según las metricas anteriores se evaluaron su calibración mediante la comparación entre las probabilidades predichas y las proporciones observadas. Las probabilidades predichas $\hat{p}_i$ se agruparon en deciles basados en sus cuantiles. Para cada decil $j$, se calculó la probabilidad predicha promedio $\bar{\hat{p}}_j = \frac{1}{n_j}\sum_{i \in G_j} \hat{p}_i$ y la proporción observada $\bar{y}_j = \frac{1}{n_j}\sum_{i \in G_j} y_i$. Se construyeron intervalos de confianza del 95% utilizando el error estándar $SE_j = \sqrt{\frac{\bar{y}_j(1-\bar{y}_j)}{n_j}}$.
+Una vez seleccionados los mejores modelos según las metricas anteriores se evaluaron su calibración mediante la comparación entre las probabilidades predichas y las proporciones observadas. Las probabilidades predichas $\hat{p}_i$ se agruparon en deciles basados en sus cuantiles. Para cada decil $j$, se calculó la probabilidad predicha promedio $\bar{\hat{p}}_j = \frac{1}{n_j}\sum_{i \in G_j} \hat{p}_i$ y la proporción observada $\bar{y}_j = \frac{1}{n_j}\sum_{i \in G_j} y_i$. Se construyeron intervalos de confianza del 95% utilizando el error estándar $SE_j = \sqrt{\frac{\bar{y}_j(1-\bar{y}_j)}{n_j}}$.
 
 La bondad de ajuste global se evaluó mediante el test de Hosmer-Lemeshow:
 
@@ -734,7 +731,7 @@ Por último se calculó el Factor de Inflación de Varianza Generalizado (GVIF) 
 
 $$\text{GVIF}_j = \det(\mathbf{R}_j)\det(\mathbf{R}_{-j})^{-1}$$
 
-Dado que el GVIF depende del número de parámetros asociados a cada variable, se aplicó la corrección $\text{GVIF}^{1/(2 \times \text{df}_j)}$, donde $\text{df}_j$ representó los grados de libertad de la variable $j$. Se consideraron problemáticos valores superiores a $\sqrt{5} \approx 2.24$, indicando que la varianza del coeficiente se infló más de 5 veces debido a la colinealidad [@fox1992generalized].
+donde $\mathbf{R}j$ es la matriz de correlación del subconjunto de variables asociadas con el término $j$, y $\mathbf{R}{-j}$ es la matriz de correlación de todas las demás variables predictoras. El determinante $\det(\mathbf{R})$ mide el volumen del elipsoide de correlación; un determinante cercano a cero indica alta multicolinealidad. Dado que el GVIF depende del número de parámetros asociados a cada variable, se aplicó la corrección $\text{GVIF}^{1/(2 \times \text{df}_j)}$, donde $\text{df}_j$ representó los grados de libertad de la variable $j$. Se consideraron problemáticos valores superiores a $\sqrt{5} \approx 2.24$, indicando que la varianza del coeficiente se infló más de 5 veces debido a la colinealidad [@fox1992generalized].
 
 Todos los ánalisis consideraron un nivel de significancia de $\alpha=0.05$ e intervalos de confianza con un nivel de confianza de $1-\alpha=0.95$.
 
@@ -811,7 +808,7 @@ Los residuos de deviance no mostraron patrones sistemáticos contra valores ajus
 \newpage
 
 ```{r}
-# Función para calcular estadísticos de variables numéricas
+# Function for descriptive analysis - numeric vars
 calc_numeric_stats <- function(data, var_name, group_var = NULL) {
   if (!is.null(group_var)) {
     stats <- data %>%
@@ -860,9 +857,8 @@ calc_numeric_stats <- function(data, var_name, group_var = NULL) {
   return(stats)
 }
 
-# Función para calcular estadísticos de variables categóricas
+# Function for descriptive analysis - categorical vars
 calc_categorical_stats <- function(data, var_name, group_var = NULL) {
-  # Primero calculamos las frecuencias por grupo si existe group_var
   if (!is.null(group_var)) {
     freq_by_group <- data %>%
       count(!!sym(var_name), !!sym(group_var)) %>%
@@ -875,7 +871,6 @@ calc_categorical_stats <- function(data, var_name, group_var = NULL) {
       pivot_wider(names_from = !!sym(group_var), values_from = stat_string, values_fill = "0 (0.0%)")
   }
   
-  # Calculamos las frecuencias totales
   freq_total <- data %>%
     count(!!sym(var_name)) %>%
     mutate(
@@ -884,7 +879,6 @@ calc_categorical_stats <- function(data, var_name, group_var = NULL) {
     ) %>%
     select(!!sym(var_name), Total)
   
-  # Combinamos los resultados
   if (!is.null(group_var)) {
     result <- freq_by_group %>%
       left_join(freq_total, by = as.character(var_name))
@@ -892,7 +886,6 @@ calc_categorical_stats <- function(data, var_name, group_var = NULL) {
     result <- freq_total
   }
   
-  # Formatear el resultado
   result <- result %>%
     rename(Level = !!sym(var_name)) %>%
     mutate(
@@ -904,38 +897,33 @@ calc_categorical_stats <- function(data, var_name, group_var = NULL) {
   return(result)
 }
 
-# Crear la tabla descriptiva
+
 create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO") {
-  # Separar los datos por outcome
+
   data_yes <- data %>% filter(!!sym(outcome_var) == 1)
   data_no <- data %>% filter(!!sym(outcome_var) == 0)
   
-  # Variables numéricas a incluir
   numeric_vars <- c("edad", "duracion_tto_dias", "duracion_total_todos_ttos", 
                     "n_hosp_mental_previas", "n_retratamientos", "n_total_tratamientos")
   
-  # Variables categóricas a incluir
   categorical_vars <- c("sex", "principal_sub", "plan_type", 
                         "hosp_mental_previa", "retratamientos_cat", "motivode_egreso",
                         "estado_conyugal", "escolaridad_ultimo_ano_cursado", 
                         "condicion_ocupacional", "region_del_centro")
   
-  # Inicializar data frame para resultados
   results <- data.frame()
   
-  # Procesar variables numéricas
+
   for (var in numeric_vars) {
     if (var %in% names(data)) {
-      # Estadísticos por grupo
+
       stats_by_group <- calc_numeric_stats(data, var, outcome_var)
-      # Estadísticos totales
+
       stats_total <- calc_numeric_stats(data, var)
       
-      # Combinar
       var_stats <- stats_by_group %>%
         left_join(stats_total %>% select(-Variable, -Level), by = character())
       
-      # Renombrar columnas
       names(var_stats)[names(var_stats) == "0"] <- "No Mental Hosp"
       names(var_stats)[names(var_stats) == "1"] <- "Mental Hosp"
       
@@ -943,14 +931,12 @@ create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO")
     }
   }
   
-  # Procesar variables categóricas
+
   for (var in categorical_vars) {
     if (var %in% names(data)) {
-      # Estadísticos por grupo
+
       stats_by_group <- calc_categorical_stats(data, var, outcome_var)
-      # Estadísticos totales ya incluidos en la función
-      
-      # Renombrar columnas
+
       names(stats_by_group)[names(stats_by_group) == "0"] <- "No Mental Hosp"
       names(stats_by_group)[names(stats_by_group) == "1"] <- "Mental Hosp"
       
@@ -958,7 +944,6 @@ create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO")
     }
   }
   
-  # Agregar fila con tamaños de muestra
   n_row <- data.frame(
     Variable = "N",
     Level = "",
@@ -970,7 +955,6 @@ create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO")
   
   results <- bind_rows(n_row, results)
   
-  # Limpiar nombres de variables para presentación
   results <- results %>%
     mutate(
       Variable = case_when(
@@ -999,10 +983,9 @@ create_descriptive_table <- function(data, outcome_var = "HOSP_MENTAL_POST_TTO")
   return(results)
 }
 
-# Crear la tabla descriptiva
+
 tabla_descriptiva <- create_descriptive_table(BASE_REGRESION_LOGISTICA)
 
-# Usar kableExtra para PDF
 
 kable(tabla_descriptiva, format = "latex", 
       booktabs = T, 
@@ -1950,7 +1933,6 @@ best_models <- data.frame(
   )
 )
 
-
 ```
 
 ```{r}
@@ -2175,7 +2157,7 @@ for (i in seq_along(all_plots)) {
 ```
 
 ```{r}
-#| fig-height: 10
+#| fig-height: 14
 #| fig-width: 12
 #| fig-cap: "Diagnóstico  para las variantes del Modelo 7 que muestra: (1) Gráficos de calibración con la prueba de Hosmer-Lemeshow, (2) Residuos de desviación versus valores ajustados y (3) Evaluación de multicolinealidad utilizando el Factor de Inflación de Varianza Generalizado (GVIF)"
 
@@ -2468,5 +2450,4 @@ plot(qr)
 
 \newpage
 
-# Referencias
 
