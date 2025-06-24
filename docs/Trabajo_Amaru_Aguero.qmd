@@ -105,9 +105,9 @@ install_and_load <- function(package) {
 }
 
 # List of packages
-packages <- c("devtools", "tidyverse", "janitor", "data.table", "kableExtra",
-              "gridExtra", "car", "knitr", "plotly", "ggbreak", "patchwork",
-              "latex2exp", "openxlsx", "lubridate", "gridExtra", "pROC", 
+packages <- c("devtools", "tidyverse", "janitor", "data.table", "kableExtra", "grid", "cowplot",
+              "gridExtra", "car", "knitr", "plotly", "ggbreak", "patchwork", "tinytex",
+              "latex2exp", "openxlsx", "lubridate", "gridExtra", "pROC","margins",
               "caret", "logistf", "broom", "brglm2", "ggrepel", "purrr","caret", "tibble","ResourceSelection","qrcode")
 
 packages <- unique(packages)
@@ -638,15 +638,9 @@ Se parte de un marco de riesgo acumulativo en el que la probabilidad de hospital
 
 - Variables sociodemográficos: edad (lineal y cuadrática), sexo, estado civil, nivel educacional y región de residencia.
 
-Bajo este esquema se plantean cuatro hipótesis:
+Bajo este esquema se plantean la siguiente hipótesis:
 
-$H_1$ – Historial psiquiátrico: cada hospitalización mental previa incrementa significativamente la probabilidad de una nueva hospitalización ($\uparrow p$).
-
-$H_2$ – Re-tratamientos: los pacientes con tres o más reingresos muestran un riesgo superior al de quienes no han recaído.
-
-$H_3$ – Tratamiento residencial: refleja mayor complejidad clínica y eleva la probabilidad de hospitalización frente al tratamiento ambulatorio.
-
-$H_4$ – Sustancias depresoras del SNC: por su perfil farmacológico, conllevan mayor riesgo de complicaciones psiquiátricas agudas.
+Pacientes con mayor carga clínica y antecedentes complejos, incluyendo historial de hospitalizaciones psiquiátricas previas, múltiples re-tratamientos, tratamiento residencial, y consumo de sustancias depresoras del sistema nervioso central, presentan una mayor probabilidad de hospitalización psiquiátrica en comparación con aquellos sin estas características.
 
 Este modelo conceptual apoyado por la evidencia internacional sobre patología dual y cursos clínicos severos  guiará la exploración empírica de los datos chilenos [@GomezSanchezLafuente2016]. Evaluar dichas hipótesis permitirá distinguir los pacientes de alto riesgo y orientar estrategias integradas que reduzcan la probabilidad de hospitalización, mejoren la continuidad asistencial y optimicen el uso de recursos en salud mental tanto en Chile como en otros contextos comparables.
 
@@ -727,11 +721,26 @@ $$d_i = \text{sign}(y_i - \hat{p}_i) \sqrt{2\left[y_i \log\left(\frac{y_i}{\hat{
 
 Los residuos se graficaron contra los valores ajustados y se aplicó un suavizado loess para detectar desviaciones de la linealidad. Se identificaron como valores atípicos aquellas observaciones con $|d_i| > 3$.
 
-Por último se calculó el Factor de Inflación de Varianza Generalizado (GVIF) para evaluar la multicolinealidad entre predictores. Para cada variable o conjunto de variables dummy $j$, el GVIF se definió como:
+Se calculó el Factor de Inflación de Varianza Generalizado (GVIF) para evaluar la multicolinealidad entre predictores. Para cada variable o conjunto de variables dummy $j$, el GVIF se definió como:
 
 $$\text{GVIF}_j = \det(\mathbf{R}_j)\det(\mathbf{R}_{-j})^{-1}$$
 
 donde $\mathbf{R}j$ es la matriz de correlación del subconjunto de variables asociadas con el término $j$, y $\mathbf{R}{-j}$ es la matriz de correlación de todas las demás variables predictoras. El determinante $\det(\mathbf{R})$ mide el volumen del elipsoide de correlación; un determinante cercano a cero indica alta multicolinealidad. Dado que el GVIF depende del número de parámetros asociados a cada variable, se aplicó la corrección $\text{GVIF}^{1/(2 \times \text{df}_j)}$, donde $\text{df}_j$ representó los grados de libertad de la variable $j$. Se consideraron problemáticos valores superiores a $\sqrt{5} \approx 2.24$, indicando que la varianza del coeficiente se infló más de 5 veces debido a la colinealidad [@fox1992generalized].
+
+
+Por último para facilitar la interpretación de los coeficientes en modelos de respuesta binaria, se calcularon los efectos parciales que representan el cambio en la probabilidad de hospitalización psiquiátrica ante cambios en las variables explicativas. Se estimaron dos medidas:
+
+**Efecto Parcial en el Promedio (PEA)**: Evalúa el efecto parcial en el individuo promedio:
+
+$$PEA_j = \frac{\partial P(Y=1|X=\bar{x})}{\partial x_j} = f(\bar{x}^T\beta)\beta_j$$
+
+donde $f(\cdot)$ es la función de densidad logística (Logit y Firth) o normal estandar (Probit) y $\bar{x}$ representa los valores promedio de las covariables.
+
+**Efecto Parcial Promedio (APE)**: Promedia los efectos parciales individuales en toda la muestra:
+
+$$APE_j = \frac{1}{n}\sum_{i=1}^{n} \frac{\partial P(Y=1|X=x_i)}{\partial x_j} = \frac{1}{n}\sum_{i=1}^{n} f(x_i^T\beta)\beta_j$$
+
+Para variables categóricas, los efectos parciales representan el cambio discreto en la probabilidad al pasar de la categoría de referencia a la categoría de interés, manteniendo las demás variables en sus valores observados (para APE) o promedio (para PEA).
 
 Todos los ánalisis consideraron un nivel de significancia de $\alpha=0.05$ e intervalos de confianza con un nivel de confianza de $1-\alpha=0.95$.
 
@@ -745,39 +754,25 @@ La Tabla 1 presenta las características de la muestra analítica final de 97,61
 
 ## Modelos de Regresión Logística
 
-### Modelo Base y Progresión
+La Tabla 2 presenta los resultados de los modelos logit estándar. El intercepto del Modelo 7 ($\hat{\beta}_0 = -5.395$, p < 0.001, IC 95%: [-5.923, -4.866]) indica que los log-odds de hospitalización psiquiátrica dado el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol, edad promedio, sin hospitalizaciones previas y sin retratamientos) son significativamente negativos, correspondiendo a una probabilidad basal de aproximadamente 0.5%. La Tabla 6 muestra las comparaciones entre modelos anidados mediante pruebas de razón de verosimilitud. La inclusión de hospitalizaciones previas (Modelo 2 vs 3) produjo la mayor reducción en deviance ($\chi^2_{LR} = 2,681.75$, gl = 1, p < 0.001), seguida por la adición de retratamientos (Modelo 3 vs 4: $\chi^2_{LR} = 3,610.47$, gl = 3, p < 0.001).
 
-La Tabla 2 presenta los resultados de los modelos logit estándar. El intercepto del Modelo 3 ($\hat{\beta}_0 = -2.972$, IC 95%: [-3.092, -2.852]) indica que los log-odds de hospitalización psiquiátrica dado el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol, edad promedio, sin hospitalizaciones previas) son significativamente negativos, correspondiendo a una probabilidad basal de $\frac{e^{-2.972}}{1+e^{-2.972}} = 0.049$ o 4.9%.
+En la Tabla 2 y Tabla 10 se observa que el mayor efecto positivo sobre los log-odds de hospitalización psiquiátrica es el consumo de depresores del SNC, tomando alcohol como referencia ($\hat{\beta} = 0.463$, p < 0.001, IC 95%: [0.243, 0.683]. Este efecto se traduce en un incremento de 2.8 puntos porcentuales en la probabilidad de hospitalización (PEA = APE = 0.0283). El coeficiente se mantiene estable en todos los modelos indicando su robustez. La cocaína mostró una asociación negativa no significativa ($\hat{\beta} = -0.019$, p > 0.05, IC 95%: [-0.154, 0.117], PEA = APE = -0.0011), representando una reducción no significativa de 0.1 puntos porcentuales. La pasta base no mostró diferencias significativas con respecto al alcohol ($\hat{\beta} = 0.042$, p > 0.05, IC 95%: [-0.068, 0.153], PEA = APE = 0.0026), con un incremento no significativo de 0.3 puntos porcentuales. La marihuana tampoco mostró efectos significativos ($\hat{\beta} = -0.093$, p > 0.05, IC 95%: [-0.301, 0.116], PEA = APE = -0.0056). Las otras sustancias presentaron un coeficiente positivo pero no significativo ($\hat{\beta} = 0.026$, p > 0.05, IC 95%: [-0.536, 0.587], PEA = APE = 0.0016).
 
-La Tabla 6 muestra las comparaciones entre modelos anidados mediante pruebas de razón de verosimilitud. La inclusión de hospitalizaciones previas (Modelo 2 vs 3) produjo la mayor reducción en deviance ($\chi^2_{LR} = 2,681.75$, gl = 1, p < 0.001), seguida por la adición de retratamientos (Modelo 3 vs 4: $\chi^2_{LR} = 3,610.47$, gl = 3, p < 0.001).
+El sexo masculino se asoció con menores log-odds de hospitalización ($\hat{\beta} = -0.105$, p < 0.05, IC 95%: [-0.203, -0.006]). Esto se traduce en una reducción de 0.6 puntos porcentuales en la probabilidad (PEA = APE = -0.0064). La edad mostró una relación no lineal significativa: el efecto lineal fue positivo ($\hat{\beta} = 0.089$, p < 0.001, IC 95%: [0.074, 0.105]), indicando que cada año adicional de edad aumenta la probabilidad de hospitalización en 0.55 puntos porcentuales (PEA = APE = 0.0055). El término cuadrático fue negativo ($\hat{\beta} = -0.001$, p < 0.001, IC 95%: [-0.001, -0.001], PEA = APE = -0.0001), sugiriendo que el riesgo de hospitalización aumenta con la edad pero a una tasa decreciente (Tabla 2, Modelo 7; Tabla 10).
 
-### Predictor tipo de sustancias (Modelo 7)
+Existe una mayor probabilidad de hospitalización psiquiátrica posterior dado un plan residencial versus ambulatorio ($\hat{\beta} = 0.279$, p < 0.001, IC 95%: [0.205, 0.353]). Esto representa un incremento de 1.7 puntos porcentuales en la probabilidad (PEA = APE = 0.0170). Comparando los modelos en la Tabla 2, este efecto se redujo considerablemente desde el Modelo 2 ($\hat{\beta} = 0.763$) al incluir hospitalizaciones previas y retratamientos, sugiriendo que parte del efecto inicial se debía a mayor severidad basal en pacientes residenciales (sesgo por omisión negativo).
 
-En la Tabla 2 se observa que el mayor efecto positivo sobre los log-odds de hospitalización psiquiátrica es el consumo de depresores del SNC,  tomando alcohol como referencia ($\hat{\beta} = 0.463$, IC 95%: [0.243, 0.683]), lo que representa un odds ratio de $e^{0.463} = 1.59$, indicando 1.59 vese más de probabilidad de hospitalización sobre la no hospitalización, comparado con pacientes tratados por alcohol (El coeficiente se mantiene estable en todos los modelos indicandso su robustez). La cocaína mostró una asociación negativa no significativa ($\hat{\beta} = -0.019$, IC 95%: [-0.154, 0.117]), mientras que la pasta base no mostró diferencias significativas ($\hat{\beta} = 0.042$, IC 95%: [-0.068, 0.153]). Estos efectos negativos si son significativos en la interacción con sexo. Esto indica que la probabilidad de la hospitalización psiquiátrica es menor en hombres que consumen pasta base o cocaína qué en mujeres como se evalúa más adelante.
+El número de hospitalizaciones psiquiátricas previas fue el predictor más fuerte ($\hat{\beta} = 0.478$, p < 0.001, IC 95%: [0.455, 0.500]). Hay un aumento de los odds de hospitalización posterior en un incremento de 2.9 puntos porcentuales por cada hospitalización previa (PEA = APE = 0.0292). Este efecto permaneció estable a través de todos los modelos (4-7), indicando robustez ante la inclusión de covariables adicionales (Tabla 2, Tabla 10).
 
-### Características Demográficas
+Los retratamientos mostraron una relación dosis-respuesta clara con la hospitalización psiquiátrica según la Tabla 2 y Tabla 10. Comparado con ningún retratamiento, un retratamiento aumentó los log-odds en 1.048 (p < 0.001, IC 95%: [0.986, 1.110]), indicando un incremento de 6.4 puntos porcentuales (PEA = APE = 0.0640) la probabilidad de hospitalización . Dos retratamientos aumentaron los log-odds en 1.597 (p < 0.001, IC 95%: [1.514, 1.679]), representando 394% más probabilidad de hospitalización o 9.8 puntos porcentuales adicionales (PEA = APE = 0.0975). Tres o más retratamientos mostraron el efecto más pronunciado con un incremento en log-odds de 2.277 (p < 0.001, IC 95%: [2.191, 2.362]), indicando 875% más probabilidad de hospitalización o 13.9 puntos porcentuales adicionales (PEA = APE = 0.1390).
 
-El sexo masculino se asoció con menores log-odds de hospitalización ($\hat{\beta} = -0.105$, IC 95%: [-0.203, -0.006]), representando un odds ratio de 0.90. La edad mostró una relación no lineal significativa: el efecto lineal fue positivo ($\hat{\beta} = 0.089$, IC 95%: [0.074, 0.105]), mientras que el término cuadrático fue negativo ($\hat{\beta} = -0.001$, IC 95%: [-0.001, -0.001]), sugiriendo que el riesgo de hospitalización aumenta con la edad pero a una tasa decreciente (Tabla 2, Modelo 7).
+Entre las variables educacionales (referencia: otra/no especificada), ninguna categoría mostró efectos significativos en el Modelo 7 según la Tabla 2. La educación primaria ($\hat{\beta} = -0.066$, p > 0.05, IC 95%: [-0.430, 0.297], PEA = APE = -0.0041), secundaria ($\hat{\beta} = -0.097$, p > 0.05, IC 95%: [-0.459, 0.266], PEA = APE = -0.0059), universitaria ($\hat{\beta} = 0.049$, p > 0.05, IC 95%: [-0.322, 0.419], PEA = APE = 0.0030) y técnica superior ($\hat{\beta} = 0.016$, p > 0.05, IC 95%: [-0.352, 0.385], PEA = APE = 0.0010) no difirieron significativamente de la categoría de referencia.
 
-### Características del Tratamiento
+El estado civil casado/conviviente mostró menores log-odds comparado con divorciado/separado ($\hat{\beta} = -0.126$, p < 0.01, IC 95%: [-0.213, -0.039], OR = 0.88), indicando 12% menos probabilidad de hospitalización, traducido en una reducción de 0.8 puntos porcentuales (PEA = APE = -0.0077). Los solteros no mostraron diferencias significativas ($\hat{\beta} = 0.016$, p > 0.05, IC 95%: [-0.070, 0.101], PEA = APE = 0.0010), ni los viudos ($\hat{\beta} = -0.113$, p > 0.05, IC 95%: [-0.345, 0.120], PEA = APE = -0.0069) o aquellos con otro estado civil ($\hat{\beta} = 0.029$, p > 0.05, IC 95%: [-0.508, 0.567], PEA = APE = 0.0018).
 
-Existe una mayor probabilidad de hospitalización psiquiátrica posterior dado un plan residencial versus ambulatorio, ($\hat{\beta} = 0.279$, IC 95%: [0.205, 0.353]), con un odds ratio de 1.32. Comparando los modelos en la Tabla 2, este efecto se redujo considerablemente desde el Modelo 2 ($\hat{\beta} = 0.763$) al incluir hospitalizaciones previas y retratamientos, sugiriendo que parte del efecto inicial se debía a mayor severidad basal en pacientes residenciales (Sesgo por omisión negativo).
+En ocupación (referencia: desempleado), trabajar se asoció con menores log-odds ($\hat{\beta} = -0.381$, p < 0.001, IC 95%: [-0.442, -0.319], OR = 0.68), representando 32% menos probabilidad de hospitalización o una reducción de 2.3 puntos porcentuales (PEA = APE = -0.0232). Los jubilados/pensionados mostraron mayores log-odds ($\hat{\beta} = 0.359$, p < 0.001, IC 95%: [0.179, 0.538], OR = 1.43), indicando 43% más probabilidad de hospitalización o un incremento de 2.2 puntos porcentuales (PEA = APE = 0.0219). Otras ocupaciones mostraron una reducción significativa ($\hat{\beta} = -0.119$, p < 0.05, IC 95%: [-0.211, -0.027], OR = 0.89, PEA = APE = -0.0073), mientras que estudiantes ($\hat{\beta} = -0.129$, p > 0.05, IC 95%: [-0.367, 0.110], PEA = APE = -0.0079) y quienes realizan tareas del hogar ($\hat{\beta} = -0.092$, p > 0.05, IC 95%: [-0.201, 0.016], PEA = APE = -0.0056) no mostraron diferencias significativas (Tabla 2, Tabla 10).
 
-### Historial de Salud Mental
-
-El número de hospitalizaciones psiquiátricas previas fue el predictor más fuerte ($\hat{\beta} = 0.478$, IC 95%: [0.455, 0.500]). Hay un aumento de los odds de hospitalización posterior en $e^{0.478} = 1.61$ veces dado un aumento de eventos de hospitalización psiquiátrica posterior. Este efecto permaneció estable a través de todos los modelos (4-7), indicando robustez ante la inclusión de covariables adicionales (Tabla 2).
-
-### Retratamientos
-
-Los retratamientos mostraron una relación dosis-respuesta con la hospitalización psiquiátrica. Comparado con ningún retratamiento, un retratamiento aumentó los log-odds en 1.048 (IC 95%: [0.986, 1.110], OR = 2.85), dos retratamientos en 1.597 (IC 95%: [1.514, 1.679], OR = 4.94), y tres o más en 2.277 (IC 95%: [2.191, 2.362], OR = 9.75) (Tabla 2, Modelo 7).
-
-### Variables Socioeconómicas
-
-Entre las variables educacionales (referencia: otra/no especificada), ninguna categoría mostró efectos significativos en el Modelo 7. El estado civil casado/conviviente mostró menores log-odds comparado con divorciado/separado ($\hat{\beta} = -0.126$, IC 95%: [-0.213, -0.039], OR = 0.88). En ocupación (referencia: desempleado), trabajar se asoció con menores log-odds ($\hat{\beta} = -0.381$, IC 95%: [-0.442, -0.319], OR = 0.68), mientras que jubilados/pensionados mostraron mayores log-odds ($\hat{\beta} = 0.359$, IC 95%: [0.179, 0.538], OR = 1.43) (Tabla 2).
-
-### Interacciones Sexo × Sustancia
-
-La interacción entre sexo masculino y pasta base fue significativa y negativa ($\hat{\beta} = -0.257$, IC 95%: [-0.385, -0.129]), indicando que el efecto de la pasta base sobre la hospitalización psiquiátrica difiere entre hombres y mujeres. Para hombres tratados por pasta base, el efecto combinado es $0.042 + (-0.257) = -0.215$, sugiriendo menor riesgo que las mujeres tratadas por la misma sustancia (Tabla 2, Modelo 7).
+La interacción entre sexo masculino y pasta base fue significativa y negativa ($\hat{\beta} = -0.257$, p < 0.001, IC 95%: [-0.385, -0.129]), indicando que el efecto de la pasta base sobre la hospitalización psiquiátrica difiere entre hombres y mujeres. El efecto parcial de esta interacción es de -1.6 puntos porcentuales (PEA = APE = -0.0157). Para hombres tratados por pasta base, el efecto combinado es $0.042 + (-0.257) = -0.215$, sugiriendo menor riesgo que las mujeres tratadas por la misma sustancia. La interacción con cocaína también fue significativa ($\hat{\beta} = -0.165$, p < 0.05, IC 95%: [-0.326, -0.003], PEA = APE = -0.0100), indicando que los hombres tratados por cocaína tienen 1 punto porcentual menos de probabilidad de hospitalización comparado con las mujeres. Las interacciones con marihuana ($\hat{\beta} = 0.182$, p > 0.05, IC 95%: [-0.061, 0.425], PEA = APE = 0.0111), depresores ($\hat{\beta} = 0.115$, p > 0.05, IC 95%: [-0.213, 0.442], PEA = APE = 0.0070) y otras sustancias ($\hat{\beta} = 0.465$, p > 0.05, IC 95%: [-0.221, 1.152], PEA = APE = 0.0284) no fueron significativas (Tabla 2, Modelo 7; Tabla 10).
 
 ## Modelos Probit
 
@@ -2397,13 +2392,648 @@ for (plot in all_plots) {
   print(plot)
 }
 ```
+```{r}
+################################################################################
+# COMPLETE PARTIAL EFFECTS TABLE WITH BETA COEFFICIENTS 
+################################################################################
+
+# Extended function to calculate marginal effects for ALL variables
+calculate_all_marginal_effects <- function(model, data = BASE_ANALISIS, effect_type = "APE") {
+  
+  # Get model type
+  if(inherits(model, "brglmFit")) {
+    link_type <- "logit"
+  } else {
+    link_type <- family(model)$link
+  }
+  
+  # Get coefficients and their statistics
+  coefs <- coef(model)
+  coef_summary <- summary(model)$coefficients
+  
+  # Get model matrix
+  X <- model.matrix(model)
+  n <- nrow(X)
+  
+  # Calculate linear predictor
+  linear_pred <- X %*% coefs
+  
+  # Calculate scaling factor based on link function
+  if(link_type == "logit") {
+    pred_probs <- 1 / (1 + exp(-linear_pred))
+    scale_factor <- pred_probs * (1 - pred_probs)
+  } else if(link_type == "probit") {
+    pred_probs <- pnorm(linear_pred)
+    scale_factor <- dnorm(linear_pred)
+  }
+  
+  # Initialize results dataframe
+  results_df <- data.frame()
+  
+  # Skip intercept, interaction terms, and region variables
+  var_names <- names(coefs)
+  var_names <- var_names[var_names != "(Intercept)"]
+  var_names <- var_names[!grepl(":", var_names)] # Skip interactions for now
+  var_names <- var_names[!grepl("region_del_centro", var_names)] # Skip region variables
+  
+  # Calculate effects for each variable
+  for(var in var_names) {
+    if(effect_type == "APE") {
+      me <- mean(scale_factor * coefs[var])
+      se <- sd(scale_factor * coefs[var]) / sqrt(n)
+    } else {
+      mean_scale <- mean(scale_factor)
+      me <- mean_scale * coefs[var]
+      se <- mean_scale * sqrt(vcov(model)[var, var])
+    }
+    
+    # Get beta coefficient and p-value
+    beta <- coefs[var]
+    beta_se <- coef_summary[var, "Std. Error"]
+    beta_p <- coef_summary[var, "Pr(>|z|)"]
+    
+    temp_df <- data.frame(
+      Variable = var,
+      Effect = me,
+      SE = se,
+      Beta = beta,
+      Beta_SE = beta_se,
+      Beta_p = beta_p,
+      stringsAsFactors = FALSE
+    )
+    
+    results_df <- rbind(results_df, temp_df)
+  }
+  
+  # Add interaction terms separately (excluding region interactions)
+  interaction_terms <- names(coefs)[grepl(":", names(coefs))]
+  interaction_terms <- interaction_terms[!grepl("region_del_centro", interaction_terms)]
+  
+  for(var in interaction_terms) {
+    if(effect_type == "APE") {
+      me <- mean(scale_factor * coefs[var])
+      se <- sd(scale_factor * coefs[var]) / sqrt(n)
+    } else {
+      mean_scale <- mean(scale_factor)
+      me <- mean_scale * coefs[var]
+      se <- mean_scale * sqrt(vcov(model)[var, var])
+    }
+    
+    # Get beta coefficient and p-value
+    beta <- coefs[var]
+    beta_se <- coef_summary[var, "Std. Error"]
+    beta_p <- coef_summary[var, "Pr(>|z|)"]
+    
+    temp_df <- data.frame(
+      Variable = var,
+      Effect = me,
+      SE = se,
+      Beta = beta,
+      Beta_SE = beta_se,
+      Beta_p = beta_p,
+      stringsAsFactors = FALSE
+    )
+    
+    results_df <- rbind(results_df, temp_df)
+  }
+  
+  return(results_df)
+}
+
+# Calculate effects for all models and effect types
+models_list <- list(
+  "Logit" = modelo7,
+  "Probit" = modelo7_probit,
+  "Firth" = modelo7_firth
+)
+
+# Initialize combined results
+all_results <- data.frame()
+
+for (model_name in names(models_list)) {
+  model <- models_list[[model_name]]
+  
+  # Calculate PEA
+  pea_results <- calculate_all_marginal_effects(model, BASE_ANALISIS, "PEA")
+  pea_results$Model <- model_name
+  pea_results$Type <- "PEA"
+  
+  # Calculate APE
+  ape_results <- calculate_all_marginal_effects(model, BASE_ANALISIS, "APE")
+  ape_results$Model <- model_name
+  ape_results$Type <- "APE"
+  
+  # Combine
+  all_results <- rbind(all_results, pea_results, ape_results)
+}
+
+# Create wide format table
+effects_table <- all_results %>%
+  mutate(
+    # Clean variable names
+    Variable = case_when(
+      Variable == "principal_subMarijuana" ~ "Substance: Marijuana",
+      Variable == "principal_subOther substances" ~ "Substance: Other substances",
+      Variable == "principal_subCocaine" ~ "Substance: Cocaine",
+      Variable == "principal_subDepressants" ~ "Substance: Depressants",
+      Variable == "principal_subCocaine paste" ~ "Substance: Cocaine paste",
+      Variable == "edad" ~ "Age",
+      Variable == "I(edad^2)" ~ "Age²",
+      Variable == "sexMale" ~ "Sex: Male",
+      Variable == "plan_typeResidential" ~ "Plan: Residential",
+      Variable == "n_hosp_mental_previas" ~ "N° previous mental hosp.",
+      Variable == "retratamientos_cat1" ~ "Retreatments: 1",
+      Variable == "retratamientos_cat2" ~ "Retreatments: 2",
+      Variable == "retratamientos_cat3+" ~ "Retreatments: 3+",
+      Variable == "educacionPrimary" ~ "Education: Primary",
+      Variable == "educacionSecondary" ~ "Education: Secondary",
+      Variable == "educacionTechnical" ~ "Education: Technical",
+      Variable == "educacionUniversity" ~ "Education: University",
+      Variable == "estado_conyugalMarried / Partnered" ~ "Marital: Married/Partnered",
+      Variable == "estado_conyugalSingle" ~ "Marital: Single",
+      Variable == "estado_conyugalWidowed" ~ "Marital: Widowed",
+      Variable == "estado_conyugalOther / No answer" ~ "Marital: Other/No answer",
+      Variable == "condicion_ocupacionalWorking" ~ "Occupation: Working",
+      Variable == "condicion_ocupacionalStudying" ~ "Occupation: Studying",
+      Variable == "condicion_ocupacionalHousehold tasks" ~ "Occupation: Household tasks",
+      Variable == "condicion_ocupacionalRetired / Pensioned" ~ "Occupation: Retired/Pensioned",
+      Variable == "condicion_ocupacionalOther" ~ "Occupation: Other",
+      Variable == "principal_subMarijuana:sexMale" ~ "Male × Marijuana",
+      Variable == "principal_subOther substances:sexMale" ~ "Male × Other substances",
+      Variable == "principal_subCocaine:sexMale" ~ "Male × Cocaine",
+      Variable == "principal_subDepressants:sexMale" ~ "Male × Depressants",
+      Variable == "principal_subCocaine paste:sexMale" ~ "Male × Cocaine paste",
+      TRUE ~ Variable
+    ),
+    # Format effects and betas with significance stars
+    beta_stars = case_when(
+      Beta_p < 0.001 ~ "***",
+      Beta_p < 0.01 ~ "**",
+      Beta_p < 0.05 ~ "*",
+      TRUE ~ ""
+    ),
+    Beta_str = sprintf("%.4f%s", Beta, beta_stars),
+    Beta_SE_str = sprintf("(%.4f)", Beta_SE),
+    Effect_str = sprintf("%.4f", Effect),
+    SE_str = sprintf("(%.4f)", SE)
+  ) %>%
+  select(Variable, Model, Type, Beta_str, Beta_SE_str, Effect_str, SE_str)
+
+# Get unique variables to ensure consistent ordering
+unique_vars <- unique(effects_table$Variable)
+
+# Create beta coefficients table (only need one per model since beta doesn't change by effect type)
+beta_table <- effects_table %>%
+  filter(Type == "PEA") %>%  # Just use PEA rows since beta is the same
+  select(Variable, Model, Beta_str, Beta_SE_str) %>%
+  pivot_wider(
+    names_from = Model,
+    values_from = c(Beta_str, Beta_SE_str),
+    names_sep = "_"
+  )
+
+# Create effects table
+effects_only_table <- effects_table %>%
+  select(Variable, Model, Type, Effect_str, SE_str) %>%
+  pivot_wider(
+    names_from = c(Model, Type),
+    values_from = c(Effect_str, SE_str),
+    names_sep = "_"
+  )
+
+# Join beta and effects tables
+final_table <- beta_table %>%
+  left_join(effects_only_table, by = "Variable") %>%
+  select(
+    Variable,
+    Beta_str_Logit, Beta_SE_str_Logit,
+    Effect_str_Logit_PEA, SE_str_Logit_PEA,
+    Effect_str_Logit_APE, SE_str_Logit_APE,
+    Beta_str_Probit, Beta_SE_str_Probit,
+    Effect_str_Probit_PEA, SE_str_Probit_PEA,
+    Effect_str_Probit_APE, SE_str_Probit_APE,
+    Beta_str_Firth, Beta_SE_str_Firth,
+    Effect_str_Firth_PEA, SE_str_Firth_PEA,
+    Effect_str_Firth_APE, SE_str_Firth_APE
+  )
+
+# Combine columns for final formatting
+final_table_formatted <- final_table %>%
+  mutate(
+    `Logit β` = paste0(Beta_str_Logit, "\n", Beta_SE_str_Logit),
+    `Logit PEA` = paste0(Effect_str_Logit_PEA, "\n", SE_str_Logit_PEA),
+    `Logit APE` = paste0(Effect_str_Logit_APE, "\n", SE_str_Logit_APE),
+    `Probit β` = paste0(Beta_str_Probit, "\n", Beta_SE_str_Probit),
+    `Probit PEA` = paste0(Effect_str_Probit_PEA, "\n", SE_str_Probit_PEA),
+    `Probit APE` = paste0(Effect_str_Probit_APE, "\n", SE_str_Probit_APE),
+    `Firth β` = paste0(Beta_str_Firth, "\n", Beta_SE_str_Firth),
+    `Firth PEA` = paste0(Effect_str_Firth_PEA, "\n", SE_str_Firth_PEA),
+    `Firth APE` = paste0(Effect_str_Firth_APE, "\n", SE_str_Firth_APE)
+  ) %>%
+  select(Variable, 
+         `Logit β`, `Logit PEA`, `Logit APE`,
+         `Probit β`, `Probit PEA`, `Probit APE`,
+         `Firth β`, `Firth PEA`, `Firth APE`)
+
+# Create the table
+kable(final_table_formatted,
+      caption = "Coeficientes Beta, Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio (APE) para los modelos 7.",
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      align = c('l', rep('c', 9))) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"),
+                font_size = 8,
+                full_width = FALSE) %>%
+  column_spec(1, width = "3.5cm") %>%
+  column_spec(2:10, width = "1.8cm") %>%
+  add_header_above(c(" " = 1, "Logit" = 3, "Probit" = 3, "Firth" = 3)) %>%
+  footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05 (significance shown only for β coefficients)",
+                      "Standard errors in parentheses",
+                      "β = Beta coefficient; PEA = Partial Effect at the Average; APE = Average Partial Effect",
+                      "Regional variables excluded from table"))
+```
+
+
+
+```{r}
+#| fig-height: 14
+#| fig-width: 12
+#| fig-cap: "Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio (APE) para los modelos 7 de los tres métodos de estimación: Logit, Probit y Firth. La figura muestra los efectos de tres variables: Sustancia principal de consumo comparada con alcohol, Número de retratamientos comparado con ningún retratamiento y Hospitalizaciones psiquiátricas previas por unidad adicional. Los valores indican el cambio en la probabilidad de hospitalización psiquiátrica. La línea roja vertical en cero representa ausencia de efecto."
+
+################################################################################
+# PARTIAL EFFECTS ANALYSIS - SEPARATE PLOTS WITH POINTS (INCREASED SPACING)
+################################################################################
+
+################################################################################
+# 1. MANUAL CALCULATION FUNCTIONS
+################################################################################
+
+calculate_marginal_effects_manual <- function(model, data = BASE_ANALISIS, effect_type = "APE") {
+  
+  # Get model type
+  if(inherits(model, "brglmFit")) {
+    link_type <- "logit"
+  } else {
+    link_type <- family(model)$link
+  }
+  
+  # Get coefficients
+  coefs <- coef(model)
+  
+  # Get model matrix
+  X <- model.matrix(model)
+  n <- nrow(X)
+  
+  # Calculate linear predictor
+  linear_pred <- X %*% coefs
+  
+  # Calculate scaling factor based on link function
+  if(link_type == "logit") {
+    pred_probs <- 1 / (1 + exp(-linear_pred))
+    scale_factor <- pred_probs * (1 - pred_probs)
+  } else if(link_type == "probit") {
+    pred_probs <- pnorm(linear_pred)
+    scale_factor <- dnorm(linear_pred)
+  }
+  
+  results <- list()
+  
+  # For continuous variables (n_hosp_mental_previas)
+  if("n_hosp_mental_previas" %in% colnames(X)) {
+    var_name <- "n_hosp_mental_previas"
+    coef_name <- var_name
+    
+    if(effect_type == "APE") {
+      me <- mean(scale_factor * coefs[coef_name])
+      se <- sd(scale_factor * coefs[coef_name]) / sqrt(n)
+    } else {
+      mean_scale <- mean(scale_factor)
+      me <- mean_scale * coefs[coef_name]
+      se <- mean_scale * sqrt(vcov(model)[coef_name, coef_name])
+    }
+    
+    results[[var_name]] <- data.frame(
+      factor = var_name,
+      AME = me,
+      SE = se,
+      z = me / se,
+      p = 2 * pnorm(-abs(me / se)),
+      lower = me - 1.96 * se,
+      upper = me + 1.96 * se,
+      stringsAsFactors = FALSE
+    )
+  }
+  
+  # For factor variables (principal_sub)
+  substance_vars <- grep("^principal_sub", names(coefs), value = TRUE)
+  substance_vars <- substance_vars[!grepl(":", substance_vars)]
+  
+  if(length(substance_vars) > 0) {
+    substance_effects <- data.frame()
+    
+    for(var in substance_vars) {
+      if(effect_type == "APE") {
+        me <- mean(scale_factor * coefs[var])
+        se <- sd(scale_factor * coefs[var]) / sqrt(n)
+      } else {
+        mean_scale <- mean(scale_factor)
+        me <- mean_scale * coefs[var]
+        se <- mean_scale * sqrt(vcov(model)[var, var])
+      }
+      
+      temp_df <- data.frame(
+        factor = var,
+        AME = me,
+        SE = se,
+        z = me / se,
+        p = 2 * pnorm(-abs(me / se)),
+        lower = me - 1.96 * se,
+        upper = me + 1.96 * se,
+        stringsAsFactors = FALSE
+      )
+      
+      if(nrow(substance_effects) == 0) {
+        substance_effects <- temp_df
+      } else {
+        substance_effects <- rbind(substance_effects, temp_df)
+      }
+    }
+    results[["principal_sub"]] <- substance_effects
+  }
+  
+  # For retreatments
+  retreat_vars <- grep("^retratamientos_cat", names(coefs), value = TRUE)
+  
+  if(length(retreat_vars) > 0) {
+    retreat_effects <- data.frame()
+    
+    for(var in retreat_vars) {
+      if(effect_type == "APE") {
+        me <- mean(scale_factor * coefs[var])
+        se <- sd(scale_factor * coefs[var]) / sqrt(n)
+      } else {
+        mean_scale <- mean(scale_factor)
+        me <- mean_scale * coefs[var]
+        se <- mean_scale * sqrt(vcov(model)[var, var])
+      }
+      
+      temp_df <- data.frame(
+        factor = var,
+        AME = me,
+        SE = se,
+        z = me / se,
+        p = 2 * pnorm(-abs(me / se)),
+        lower = me - 1.96 * se,
+        upper = me + 1.96 * se,
+        stringsAsFactors = FALSE
+      )
+      
+      if(nrow(retreat_effects) == 0) {
+        retreat_effects <- temp_df
+      } else {
+        retreat_effects <- rbind(retreat_effects, temp_df)
+      }
+    }
+    results[["retratamientos_cat"]] <- retreat_effects
+  }
+  
+  return(results)
+}
+
+################################################################################
+# 2. CALCULATE EFFECTS FOR ALL MODELS
+################################################################################
+
+models_list <- list(
+  "Logit" = modelo7,
+  "Probit" = modelo7_probit,
+  "Firth" = modelo7_firth
+)
+
+# Initialize with proper structure
+all_effects <- data.frame(
+  factor = character(),
+  AME = numeric(),
+  SE = numeric(),
+  z = numeric(),
+  p = numeric(),
+  lower = numeric(),
+  upper = numeric(),
+  Model = character(),
+  Effect_Type = character(),
+  Variable = character(),
+  stringsAsFactors = FALSE
+)
+
+for (model_name in names(models_list)) {
+  model <- models_list[[model_name]]
+  
+  # Calculate APE
+  ape_results <- calculate_marginal_effects_manual(model, BASE_ANALISIS, "APE")
+  
+  # Calculate PEA
+  pea_results <- calculate_marginal_effects_manual(model, BASE_ANALISIS, "PEA")
+  
+  # Combine results
+  for(var_name in names(ape_results)) {
+    # APE
+    temp_ape <- ape_results[[var_name]]
+    temp_ape$Model <- model_name
+    temp_ape$Effect_Type <- "APE"
+    temp_ape$Variable <- var_name
+    all_effects <- rbind(all_effects, temp_ape)
+    
+    # PEA
+    temp_pea <- pea_results[[var_name]]
+    temp_pea$Model <- model_name
+    temp_pea$Effect_Type <- "PEA"
+    temp_pea$Variable <- var_name
+    all_effects <- rbind(all_effects, temp_pea)
+  }
+}
+
+################################################################################
+# 3. CREATE INDIVIDUAL PLOTS WITH COOL COLORS
+################################################################################
+
+# Define cool color palette
+cool_colors <- c(
+  "Logit" = "#2196F3",    # Vibrant blue
+  "Probit" = "#00BCD4",   # Vibrant cyan
+  "Firth" = "#4CAF50"     # Vibrant green
+)
+
+# Prepare data
+plot_data <- all_effects %>%
+  mutate(
+    Level = case_when(
+      Variable == "principal_sub" ~ gsub("principal_sub", "", factor),
+      Variable == "retratamientos_cat" ~ gsub("retratamientos_cat", "", factor),
+      Variable == "n_hosp_mental_previas" ~ "Per unit increase",
+      TRUE ~ factor
+    ),
+    AME_label = sprintf("%.3f", AME)
+  )
+
+# Plot 1: Principal Substance
+p_substance <- plot_data %>%
+  filter(Variable == "principal_sub") %>%
+  ggplot(aes(x = AME, y = reorder(Level, AME))) +
+  geom_point(aes(color = Model), 
+             size = 5, 
+             position = position_dodge(width = 0.7),
+             alpha = 0.9) +
+  geom_text(aes(label = AME_label, color = Model), 
+            position = position_dodge(width = 0.7),
+            hjust = -0.2,
+            vjust = 0,
+            size = 3.5,
+            show.legend = FALSE) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.8) +
+  facet_wrap(~ Effect_Type, ncol = 2) +
+  scale_color_manual(values = cool_colors) +
+  labs(
+    title = "Principal Substance Effects (vs. Alcohol)",
+    x = "Change in Probability",
+    y = "",
+    color = "Model"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    strip.text = element_text(size = 11, face = "bold"),
+    strip.background = element_rect(fill = "gray95", color = NA),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "gray85"),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.text.y = element_text(margin = margin(r = 10))
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.1, 0.35)))
+
+# Plot 2: Retreatments
+p_retreatments <- plot_data %>%
+  filter(Variable == "retratamientos_cat") %>%
+  mutate(Level = factor(Level, levels = c("1", "2", "3+"))) %>%
+  ggplot(aes(x = AME, y = Level)) +
+  geom_point(aes(color = Model), 
+             size = 5, 
+             position = position_dodge(width = 0.6),
+             alpha = 0.9) +
+  geom_text(aes(label = AME_label, color = Model), 
+            position = position_dodge(width = 0.6),
+            hjust = -0.2,
+            vjust = 0,
+            size = 3.5,
+            show.legend = FALSE) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.8) +
+  facet_wrap(~ Effect_Type, ncol = 2) +
+  scale_color_manual(values = cool_colors) +
+  labs(
+    title = "Retreatment Effects (vs. 0 Retreatments)",
+    x = "Change in Probability",
+    y = "",
+    color = "Model"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    strip.text = element_text(size = 11, face = "bold"),
+    strip.background = element_rect(fill = "gray95", color = NA),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "gray85"),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.text.y = element_text(margin = margin(r = 10))
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.1, 0.35)))
+
+# Plot 3: Previous Hospitalizations
+p_hosp <- plot_data %>%
+  filter(Variable == "n_hosp_mental_previas") %>%
+  mutate(
+    y_position = case_when(
+      Model == "Logit" ~ 0.7,
+      Model == "Probit" ~ 1,
+      Model == "Firth" ~ 1.3
+    )
+  ) %>%
+  ggplot(aes(x = AME, y = y_position)) +
+  geom_point(aes(color = Model), 
+             size = 6, 
+             alpha = 0.9) +
+  geom_text(aes(label = AME_label, color = Model), 
+            hjust = -0.2,
+            vjust = 0,
+            size = 4,
+            show.legend = FALSE) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.8) +
+  facet_wrap(~ Effect_Type, ncol = 2) +
+  scale_color_manual(values = cool_colors) +
+  scale_y_continuous(
+    limits = c(0.5, 1.5),
+    breaks = c(1),
+    labels = c("Effect per unit")
+  ) +
+  labs(
+    title = "Previous Mental Hospitalizations Effects",
+    x = "Change in Probability",
+    y = "",
+    color = "Model"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    strip.text = element_text(size = 11, face = "bold"),
+    strip.background = element_rect(fill = "gray95", color = NA),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "gray85"),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10)
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.1, 0.35)))
+
+################################################################################
+# 4. COMBINE PLOTS
+################################################################################
+
+combined_plot <- plot_grid(
+  p_substance,
+  p_retreatments,
+  p_hosp,
+  ncol = 1,
+  rel_heights = c(1.5, 1, 0.8),
+  labels = NULL
+)
+
+# Añadir título y subtítulo con ggdraw()
+
+title <- ggdraw() +
+  draw_label(
+    "Partial Effects on Mental Hospitalization Probability\n",
+    fontface = 'bold', size = 18
+  ) +
+  draw_label(
+    "Comparing PEA (Partial Effect at the Average) and APE (Average Partial Effect)",
+    y = 0.9, size = 14, colour = "gray40"
+  )
+
+final_plot <- plot_grid(title, combined_plot, ncol = 1, rel_heights = c(0.1, 1))
+print(final_plot)
+```
+
 
 \newpage
 
 # Discusión y Conclusiones
 ## Marco teórico planteado y resultados obtenidos
 
-El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiquiátrica depende de la severidad de la adicción, la vulnerabilidad psiquiátrica previa, las características del tratamiento y factores sociodemográficos. Nuestros resultados respaldan este marco y las hipótesis H1–H4 planteadas. El historial psiquiátrico (H1) surgió como predictor dominante: cada hospitalización mental previa aumentó significativamente la probabilidad de otra hospitalización subsecuente. Asimismo, los retratamientos (H2) mostraron un marcado efecto dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron casi 10 veces mayor odds de hospitalización que aquellos sin recaídas. El tipo de tratamiento (H3) también fue significativo: la atención residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo al controlar la mayor severidad de los casos derivados a residencias (sesgo de selección). En cuanto al tipo de sustancia (H4), el consumo de depresores del SNC tuvo el efecto más marcado, aumentando 60% la odds de hospitalización comparado con alcohol, en línea con su mayor potencial de complicaciones psiquiátricas agudas. En conjunto, estos hallazgos sustentan el modelo de riesgo acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa sustancialmente el riesgo de descompensación mental, concordando con evidencia internacional en patología dual que vincula la comorbilidad adictiva-psiquiátrica a mayores tasas de rehospitalización
+El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiquiátrica depende de la severidad de la adicción, la vulnerabilidad psiquiátrica previa, las características del tratamiento y factores sociodemográficos. Nuestros resultados respaldan este marco y la hipótesis palnteada. El historial psiquiátrico surgió como predictor dominante: cada hospitalización mental previa aumentó significativamente la probabilidad de otra hospitalización subsecuente. Asimismo, los retratamientos mostraron un marcado efecto dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron casi 10 veces mayor odds de hospitalización que aquellos sin recaídas. El tipo de tratamiento también fue significativo: la atención residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo al controlar la mayor severidad de los casos derivados a residencias (sesgo de selección). En cuanto al tipo de sustancia, el consumo de depresores del SNC tuvo el efecto más marcado, aumentando 60% la odds de hospitalización comparado con alcohol, en línea con su mayor potencial de complicaciones psiquiátricas agudas. En conjunto, estos hallazgos sustentan el modelo de riesgo acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa sustancialmente el riesgo de descompensación mental, concordando con evidencia internacional en patología dual que vincula la comorbilidad adictiva-psiquiátrica a mayores tasas de rehospitalización
 
 ## Limitaciones del estudio
 

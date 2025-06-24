@@ -275,7 +275,7 @@
 \subtitle{Trastornos por consumo de sustancias y hospitalizaciones por
 salud mental en Chile 2010-2022}
 \author{Amaru Simón Agüero Jiménez}
-\date{2025-06-21}
+\date{2025-06-24}
 \begin{document}
 \maketitle
 
@@ -346,21 +346,14 @@ hospitalización (\(p\)) surge de la interacción entre:
   civil, nivel educacional y región de residencia.
 \end{itemize}
 
-Bajo este esquema se plantean cuatro hipótesis:
+Bajo este esquema se plantean la siguiente hipótesis:
 
-\(H_1\) -- Historial psiquiátrico: cada hospitalización mental previa
-incrementa significativamente la probabilidad de una nueva
-hospitalización (\(\uparrow p\)).
-
-\(H_2\) -- Re-tratamientos: los pacientes con tres o más reingresos
-muestran un riesgo superior al de quienes no han recaído.
-
-\(H_3\) -- Tratamiento residencial: refleja mayor complejidad clínica y
-eleva la probabilidad de hospitalización frente al tratamiento
-ambulatorio.
-
-\(H_4\) -- Sustancias depresoras del SNC: por su perfil farmacológico,
-conllevan mayor riesgo de complicaciones psiquiátricas agudas.
+Pacientes con mayor carga clínica y antecedentes complejos, incluyendo
+historial de hospitalizaciones psiquiátricas previas, múltiples
+re-tratamientos, tratamiento residencial, y consumo de sustancias
+depresoras del sistema nervioso central, presentan una mayor
+probabilidad de hospitalización psiquiátrica en comparación con aquellos
+sin estas características.
 
 Este modelo conceptual apoyado por la evidencia internacional sobre
 patología dual y cursos clínicos severos guiará la exploración empírica
@@ -545,9 +538,9 @@ suavizado loess para detectar desviaciones de la linealidad. Se
 identificaron como valores atípicos aquellas observaciones con
 \(|d_i| > 3\).
 
-Por último se calculó el Factor de Inflación de Varianza Generalizado
-(GVIF) para evaluar la multicolinealidad entre predictores. Para cada
-variable o conjunto de variables dummy \(j\), el GVIF se definió como:
+Se calculó el Factor de Inflación de Varianza Generalizado (GVIF) para
+evaluar la multicolinealidad entre predictores. Para cada variable o
+conjunto de variables dummy \(j\), el GVIF se definió como:
 
 \[\text{GVIF}_j = \det(\mathbf{R}_j)\det(\mathbf{R}_{-j})^{-1}\]
 
@@ -563,6 +556,30 @@ representó los grados de libertad de la variable \(j\). Se consideraron
 problemáticos valores superiores a \(\sqrt{5} \approx 2.24\), indicando
 que la varianza del coeficiente se infló más de 5 veces debido a la
 colinealidad\textsuperscript{15}.
+
+Por último para facilitar la interpretación de los coeficientes en
+modelos de respuesta binaria, se calcularon los efectos parciales que
+representan el cambio en la probabilidad de hospitalización psiquiátrica
+ante cambios en las variables explicativas. Se estimaron dos medidas:
+
+\textbf{Efecto Parcial en el Promedio (PEA)}: Evalúa el efecto parcial
+en el individuo promedio:
+
+\[PEA_j = \frac{\partial P(Y=1|X=\bar{x})}{\partial x_j} = f(\bar{x}^T\beta)\beta_j\]
+
+donde \(f(\cdot)\) es la función de densidad logística (Logit y Firth) o
+normal estandar (Probit) y \(\bar{x}\) representa los valores promedio
+de las covariables.
+
+\textbf{Efecto Parcial Promedio (APE)}: Promedia los efectos parciales
+individuales en toda la muestra:
+
+\[APE_j = \frac{1}{n}\sum_{i=1}^{n} \frac{\partial P(Y=1|X=x_i)}{\partial x_j} = \frac{1}{n}\sum_{i=1}^{n} f(x_i^T\beta)\beta_j\]
+
+Para variables categóricas, los efectos parciales representan el cambio
+discreto en la probabilidad al pasar de la categoría de referencia a la
+categoría de interés, manteniendo las demás variables en sus valores
+observados (para APE) o promedio (para PEA).
 
 Todos los ánalisis consideraron un nivel de significancia de
 \(\alpha=0.05\) e intervalos de confianza con un nivel de confianza de
@@ -591,110 +608,145 @@ más retratamientos.
 \subsection{Modelos de Regresión
 Logística}\label{modelos-de-regresiuxf3n-loguxedstica}
 
-\subsubsection{Modelo Base y
-Progresión}\label{modelo-base-y-progresiuxf3n}
-
 La Tabla 2 presenta los resultados de los modelos logit estándar. El
-intercepto del Modelo 3 (\(\hat{\beta}_0 = -2.972\), IC 95\%: {[}-3.092,
--2.852{]}) indica que los log-odds de hospitalización psiquiátrica dado
-el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol,
-edad promedio, sin hospitalizaciones previas) son significativamente
-negativos, correspondiendo a una probabilidad basal de
-\(\frac{e^{-2.972}}{1+e^{-2.972}} = 0.049\) o 4.9\%.
+intercepto del Modelo 7 (\(\hat{\beta}_0 = -5.395\), p \textless{}
+0.001, IC 95\%: {[}-5.923, -4.866{]}) indica que los log-odds de
+hospitalización psiquiátrica dado el grupo de referencia (mujeres con
+tratamiento ambulatorio por alcohol, edad promedio, sin
+hospitalizaciones previas y sin retratamientos) son significativamente
+negativos, correspondiendo a una probabilidad basal de aproximadamente
+0.5\%. La Tabla 6 muestra las comparaciones entre modelos anidados
+mediante pruebas de razón de verosimilitud. La inclusión de
+hospitalizaciones previas (Modelo 2 vs 3) produjo la mayor reducción en
+deviance (\(\chi^2_{LR} = 2,681.75\), gl = 1, p \textless{} 0.001),
+seguida por la adición de retratamientos (Modelo 3 vs 4:
+\(\chi^2_{LR} = 3,610.47\), gl = 3, p \textless{} 0.001).
 
-La Tabla 6 muestra las comparaciones entre modelos anidados mediante
-pruebas de razón de verosimilitud. La inclusión de hospitalizaciones
-previas (Modelo 2 vs 3) produjo la mayor reducción en deviance
-(\(\chi^2_{LR} = 2,681.75\), gl = 1, p \textless{} 0.001), seguida por
-la adición de retratamientos (Modelo 3 vs 4: \(\chi^2_{LR} = 3,610.47\),
-gl = 3, p \textless{} 0.001).
-
-\subsubsection{Predictor tipo de sustancias (Modelo
-7)}\label{predictor-tipo-de-sustancias-modelo-7}
-
-En la Tabla 2 se observa que el mayor efecto positivo sobre los log-odds
-de hospitalización psiquiátrica es el consumo de depresores del SNC,
-tomando alcohol como referencia (\(\hat{\beta} = 0.463\), IC 95\%:
-{[}0.243, 0.683{]}), lo que representa un odds ratio de
-\(e^{0.463} = 1.59\), indicando 1.59 vese más de probabilidad de
-hospitalización sobre la no hospitalización, comparado con pacientes
-tratados por alcohol (El coeficiente se mantiene estable en todos los
-modelos indicandso su robustez). La cocaína mostró una asociación
-negativa no significativa (\(\hat{\beta} = -0.019\), IC 95\%: {[}-0.154,
-0.117{]}), mientras que la pasta base no mostró diferencias
-significativas (\(\hat{\beta} = 0.042\), IC 95\%: {[}-0.068, 0.153{]}).
-Estos efectos negativos si son significativos en la interacción con
-sexo. Esto indica que la probabilidad de la hospitalización psiquiátrica
-es menor en hombres que consumen pasta base o cocaína qué en mujeres
-como se evalúa más adelante.
-
-\subsubsection{Características
-Demográficas}\label{caracteruxedsticas-demogruxe1ficas}
+En la Tabla 2 y Tabla 10 se observa que el mayor efecto positivo sobre
+los log-odds de hospitalización psiquiátrica es el consumo de depresores
+del SNC, tomando alcohol como referencia (\(\hat{\beta} = 0.463\), p
+\textless{} 0.001, IC 95\%: {[}0.243, 0.683{]}. Este efecto se traduce
+en un incremento de 2.8 puntos porcentuales en la probabilidad de
+hospitalización (PEA = APE = 0.0283). El coeficiente se mantiene estable
+en todos los modelos indicando su robustez. La cocaína mostró una
+asociación negativa no significativa (\(\hat{\beta} = -0.019\), p
+\textgreater{} 0.05, IC 95\%: {[}-0.154, 0.117{]}, PEA = APE = -0.0011),
+representando una reducción no significativa de 0.1 puntos porcentuales.
+La pasta base no mostró diferencias significativas con respecto al
+alcohol (\(\hat{\beta} = 0.042\), p \textgreater{} 0.05, IC 95\%:
+{[}-0.068, 0.153{]}, PEA = APE = 0.0026), con un incremento no
+significativo de 0.3 puntos porcentuales. La marihuana tampoco mostró
+efectos significativos (\(\hat{\beta} = -0.093\), p \textgreater{} 0.05,
+IC 95\%: {[}-0.301, 0.116{]}, PEA = APE = -0.0056). Las otras sustancias
+presentaron un coeficiente positivo pero no significativo
+(\(\hat{\beta} = 0.026\), p \textgreater{} 0.05, IC 95\%: {[}-0.536,
+0.587{]}, PEA = APE = 0.0016).
 
 El sexo masculino se asoció con menores log-odds de hospitalización
-(\(\hat{\beta} = -0.105\), IC 95\%: {[}-0.203, -0.006{]}), representando
-un odds ratio de 0.90. La edad mostró una relación no lineal
-significativa: el efecto lineal fue positivo (\(\hat{\beta} = 0.089\),
-IC 95\%: {[}0.074, 0.105{]}), mientras que el término cuadrático fue
-negativo (\(\hat{\beta} = -0.001\), IC 95\%: {[}-0.001, -0.001{]}),
+(\(\hat{\beta} = -0.105\), p \textless{} 0.05, IC 95\%: {[}-0.203,
+-0.006{]}). Esto se traduce en una reducción de 0.6 puntos porcentuales
+en la probabilidad (PEA = APE = -0.0064). La edad mostró una relación no
+lineal significativa: el efecto lineal fue positivo
+(\(\hat{\beta} = 0.089\), p \textless{} 0.001, IC 95\%: {[}0.074,
+0.105{]}), indicando que cada año adicional de edad aumenta la
+probabilidad de hospitalización en 0.55 puntos porcentuales (PEA = APE =
+0.0055). El término cuadrático fue negativo (\(\hat{\beta} = -0.001\), p
+\textless{} 0.001, IC 95\%: {[}-0.001, -0.001{]}, PEA = APE = -0.0001),
 sugiriendo que el riesgo de hospitalización aumenta con la edad pero a
-una tasa decreciente (Tabla 2, Modelo 7).
-
-\subsubsection{Características del
-Tratamiento}\label{caracteruxedsticas-del-tratamiento}
+una tasa decreciente (Tabla 2, Modelo 7; Tabla 10).
 
 Existe una mayor probabilidad de hospitalización psiquiátrica posterior
-dado un plan residencial versus ambulatorio, (\(\hat{\beta} = 0.279\),
-IC 95\%: {[}0.205, 0.353{]}), con un odds ratio de 1.32. Comparando los
-modelos en la Tabla 2, este efecto se redujo considerablemente desde el
-Modelo 2 (\(\hat{\beta} = 0.763\)) al incluir hospitalizaciones previas
-y retratamientos, sugiriendo que parte del efecto inicial se debía a
-mayor severidad basal en pacientes residenciales (Sesgo por omisión
-negativo).
-
-\subsubsection{Historial de Salud
-Mental}\label{historial-de-salud-mental}
+dado un plan residencial versus ambulatorio (\(\hat{\beta} = 0.279\), p
+\textless{} 0.001, IC 95\%: {[}0.205, 0.353{]}). Esto representa un
+incremento de 1.7 puntos porcentuales en la probabilidad (PEA = APE =
+0.0170). Comparando los modelos en la Tabla 2, este efecto se redujo
+considerablemente desde el Modelo 2 (\(\hat{\beta} = 0.763\)) al incluir
+hospitalizaciones previas y retratamientos, sugiriendo que parte del
+efecto inicial se debía a mayor severidad basal en pacientes
+residenciales (sesgo por omisión negativo).
 
 El número de hospitalizaciones psiquiátricas previas fue el predictor
-más fuerte (\(\hat{\beta} = 0.478\), IC 95\%: {[}0.455, 0.500{]}). Hay
-un aumento de los odds de hospitalización posterior en
-\(e^{0.478} = 1.61\) veces dado un aumento de eventos de hospitalización
-psiquiátrica posterior. Este efecto permaneció estable a través de todos
-los modelos (4-7), indicando robustez ante la inclusión de covariables
-adicionales (Tabla 2).
+más fuerte (\(\hat{\beta} = 0.478\), p \textless{} 0.001, IC 95\%:
+{[}0.455, 0.500{]}). Hay un aumento de los odds de hospitalización
+posterior en un incremento de 2.9 puntos porcentuales por cada
+hospitalización previa (PEA = APE = 0.0292). Este efecto permaneció
+estable a través de todos los modelos (4-7), indicando robustez ante la
+inclusión de covariables adicionales (Tabla 2, Tabla 10).
 
-\subsubsection{Retratamientos}\label{retratamientos}
-
-Los retratamientos mostraron una relación dosis-respuesta con la
-hospitalización psiquiátrica. Comparado con ningún retratamiento, un
-retratamiento aumentó los log-odds en 1.048 (IC 95\%: {[}0.986,
-1.110{]}, OR = 2.85), dos retratamientos en 1.597 (IC 95\%: {[}1.514,
-1.679{]}, OR = 4.94), y tres o más en 2.277 (IC 95\%: {[}2.191,
-2.362{]}, OR = 9.75) (Tabla 2, Modelo 7).
-
-\subsubsection{Variables
-Socioeconómicas}\label{variables-socioeconuxf3micas}
+Los retratamientos mostraron una relación dosis-respuesta clara con la
+hospitalización psiquiátrica según la Tabla 2 y Tabla 10. Comparado con
+ningún retratamiento, un retratamiento aumentó los log-odds en 1.048 (p
+\textless{} 0.001, IC 95\%: {[}0.986, 1.110{]}), indicando un incremento
+de 6.4 puntos porcentuales (PEA = APE = 0.0640) la probabilidad de
+hospitalización . Dos retratamientos aumentaron los log-odds en 1.597 (p
+\textless{} 0.001, IC 95\%: {[}1.514, 1.679{]}), representando 394\% más
+probabilidad de hospitalización o 9.8 puntos porcentuales adicionales
+(PEA = APE = 0.0975). Tres o más retratamientos mostraron el efecto más
+pronunciado con un incremento en log-odds de 2.277 (p \textless{} 0.001,
+IC 95\%: {[}2.191, 2.362{]}), indicando 875\% más probabilidad de
+hospitalización o 13.9 puntos porcentuales adicionales (PEA = APE =
+0.1390).
 
 Entre las variables educacionales (referencia: otra/no especificada),
-ninguna categoría mostró efectos significativos en el Modelo 7. El
-estado civil casado/conviviente mostró menores log-odds comparado con
-divorciado/separado (\(\hat{\beta} = -0.126\), IC 95\%: {[}-0.213,
--0.039{]}, OR = 0.88). En ocupación (referencia: desempleado), trabajar
-se asoció con menores log-odds (\(\hat{\beta} = -0.381\), IC 95\%:
-{[}-0.442, -0.319{]}, OR = 0.68), mientras que jubilados/pensionados
-mostraron mayores log-odds (\(\hat{\beta} = 0.359\), IC 95\%: {[}0.179,
-0.538{]}, OR = 1.43) (Tabla 2).
+ninguna categoría mostró efectos significativos en el Modelo 7 según la
+Tabla 2. La educación primaria (\(\hat{\beta} = -0.066\), p
+\textgreater{} 0.05, IC 95\%: {[}-0.430, 0.297{]}, PEA = APE = -0.0041),
+secundaria (\(\hat{\beta} = -0.097\), p \textgreater{} 0.05, IC 95\%:
+{[}-0.459, 0.266{]}, PEA = APE = -0.0059), universitaria
+(\(\hat{\beta} = 0.049\), p \textgreater{} 0.05, IC 95\%: {[}-0.322,
+0.419{]}, PEA = APE = 0.0030) y técnica superior
+(\(\hat{\beta} = 0.016\), p \textgreater{} 0.05, IC 95\%: {[}-0.352,
+0.385{]}, PEA = APE = 0.0010) no difirieron significativamente de la
+categoría de referencia.
 
-\subsubsection{Interacciones Sexo ×
-Sustancia}\label{interacciones-sexo-sustancia}
+El estado civil casado/conviviente mostró menores log-odds comparado con
+divorciado/separado (\(\hat{\beta} = -0.126\), p \textless{} 0.01, IC
+95\%: {[}-0.213, -0.039{]}, OR = 0.88), indicando 12\% menos
+probabilidad de hospitalización, traducido en una reducción de 0.8
+puntos porcentuales (PEA = APE = -0.0077). Los solteros no mostraron
+diferencias significativas (\(\hat{\beta} = 0.016\), p \textgreater{}
+0.05, IC 95\%: {[}-0.070, 0.101{]}, PEA = APE = 0.0010), ni los viudos
+(\(\hat{\beta} = -0.113\), p \textgreater{} 0.05, IC 95\%: {[}-0.345,
+0.120{]}, PEA = APE = -0.0069) o aquellos con otro estado civil
+(\(\hat{\beta} = 0.029\), p \textgreater{} 0.05, IC 95\%: {[}-0.508,
+0.567{]}, PEA = APE = 0.0018).
+
+En ocupación (referencia: desempleado), trabajar se asoció con menores
+log-odds (\(\hat{\beta} = -0.381\), p \textless{} 0.001, IC 95\%:
+{[}-0.442, -0.319{]}, OR = 0.68), representando 32\% menos probabilidad
+de hospitalización o una reducción de 2.3 puntos porcentuales (PEA = APE
+= -0.0232). Los jubilados/pensionados mostraron mayores log-odds
+(\(\hat{\beta} = 0.359\), p \textless{} 0.001, IC 95\%: {[}0.179,
+0.538{]}, OR = 1.43), indicando 43\% más probabilidad de hospitalización
+o un incremento de 2.2 puntos porcentuales (PEA = APE = 0.0219). Otras
+ocupaciones mostraron una reducción significativa
+(\(\hat{\beta} = -0.119\), p \textless{} 0.05, IC 95\%: {[}-0.211,
+-0.027{]}, OR = 0.89, PEA = APE = -0.0073), mientras que estudiantes
+(\(\hat{\beta} = -0.129\), p \textgreater{} 0.05, IC 95\%: {[}-0.367,
+0.110{]}, PEA = APE = -0.0079) y quienes realizan tareas del hogar
+(\(\hat{\beta} = -0.092\), p \textgreater{} 0.05, IC 95\%: {[}-0.201,
+0.016{]}, PEA = APE = -0.0056) no mostraron diferencias significativas
+(Tabla 2, Tabla 10).
 
 La interacción entre sexo masculino y pasta base fue significativa y
-negativa (\(\hat{\beta} = -0.257\), IC 95\%: {[}-0.385, -0.129{]}),
-indicando que el efecto de la pasta base sobre la hospitalización
-psiquiátrica difiere entre hombres y mujeres. Para hombres tratados por
-pasta base, el efecto combinado es \(0.042 + (-0.257) = -0.215\),
-sugiriendo menor riesgo que las mujeres tratadas por la misma sustancia
-(Tabla 2, Modelo 7).
+negativa (\(\hat{\beta} = -0.257\), p \textless{} 0.001, IC 95\%:
+{[}-0.385, -0.129{]}), indicando que el efecto de la pasta base sobre la
+hospitalización psiquiátrica difiere entre hombres y mujeres. El efecto
+parcial de esta interacción es de -1.6 puntos porcentuales (PEA = APE =
+-0.0157). Para hombres tratados por pasta base, el efecto combinado es
+\(0.042 + (-0.257) = -0.215\), sugiriendo menor riesgo que las mujeres
+tratadas por la misma sustancia. La interacción con cocaína también fue
+significativa (\(\hat{\beta} = -0.165\), p \textless{} 0.05, IC 95\%:
+{[}-0.326, -0.003{]}, PEA = APE = -0.0100), indicando que los hombres
+tratados por cocaína tienen 1 punto porcentual menos de probabilidad de
+hospitalización comparado con las mujeres. Las interacciones con
+marihuana (\(\hat{\beta} = 0.182\), p \textgreater{} 0.05, IC 95\%:
+{[}-0.061, 0.425{]}, PEA = APE = 0.0111), depresores
+(\(\hat{\beta} = 0.115\), p \textgreater{} 0.05, IC 95\%: {[}-0.213,
+0.442{]}, PEA = APE = 0.0070) y otras sustancias
+(\(\hat{\beta} = 0.465\), p \textgreater{} 0.05, IC 95\%: {[}-0.221,
+1.152{]}, PEA = APE = 0.0284) no fueron significativas (Tabla 2, Modelo
+7; Tabla 10).
 
 \subsection{Modelos Probit}\label{modelos-probit}
 
@@ -1392,6 +1444,360 @@ Generalizado (GVIF)}
 
 \end{figure}%
 
+\begin{table}[H]
+\centering
+\caption{\label{tab:unnamed-chunk-16}Coeficientes Beta, Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio (APE) para los modelos 7.}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\fontsize{8}{10}\selectfont
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}>{\centering\arraybackslash}p{1.8cm}}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{3}{c}{Logit} & \multicolumn{3}{c}{Probit} & \multicolumn{3}{c}{Firth} \\
+\cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7} \cmidrule(l{3pt}r{3pt}){8-10}
+Variable & Logit β & Logit PEA & Logit APE & Probit β & Probit PEA & Probit APE & Firth β & Firth PEA & Firth APE\\
+\midrule
+Substance: Other substances & 0.0257
+(0.2865) & 0.0016
+(0.0175) & 0.0016
+(0.0000) & -0.0091
+(0.1468) & -0.0011
+(0.0179) & -0.0011
+(0.0000) & 0.0520
+(0.2836) & 0.0032
+(0.0173) & 0.0032
+(0.0000)\\
+Substance: Cocaine & -0.0187
+(0.0691) & -0.0011
+(0.0042) & -0.0011
+(0.0000) & -0.0125
+(0.0352) & -0.0015
+(0.0043) & -0.0015
+(0.0000) & -0.0182
+(0.0691) & -0.0011
+(0.0042) & -0.0011
+(0.0000)\\
+Substance: Depressants & 0.4629***
+(0.1124) & 0.0283
+(0.0069) & 0.0283
+(0.0001) & 0.2397***
+(0.0595) & 0.0292
+(0.0072) & 0.0292
+(0.0001) & 0.4649***
+(0.1122) & 0.0284
+(0.0069) & 0.0284
+(0.0001)\\
+Substance: Marijuana & -0.0925
+(0.1065) & -0.0056
+(0.0065) & -0.0056
+(0.0000) & -0.0525
+(0.0528) & -0.0064
+(0.0064) & -0.0064
+(0.0000) & -0.0898
+(0.1063) & -0.0055
+(0.0065) & -0.0055
+(0.0000)\\
+Substance: Cocaine paste & 0.0425
+(0.0565) & 0.0026
+(0.0035) & 0.0026
+(0.0000) & 0.0278
+(0.0291) & 0.0034
+(0.0035) & 0.0034
+(0.0000) & 0.0423
+(0.0565) & 0.0026
+(0.0035) & 0.0026
+(0.0000)\\
+\addlinespace
+Age & 0.0893***
+(0.0078) & 0.0055
+(0.0005) & 0.0055
+(0.0000) & 0.0405***
+(0.0037) & 0.0049
+(0.0005) & 0.0049
+(0.0000) & 0.0891***
+(0.0078) & 0.0055
+(0.0005) & 0.0055
+(0.0000)\\
+Age² & -0.0009***
+(0.0001) & -0.0001
+(0.0000) & -0.0001
+(0.0000) & -0.0004***
+(0.0000) & -0.0000
+(0.0000) & -0.0000
+(0.0000) & -0.0009***
+(0.0001) & -0.0001
+(0.0000) & -0.0001
+(0.0000)\\
+Sex: Male & -0.1045*
+(0.0501) & -0.0064
+(0.0031) & -0.0064
+(0.0000) & -0.0583*
+(0.0254) & -0.0071
+(0.0031) & -0.0071
+(0.0000) & -0.1049*
+(0.0501) & -0.0064
+(0.0031) & -0.0064
+(0.0000)\\
+Plan: Residential & 0.2791***
+(0.0378) & 0.0170
+(0.0023) & 0.0170
+(0.0000) & 0.1548***
+(0.0198) & 0.0188
+(0.0024) & 0.0188
+(0.0000) & 0.2790***
+(0.0378) & 0.0171
+(0.0023) & 0.0171
+(0.0000)\\
+N° previous mental hosp. & 0.4776***
+(0.0114) & 0.0292
+(0.0007) & 0.0292
+(0.0001) & 0.2416***
+(0.0062) & 0.0294
+(0.0008) & 0.0294
+(0.0001) & 0.4769***
+(0.0114) & 0.0292
+(0.0007) & 0.0292
+(0.0001)\\
+\addlinespace
+Retreatments: 1 & 1.0479***
+(0.0314) & 0.0640
+(0.0019) & 0.0640
+(0.0002) & 0.5120***
+(0.0158) & 0.0623
+(0.0019) & 0.0623
+(0.0001) & 1.0473***
+(0.0314) & 0.0641
+(0.0019) & 0.0641
+(0.0002)\\
+Retreatments: 2 & 1.5968***
+(0.0421) & 0.0975
+(0.0026) & 0.0975
+(0.0003) & 0.8077***
+(0.0227) & 0.0983
+(0.0028) & 0.0983
+(0.0002) & 1.5958***
+(0.0421) & 0.0976
+(0.0026) & 0.0976
+(0.0003)\\
+Retreatments: 3+ & 2.2766***
+(0.0437) & 0.1390
+(0.0027) & 0.1390
+(0.0004) & 1.2007***
+(0.0247) & 0.1461
+(0.0030) & 0.1461
+(0.0003) & 2.2747***
+(0.0437) & 0.1391
+(0.0027) & 0.1391
+(0.0004)\\
+Education: Primary & -0.0665
+(0.1856) & -0.0041
+(0.0113) & -0.0041
+(0.0000) & -0.0433
+(0.0930) & -0.0053
+(0.0113) & -0.0053
+(0.0000) & -0.0779
+(0.1846) & -0.0048
+(0.0113) & -0.0048
+(0.0000)\\
+Education: Secondary & -0.0968
+(0.1849) & -0.0059
+(0.0113) & -0.0059
+(0.0000) & -0.0604
+(0.0926) & -0.0073
+(0.0113) & -0.0073
+(0.0000) & -0.1083
+(0.1839) & -0.0066
+(0.0113) & -0.0066
+(0.0000)\\
+\addlinespace
+Education: University & 0.0488
+(0.1890) & 0.0030
+(0.0115) & 0.0030
+(0.0000) & 0.0157
+(0.0948) & 0.0019
+(0.0115) & 0.0019
+(0.0000) & 0.0378
+(0.1880) & 0.0023
+(0.0115) & 0.0023
+(0.0000)\\
+Education: Technical & 0.0163
+(0.1880) & 0.0010
+(0.0115) & 0.0010
+(0.0000) & -0.0025
+(0.0942) & -0.0003
+(0.0115) & -0.0003
+(0.0000) & 0.0052
+(0.1870) & 0.0003
+(0.0114) & 0.0003
+(0.0000)\\
+Marital: Married/Partnered & -0.1263**
+(0.0444) & -0.0077
+(0.0027) & -0.0077
+(0.0000) & -0.0678**
+(0.0224) & -0.0082
+(0.0027) & -0.0082
+(0.0000) & -0.1264**
+(0.0444) & -0.0077
+(0.0027) & -0.0077
+(0.0000)\\
+Marital: Other/No answer & 0.0293
+(0.2742) & 0.0018
+(0.0167) & 0.0018
+(0.0000) & -0.0222
+(0.1400) & -0.0027
+(0.0170) & -0.0027
+(0.0000) & 0.0536
+(0.2715) & 0.0033
+(0.0166) & 0.0033
+(0.0000)\\
+Marital: Single & 0.0157
+(0.0436) & 0.0010
+(0.0027) & 0.0010
+(0.0000) & 0.0003
+(0.0221) & 0.0000
+(0.0027) & 0.0000
+(0.0000) & 0.0154
+(0.0436) & 0.0009
+(0.0027) & 0.0009
+(0.0000)\\
+\addlinespace
+Marital: Widowed & -0.1126
+(0.1185) & -0.0069
+(0.0072) & -0.0069
+(0.0000) & -0.0654
+(0.0601) & -0.0080
+(0.0073) & -0.0080
+(0.0000) & -0.1089
+(0.1183) & -0.0067
+(0.0072) & -0.0067
+(0.0000)\\
+Occupation: Studying & -0.1288
+(0.1217) & -0.0079
+(0.0074) & -0.0079
+(0.0000) & -0.0742
+(0.0595) & -0.0090
+(0.0072) & -0.0090
+(0.0000) & -0.1241
+(0.1214) & -0.0076
+(0.0074) & -0.0076
+(0.0000)\\
+Occupation: Other & -0.1189*
+(0.0469) & -0.0073
+(0.0029) & -0.0073
+(0.0000) & -0.0643**
+(0.0238) & -0.0078
+(0.0029) & -0.0078
+(0.0000) & -0.1184*
+(0.0468) & -0.0072
+(0.0029) & -0.0072
+(0.0000)\\
+Occupation: Retired/Pensioned & 0.3587***
+(0.0916) & 0.0219
+(0.0056) & 0.0219
+(0.0001) & 0.1702***
+(0.0482) & 0.0207
+(0.0059) & 0.0207
+(0.0000) & 0.3600***
+(0.0915) & 0.0220
+(0.0056) & 0.0220
+(0.0001)\\
+Occupation: Household tasks & -0.0922
+(0.0553) & -0.0056
+(0.0034) & -0.0056
+(0.0000) & -0.0465
+(0.0286) & -0.0057
+(0.0035) & -0.0057
+(0.0000) & -0.0918
+(0.0552) & -0.0056
+(0.0034) & -0.0056
+(0.0000)\\
+\addlinespace
+Occupation: Working & -0.3805***
+(0.0315) & -0.0232
+(0.0019) & -0.0232
+(0.0001) & -0.1860***
+(0.0156) & -0.0226
+(0.0019) & -0.0226
+(0.0000) & -0.3803***
+(0.0314) & -0.0233
+(0.0019) & -0.0233
+(0.0001)\\
+Male × Other substances & 0.4652
+(0.3503) & 0.0284
+(0.0214) & 0.0284
+(0.0001) & 0.2570
+(0.1813) & 0.0313
+(0.0221) & 0.0313
+(0.0001) & 0.4498
+(0.3475) & 0.0275
+(0.0213) & 0.0275
+(0.0001)\\
+Male × Cocaine & -0.1646*
+(0.0825) & -0.0100
+(0.0050) & -0.0100
+(0.0000) & -0.0784
+(0.0413) & -0.0095
+(0.0050) & -0.0095
+(0.0000) & -0.1647*
+(0.0824) & -0.0101
+(0.0050) & -0.0101
+(0.0000)\\
+Male × Depressants & 0.1147
+(0.1669) & 0.0070
+(0.0102) & 0.0070
+(0.0000) & 0.0611
+(0.0883) & 0.0074
+(0.0107) & 0.0074
+(0.0000) & 0.1163
+(0.1666) & 0.0071
+(0.0102) & 0.0071
+(0.0000)\\
+Male × Marijuana & 0.1821
+(0.1240) & 0.0111
+(0.0076) & 0.0111
+(0.0000) & 0.0955
+(0.0613) & 0.0116
+(0.0075) & 0.0116
+(0.0000) & 0.1803
+(0.1238) & 0.0110
+(0.0076) & 0.0110
+(0.0000)\\
+\addlinespace
+Male × Cocaine paste & -0.2568***
+(0.0652) & -0.0157
+(0.0040) & -0.0157
+(0.0000) & -0.1255***
+(0.0333) & -0.0153
+(0.0040) & -0.0153
+(0.0000) & -0.2565***
+(0.0652) & -0.0157
+(0.0040) & -0.0157
+(0.0000)\\
+\bottomrule
+\multicolumn{10}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{10}{l}{\rule{0pt}{1em}*** p < 0.001, ** p < 0.01, * p < 0.05 (significance shown only for β coefficients)}\\
+\multicolumn{10}{l}{\rule{0pt}{1em}Standard errors in parentheses}\\
+\multicolumn{10}{l}{\rule{0pt}{1em}β = Beta coefficient; PEA = Partial Effect at the Average; APE = Average Partial Effect}\\
+\multicolumn{10}{l}{\rule{0pt}{1em}Regional variables excluded from table}\\
+\end{tabular}}
+\end{table}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{Trabajo_Amaru_Aguero_files/figure-pdf/unnamed-chunk-17-1.pdf}}
+
+}
+
+\caption{Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio
+(APE) para los modelos 7 de los tres métodos de estimación: Logit,
+Probit y Firth. La figura muestra los efectos de tres variables:
+Sustancia principal de consumo comparada con alcohol, Número de
+retratamientos comparado con ningún retratamiento y Hospitalizaciones
+psiquiátricas previas por unidad adicional. Los valores indican el
+cambio en la probabilidad de hospitalización psiquiátrica. La línea roja
+vertical en cero representa ausencia de efecto.}
+
+\end{figure}%
+
 \newpage
 
 \section{Discusión y Conclusiones}\label{discusiuxf3n-y-conclusiones}
@@ -1402,26 +1808,25 @@ obtenidos}\label{marco-teuxf3rico-planteado-y-resultados-obtenidos}
 El modelo teórico asumió un riesgo acumulativo en que la hospitalización
 psiquiátrica depende de la severidad de la adicción, la vulnerabilidad
 psiquiátrica previa, las características del tratamiento y factores
-sociodemográficos. Nuestros resultados respaldan este marco y las
-hipótesis H1--H4 planteadas. El historial psiquiátrico (H1) surgió como
-predictor dominante: cada hospitalización mental previa aumentó
-significativamente la probabilidad de otra hospitalización subsecuente.
-Asimismo, los retratamientos (H2) mostraron un marcado efecto
-dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron
-casi 10 veces mayor odds de hospitalización que aquellos sin recaídas.
-El tipo de tratamiento (H3) también fue significativo: la atención
-residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque
-parte de esta brecha se redujo al controlar la mayor severidad de los
-casos derivados a residencias (sesgo de selección). En cuanto al tipo de
-sustancia (H4), el consumo de depresores del SNC tuvo el efecto más
-marcado, aumentando 60\% la odds de hospitalización comparado con
-alcohol, en línea con su mayor potencial de complicaciones psiquiátricas
-agudas. En conjunto, estos hallazgos sustentan el modelo de riesgo
-acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta
-severidad adictiva incrementa sustancialmente el riesgo de
-descompensación mental, concordando con evidencia internacional en
-patología dual que vincula la comorbilidad adictiva-psiquiátrica a
-mayores tasas de rehospitalización
+sociodemográficos. Nuestros resultados respaldan este marco y la
+hipótesis palnteada. El historial psiquiátrico surgió como predictor
+dominante: cada hospitalización mental previa aumentó significativamente
+la probabilidad de otra hospitalización subsecuente. Asimismo, los
+retratamientos mostraron un marcado efecto dosis-respuesta: pacientes
+con ≥3 reingresos a tratamiento presentaron casi 10 veces mayor odds de
+hospitalización que aquellos sin recaídas. El tipo de tratamiento
+también fue significativo: la atención residencial se asoció con mayor
+riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo
+al controlar la mayor severidad de los casos derivados a residencias
+(sesgo de selección). En cuanto al tipo de sustancia, el consumo de
+depresores del SNC tuvo el efecto más marcado, aumentando 60\% la odds
+de hospitalización comparado con alcohol, en línea con su mayor
+potencial de complicaciones psiquiátricas agudas. En conjunto, estos
+hallazgos sustentan el modelo de riesgo acumulativo: la combinación de
+vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa
+sustancialmente el riesgo de descompensación mental, concordando con
+evidencia internacional en patología dual que vincula la comorbilidad
+adictiva-psiquiátrica a mayores tasas de rehospitalización
 
 \subsection{Limitaciones del estudio}\label{limitaciones-del-estudio}
 
@@ -1457,7 +1862,7 @@ diagnósticos, está disponible en el siguiente
 GitHub}. De igual manera se puede acceder con el siguiente código QR.
 
 \begin{center}
-\pandocbounded{\includegraphics[keepaspectratio]{Trabajo_Amaru_Aguero_files/figure-pdf/unnamed-chunk-16-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Trabajo_Amaru_Aguero_files/figure-pdf/unnamed-chunk-18-1.pdf}}
 \end{center}
 
 El informe .pdf se encuentra en
@@ -1465,7 +1870,7 @@ El informe .pdf se encuentra en
 dirección}. De igual manera se puede acceder con el siguiente código QR.
 
 \begin{center}
-\pandocbounded{\includegraphics[keepaspectratio]{Trabajo_Amaru_Aguero_files/figure-pdf/unnamed-chunk-17-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Trabajo_Amaru_Aguero_files/figure-pdf/unnamed-chunk-19-1.pdf}}
 \end{center}
 
 \newpage
