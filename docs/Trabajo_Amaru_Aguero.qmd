@@ -2694,8 +2694,8 @@ kable(table_standard_ci,
   kable_styling(latex_options = c("HOLD_position", "scale_down"),
                 font_size = 6.5,
                 full_width = FALSE) %>%
-  column_spec(1, width = "3.5cm") %>%
-  column_spec(2:10, width = "1.8cm") %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2:10, width = "2cm") %>%
   add_header_above(c(" " = 1, "Logit" = 3, "Probit" = 3, "Firth" = 3)) %>%
   footnote(general = c("*** p < 0.001, ** p < 0.01, * p < 0.05 (significance for β coefficients)",
                       "† indicates 95% CI does not contain zero (for marginal effects)",
@@ -4245,7 +4245,7 @@ El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiq
 
 ## Limitaciones del estudio
 
-Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial podría reflejar en parte la mayor gravedad clínica de sus pacientes. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de hospitalización.
+Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial podría reflejar en parte la mayor gravedad clínica de sus pacientes. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Cuarto, estos factores no observados genera posibles sesgos de variables omitidas. Entre estas variables están la severidad de la adicción, comorbilidades psiquiátricas específicas, apoyo social y familiar, adherencia al tratamiento, calidad del tratamiento, entre otras. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de hospitalización.
 
 \newpage
 
