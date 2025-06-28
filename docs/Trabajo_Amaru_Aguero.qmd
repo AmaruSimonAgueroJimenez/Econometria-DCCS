@@ -75,6 +75,7 @@ execute:
 
 
 ```{r}
+  
 ################################################################################
 # Function to install and load packages with error handling
 ################################################################################
@@ -618,41 +619,45 @@ if (file.exists(ruta_base)) {
 # Introdución  
 ## Relevancia del problema
 
-Los trastornos por consumo de sustancias (TCS) constituyen una de las principales causas de carga de enfermedad y mortalidad evitable a escala global. En 2016 se calculó que más de 100 millones de personas sufrían trastorno por consumo de alcohol y decenas de millones presentaban dependencia de opioides, cannabis o cocaína [@Volkow2023]. La frecuente comorbilidad psiquiátrica, depresión, trastornos de ansiedad, psicosis o trastornos de personalidad multiplica la severidad clínica y los costes sociosanitarios [@Connery2020]. Estudios hospitalarios europeos y norteamericanos muestran que alrededor del 20 % de las admisiones psiquiátricas corresponden a pacientes con diagnóstico dual, fenómeno que favorece re-ingresos y estancias prolongadas [@GomezSanchezLafuente2022].
+Los trastornos por uso de sustancias (TUS) constituyen una de las principales causas de carga de enfermedad y mortalidad evitable a escala global. En 2016 se calculó que más de 100 millones de personas sufrían trastorno por consumo de alcohol y decenas de millones presentaban dependencia de opioides, cannabis o cocaína [@Volkow2023]. La frecuente comorbilidad psiquiátrica, depresión, trastornos de ansiedad, psicosis o trastornos de personalidad multiplica la severidad clínica y los costes sociosanitarios [@Connery2020]. Estudios hospitalarios europeos y norteamericanos muestran que alrededor del 20 % de las admisiones psiquiátricas corresponden a pacientes de sexo femenino con diagnóstico dual, fenómeno que favorece re-ingresos y estancias prolongadas[@GomezSanchezLafuente2022].
 
-En Chile, las encuestas nacionales sitúan la prevalencia de abuso o dependencia de sustancias entre el 11 % y el 20 %, una de las más elevadas de Latinoamérica.. Los registros hospitalarios concuerdan con las cifras internacionales: alrededor de una quinta parte de los internados en psiquiatría presenta un TCS como diagnóstico primario o secundario. Esta convergencia evidencia que la hospitalización psiquiátrica es un desenlace clínico crítico en la trayectoria de las adicciones, razón por la cual identificar sus factores determinantes resulta esencial para planificar intervenciones preventivas, asignar recursos y reducir la carga asistencial [@Connery2020; @Saxena2011; @GomezSanchezLafuente2016; @Rojas2002].
+En Chile, las encuestas nacionales sitúan la prevalencia de abuso o dependencia de sustancias entre el 11 % y el 20 %, una de las más elevadas de Latinoamérica. Los registros hospitalarios concuerdan con las cifras internacionales: alrededor de una quinta parte de los internados en psiquiatría presenta un TCS como diagnóstico primario o secundario. Esta convergencia evidencia que la hospitalización psiquiátrica es un desenlace clínico crítico en la trayectoria de las adicciones, razón por la cual identificar sus factores determinantes resulta esencial para planificar intervenciones preventivas, asignar recursos y reducir la carga asistencial [@Connery2020; @Saxena2011; @GomezSanchezLafuente2016; @Rojas2002].
 
 ## Pregunta de investigación
 
-¿Qué factores individuales y clínicos se asocian a la hospitalización psiquiátrica dentro del tiempo posterior al alta de un tratamiento por consumo de sustancias, en adultos atendidos en la red chilena entre 2010-2022?
+¿Qué drogas se asocian a la hospitalización psiquiátrica dentro del tiempo posterior al alta de un tratamiento por consumo de sustancias, en adultos con TUS atendidos en la red chilena entre 2010-2022?
 
 ## Modelo teórico o mecanismo que explicaría la relación entre las variables que se van a analizar e hipótesis
 
-Se parte de un marco de riesgo acumulativo en el que la probabilidad de hospitalización ($p$) surge de la interacción entre:
+Se parte de un marco de riesgo acumulativo en el que la probabilidad de hospitalización ($p$) surge de la asociación entre:
 
-- Severidad adictiva: tipo de sustancia principal y número de re-tratamientos, como indicador de recaídas y cronicidad.
+- Severidad adictiva:  tipo de sustancia como variable independiente principal y número de re-tratamientos, como variable confusora e indicadora de recaídas y cronicidad.
 
-- Vulnerabilidad psiquiátrica previa: presencia y número de hospitalizaciones mentales antes del tratamiento por drogas.
+- Vulnerabilidad psiquiátrica previa: número de hospitalizaciones mentales antes del tratamiento por drogas, como variable confusora.
 
-- Características del tratamiento: modalidad (ambulatoria vs residencial) y duración total del episodio.
+- Características del tratamiento: modalidad (ambulatoria vs residencial).
 
-- Variables sociodemográficos: edad (lineal y cuadrática), sexo, estado civil, nivel educacional y región de residencia.
+- Variables sociodemográficos: la principal es el sexo, dado su interaction con el tipo de sustancia, edad (lineal y cuadrática), , estado civil, nivel educacional y región de residencia.
 
-Bajo este esquema se plantean la siguiente hipótesis:
+Bajo este esquema se plantea la siguiente hipótesis:
 
-Pacientes con mayor carga clínica y antecedentes complejos, incluyendo historial de hospitalizaciones psiquiátricas previas, múltiples re-tratamientos, tratamiento residencial, y consumo de sustancias depresoras del sistema nervioso central, presentan una mayor probabilidad de hospitalización psiquiátrica en comparación con aquellos sin estas características.
+Pacientes con historial de TUS presentan una mayor probabilidad de hospitalización psiquiátrica caundo su sustancia principal de consumo es de depresores del sistema nervioso central.
 
-Este modelo conceptual apoyado por la evidencia internacional sobre patología dual y cursos clínicos severos  guiará la exploración empírica de los datos chilenos [@GomezSanchezLafuente2016]. Evaluar dichas hipótesis permitirá distinguir los pacientes de alto riesgo y orientar estrategias integradas que reduzcan la probabilidad de hospitalización, mejoren la continuidad asistencial y optimicen el uso de recursos en salud mental tanto en Chile como en otros contextos comparables.
+Este modelo conceptual apoyado por la evidencia internacional sobre patología dual y cursos clínicos severos  guiará la exploración empírica de los datos chilenos [@GomezSanchezLafuente2016]. Evaluar dichas hipótesis permitirá distinguir los pacientes de alto riesgo segun y orientar estrategias integradas que reduzcan la probabilidad de hospitalización, mejoren la continuidad asistencial y optimicen el uso de recursos en salud mental tanto en Chile como en otros contextos comparables.
 
 # Metodología 
 ## Datos
 
-Este es un estudio de cohorte retrospectiva de pacientes adultos en tratamiento por consumo de sustancias, con datos otorgados por el Servicio Nacional para la Prevención y Rehabilitación del Consumo de Drogas y Alcohol de Chile (SENDA) en convenio con el núcleo mileniso de ánalsis de políticas públicas de drogas (nDP). La cohorte se construyó vinculando los registros administrativos de los pacientes (n = 156.771 episodios de tratamiento entre 97,698 personas en las 16 regiones del país) con los datos de egresos hospitalarios a nivel nacional entre 2010 y 2022 (20.652.003 hospitalizaciones).
+Este es un estudio de cohorte retrospectiva de pacientes adultos en tratamiento por consumo de sustancias, con datos otorgados por el Servicio Nacional para la Prevención y Rehabilitación del Consumo de Drogas y Alcohol de Chile (SENDA) en convenio con el núcleo milenio de ánalisis de políticas públicas de drogas (nDP). La cohorte se construyó vinculando los registros administrativos de los pacientes (n = 156.771 episodios de tratamiento entre 97,698 personas en las 16 regiones del país) con los datos de egresos hospitalarios a nivel nacional entre 2010 y 2022 (20.652.003 hospitalizaciones).
 El registro de pacientes en tratamiento se realizó en una plataforma electrónica denominada SISTRAT, que contenía información sociodemográfica, datos sobre el estado de salud y patrones de consumo de sustancias, entre otras variables, además de información sobre el propio tratamiento (p. ej., fecha de ingreso, egreso, tipo de tratamiento). Los conjuntos de datos de egresos hospitalarios son gestionados por el Departamento de Estadísticas e Información de Salud del Ministerio de Salud e incluyen información sobre todas las hospitalizaciones en centros públicos y privados, así como la causa principal y secundaria de ingreso, la fecha de ingreso y el alta, entre otras variables. Las bases de datos se vincularon de forma determinista mediante un hash de 64 caracteres resultante del cifrado (con un algoritmo SHA-256) del número de identificación único de cada persona.
 
 ## Variables de interés 
 
-Se incluyeron como principal **predictores** múltiples variables relacionadas al **consumo y tratamiento rehabilitador de drogas**. Se consideró la *sustancia principal* por la cual se trató al paciente (alcohol, pasta base de cocaína, cocaína, marihuana, depresores del SNC u otras sustancias; tomando Alcohol como categoría de referencia), el *tipo de plan de tratamiento* (ambulatorio vs. residencial), la duración del tratamiento, el **número de reingresos** a tratamiento (retratamientos, categorizados en 0, 1, 2, 3 o más reingresos) y el **motivo de egreso** del programa (alta terapéutica, derivación, abandono temprano/tardío, etc.). Entre las variables **sociodemográficas** consideradas están la edad (en años) al inicio del tratamiento incorporada también en forma cuadrática ($\text{edad}^2$) para capturar posibles efectos no lineales, el sexo del paciente, el **estado civil** (por ejemplo, soltero, casado/conviviente, separado, viudo), el **nivel educacional** alcanzado (educación primaria, secundaria, técnica, universitaria) y la situación de **empleo** (categorías como trabajando, desempleado, estudiando, tareas del hogar, jubilado, etc.). Se justó con otras variables del **historial clínico** de salud mental del paciente a través del número de hospitalizaciones psiquiátricas previas al tratamiento de drogas. Todas las variables categóricas se introdujeron mediante codificación *dummy*, definiendo categorías de referencia apropiadas (p. ej., sexo femenino, tratamiento ambulatorio, etc.)
+Se incluyeron como **predictores** de la probabilidad de hospitalización ($p$), múltiples variables relacionadas al **consumo y tratamiento rehabilitador de drogas**. Se consideró como la principal variable independiente la *sustancia principal* por la cual se trató al paciente (alcohol, pasta base de cocaína, cocaína, marihuana, depresores del SNC u otras sustancias; tomando Alcohol como categoría de referencia). Luego como variables confusoras (que producen sesgo por omisión), el **número de reingresos** a tratamiento (retratamientos, categorizados en 0, 1, 2, 3 o más reingresos), el *tipo de plan de tratamiento* (ambulatorio vs. residencial) y el **historial clínico** de salud mental del paciente a través del número de hospitalizaciones psiquiátricas previas al tratamiento de drogas (dado la posible autoselección).
+
+Ademas se ajustaron por variables **sociodemográficas** consideradas están la edad (en años) al inicio del tratamiento incorporada también en forma cuadrática ($\text{edad}^2$) para capturar posibles efectos no lineales, el sexo del paciente y su interación por el tipo de sustancia, el **estado civil** (por ejemplo, soltero, casado/conviviente, separado, viudo), el **nivel educacional** alcanzado (educación primaria, secundaria, técnica, universitaria) y la situación de **empleo** (categorías como trabajando, desempleado, estudiando, tareas del hogar, jubilado, etc.). 
+
+Todas las variables categóricas se introdujeron mediante codificación *dummy*, definiendo categorías de referencia apropiadas (p. ej., sexo femenino, tratamiento ambulatorio, etc.)
 
 ## Modelos
 
@@ -672,7 +677,7 @@ donde $\mathbf{I}(\boldsymbol{\beta})$ fue la matriz de información de Fisher. 
 
 En los tres metodos, $p_i = P(Y=1 \mid X)$ es la probabilidad de hospitalización psiquiátrica dada la presencia del vector de predictores $\mathbf{x}_i^T$.  En ambos casos, $Y$ es una variable dicotómica indicadora de si el paciente fue hospitalizado en un recinto psiquiátrico tras completar el tratamiento de rehabilitación, y el vector $\boldsymbol{\beta}$ representan los coeficientes de cada variable explicativa $\mathbf{x}_i^T$ [@cox1958regression; @bliss1934method; @firth1993bias].
 
-El **desarrollo de los modelos** siguió un enfoque escalonado. Se comenzó estimando un modelo base con un conjunto inicial de covariables fundamentales, al cual se le fueron incorporando progresivamente bloques adicionales de variables para evaluar su contribución incremental al ajuste. La significancia estadística de cada bloque añadido se evaluó mediante pruebas de **razón de verosimilitud** (LR) para modelos anidados [@neyman1933problem]. Para la comparación de modelos se calculó el **criterio de información de Akaike** (AIC) de cada especificación, considerando preferible aquel modelo con menor AIC (indicativo de mejor equilibrio entre buen ajuste y parsimonia). Asimismo, se estimó el **área bajo la curva ROC** (AUC) para cada modelo, como medida de desempeño predictivo (discriminación entre pacientes con y sin hospitalización) [@akaike1973information]. Con objeto de caracterizar integralmente el rendimiento predictivo, se estimaron además las siguientes métricas, definidas a partir de la matriz de confusión (verdaderos positivos TP, falsos positivos FP, verdaderos negativos TN y falsos negativos FN):
+El **desarrollo de los modelos** siguió un enfoque escalonado. Se comenzó estimando un modelo base con un conjunto inicial entre las que estaba sustancia principal sexo y edad, al cual se le fueron incorporando progresivamente bloques adicionales de variables para evaluar su contribución incremental al ajuste. La significancia estadística de cada bloque añadido se evaluó mediante pruebas de **razón de verosimilitud** (LR) para modelos anidados [@neyman1933problem]. Para la comparación de modelos se calculó el **criterio de información de Akaike** (AIC) de cada especificación, considerando preferible aquel modelo con menor AIC (indicativo de mejor equilibrio entre buen ajuste y parsimonia). Asimismo, se estimó el **área bajo la curva ROC** (AUC) para cada modelo, como medida de desempeño predictivo (discriminación entre pacientes con y sin hospitalización) [@akaike1973information]. Con objeto de caracterizar integralmente el rendimiento predictivo, se estimaron además las siguientes métricas, definidas a partir de la matriz de confusión (verdaderos positivos TP, falsos positivos FP, verdaderos negativos TN y falsos negativos FN):
 
 * Sensibilidad:  
 
@@ -752,9 +757,15 @@ Todos los ánalisis consideraron un nivel de significancia de $\alpha=0.05$ e in
 
 La Tabla 1 presenta las características de la muestra analítica final de 97,618 pacientes adultos en tratamiento por consumo de sustancias entre 2010 y 2022. De estos, 7,456 (7.6%) experimentaron al menos una hospitalización psiquiátrica posterior al tratamiento. La edad promedio fue de 33 años (DE = 10), con predominio masculino (74%). Las sustancias principales de tratamiento fueron pasta base de cocaína (36.3%), alcohol (34.6%) y cocaína (19.7%). La mayoría recibió tratamiento ambulatorio (89.1%) frente al residencial (10.9%). Un 11% presentó hospitalizaciones psiquiátricas previas al tratamiento, con una media de 0.2 hospitalizaciones previas (DE = 0.9). El 74.5% no tuvo retratamientos, mientras que 16.7% tuvo uno, 5.3% dos, y 3.6% tres o más retratamientos.
 
-## Modelos de Regresión Logística
+### Modelos de Regresión Logística
 
-La Tabla 2 presenta los resultados de los modelos logit estándar. El intercepto del Modelo 7 ($\hat{\beta}_0 = -5.395$, p < 0.001, IC 95%: [-5.923, -4.866]) indica que los log-odds de hospitalización psiquiátrica dado el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol, edad promedio, sin hospitalizaciones previas y sin retratamientos) son significativamente negativos, correspondiendo a una probabilidad basal de aproximadamente 0.5%. La Tabla 6 muestra las comparaciones entre modelos anidados mediante pruebas de razón de verosimilitud. La inclusión de hospitalizaciones previas (Modelo 2 vs 3) produjo la mayor reducción en deviance ($\chi^2_{LR} = 2,681.75$, gl = 1, p < 0.001), seguida por la adición de retratamientos (Modelo 3 vs 4: $\chi^2_{LR} = 3,610.47$, gl = 3, p < 0.001).
+### Análisis de Sesgos de Omisión en Sustancia Principal en Modelos de Regresión Logística Anidados
+
+La Tabla 2 presenta los resultados de los  7 modelos logit estándar. En la tabla 10 Los tests de razón de verosimilitud confirman que cada adición de variables mejora significativamente el ajuste del modelo (todos los p-valores < 0.001), validando la importancia de incluir estas covariables para evitar sesgos de omisión. La pasta base de cocaina experimenta el sesgo de omisión positiva más dramático: su coeficiente se reduce sustancialmente de $\hat{\beta}=0.150$ (Modelo 1) a $\hat{\beta}=0.007$ (Modelo 2) al incluir el plan residencial, manteniéndose cerca de cero hasta el Modelo 6 ($\hat{\beta}=-0.105$) y finalmente estabilizándose en $\hat{\beta}=0.042$ (Modelo 7), sugiriendo que las variables omitidas inflaban artificialmente su efecto inicial. Otras sustancias también sufre sesgo de omisión positiva progresivo, disminuyendo consistentemente de $\hat{\beta}=0.454$ a $\hat{\beta}=0.026$ en el modelo completo, perdiendo significancia estadística. Depresores del SNC muestra un patrón de sesgo de omisión negativa moderado, con su coeficiente reduciéndose gradualmente de $\hat{\beta}=0.569$ a $\hat{\beta}=0.463$, pero manteniendo significancia. La cocainana presenta sesgo de omisión positiva, disminuyendo de $\hat{\beta}=-0.136$ a $\hat{\beta}=-0.154$, mientras que la marihuana muestra estabilidad relativa. El **plan residencial** mantiene un efecto positivo robusto ($\hat{\beta}=0.763$ a $\hat{\beta}=0.279$), y las **hospitalizaciones previas** emergen como un predictor significativo ($\hat{\beta}=0.478$), confirmando que la especificación completa del modelo es crucial para obtener estimaciones insesgadas de los efectos de las sustancias en el outcome estudiado.
+
+### Análisis de coeficientes en el modelo 7
+
+En la tabla 2 se observa el intercepto del Modelo 7 ($\hat{\beta}_0 = -5.395$, p < 0.001, IC 95%: [-5.923, -4.866]) indica que los log-odds de hospitalización psiquiátrica dado el grupo de referencia (mujeres con tratamiento ambulatorio por alcohol, edad promedio, sin hospitalizaciones previas y sin retratamientos) son significativamente negativos, correspondiendo a una probabilidad basal de aproximadamente 0.5%.
 
 En la Tabla 2, Tabla 10 y Figura 5 se observa que el mayor efecto positivo sobre los log-odds de hospitalización psiquiátrica es el consumo de depresores del SNC, tomando alcohol como referencia ($\hat{\beta} = 0.463$, p < 0.001, IC 95%: [0.243, 0.683]). Este efecto se traduce en un incremento de 2.3 puntos porcentuales en la probabilidad de hospitalización cuando se evalúa en el promedio de las covariables (PEA = 0.0234), mientras que el efecto promedio en toda la muestra es de 2.8 puntos porcentuales (APE = 0.0283). El coeficiente se mantiene estable en todos los modelos indicando su robustez. La cocaína mostró una asociación negativa no significativa ($\hat{\beta} = -0.019$, p > 0.05, IC 95%: [-0.154, 0.117]), representando una reducción no significativa de 0.1 puntos porcentuales (PEA = -0.0009, APE = -0.0011). La pasta base no mostró diferencias significativas con respecto al alcohol ($\hat{\beta} = 0.042$, p > 0.05, IC 95%: [-0.068, 0.153]), con un incremento no significativo de 0.2 a 0.3 puntos porcentuales (PEA = 0.0021, APE = 0.0026). La marihuana tampoco mostró efectos significativos ($\hat{\beta} = -0.093$, p > 0.05, IC 95%: [-0.301, 0.116], PEA = -0.0047, APE = -0.0056). Las otras sustancias presentaron un coeficiente positivo pero no significativo ($\hat{\beta} = 0.026$, p > 0.05, IC 95%: [-0.536, 0.587], PEA = 0.0013, APE = 0.0016).
 
@@ -3101,46 +3112,33 @@ kable(table_with_bootstrap,
 ```
 
 ```{r}
-#| fig-height: 14
-#| fig-width: 12
-#| fig-cap: "Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio (APE) para los modelos 7 de los tres métodos de estimación: Logit, Probit y Firth. La figura muestra los efectos de tres variables: Sustancia principal de consumo comparada con alcohol, Número de retratamientos comparado con ningún retratamiento y Hospitalizaciones psiquiátricas previas por unidad adicional. Los valores indican el cambio en la probabilidad de hospitalización psiquiátrica. Los intervalos de confianza se calcularon usando el método delta con aproximación normal."
+#| fig-height: 14 
+#| fig-width: 14
+#| fig-cap: "Efecto Parcial en el Promedio (PEA) y Efecto Parcial Promedio (APE) para las interacciones entre sustancia principal y sexo en los modelos 7. La figura muestra los efectos diferenciados por sexo para cada tipo de sustancia comparada con alcohol, calculando la probabilidad de hospitalización psiquiátrica para hombres y mujeres. Los intervalos de confianza se calcularon usando el método delta con aproximación normal."
 
 ################################################################################
-# PARTIAL EFFECTS ANALYSIS WITHOUT BOOTSTRAP
+# FUNCTIONS TO CALCULATE MARGINAL EFFECTS
 ################################################################################
 
-################################################################################
-# STANDARD CALCULATION FUNCTION
-################################################################################
-
-calculate_marginal_effects_standard <- function(model, data = BASE_ANALISIS, 
-                                              effect_type = "APE") {
+calculate_interaction_effects <- function(model, data = BASE_ANALISIS, effect_type = "APE") {
   
-  # Get model type
+  # Determine model type and link function
   if(inherits(model, "brglmFit")) {
-    link_type <- "firth"
-    model_type <- "firth"
+    link_type <- "logit"
   } else {
     link_type <- family(model)$link
-    model_type <- link_type
   }
   
-  # Get model formula
-  model_formula <- formula(model)
-  
-  # Get coefficients
+  # Extract coefficients and variance-covariance matrix
   coefs <- coef(model)
   vcov_matrix <- vcov(model)
   
-  # Get model matrix
+  # Get design matrix and linear predictor
   X <- model.matrix(model)
-  n <- nrow(X)
-  
-  # Calculate linear predictor
   linear_pred <- X %*% coefs
   
-  # Calculate scaling factor based on link function
-  if(link_type == "logit" || model_type == "firth") {
+  # Calculate scale factor based on link function
+  if(link_type == "logit") {
     pred_probs <- 1 / (1 + exp(-linear_pred))
     scale_factor <- pred_probs * (1 - pred_probs)
   } else if(link_type == "probit") {
@@ -3148,100 +3146,113 @@ calculate_marginal_effects_standard <- function(model, data = BASE_ANALISIS,
     scale_factor <- dnorm(linear_pred)
   }
   
-  results <- list()
+  # Define substances to analyze
+  substances <- c("Marijuana", "Other substances", "Cocaine", "Depressants", "Cocaine paste")
   
-  # For continuous variables (n_hosp_mental_previas)
-  if("n_hosp_mental_previas" %in% names(coefs)) {
-    var_name <- "n_hosp_mental_previas"
+  # Initialize results
+  results <- data.frame()
+  
+  for(substance in substances) {
+    # Coefficient names
+    main_effect <- paste0("principal_sub", substance)
+    interaction_effect <- paste0("principal_sub", substance, ":sexMale")
     
-    if(effect_type == "APE") {
-      me <- mean(scale_factor) * coefs[var_name]
-      se <- sqrt(mean(scale_factor)^2 * vcov_matrix[var_name, var_name])
-    } else {
-      # PEA calculation
-      X_mean <- colMeans(X)
-      linear_pred_mean <- sum(X_mean * coefs)
+    # Check if coefficients exist
+    if(main_effect %in% names(coefs) && interaction_effect %in% names(coefs)) {
       
-      if(link_type == "logit" || model_type == "firth") {
-        p_mean <- 1 / (1 + exp(-linear_pred_mean))
-        scale_factor_mean <- p_mean * (1 - p_mean)
-      } else {
-        scale_factor_mean <- dnorm(linear_pred_mean)
-      }
-      
-      me <- scale_factor_mean * coefs[var_name]
-      se <- scale_factor_mean * sqrt(vcov_matrix[var_name, var_name])
-    }
-    
-    # Standard confidence intervals
-    lower_ci <- me - 1.96 * se
-    upper_ci <- me + 1.96 * se
-    
-    results[[var_name]] <- data.frame(
-      factor = var_name,
-      AME = me,
-      SE = se,
-      z = me / se,
-      p = 2 * pnorm(-abs(me / se)),
-      lower = lower_ci,
-      upper = upper_ci,
-      stringsAsFactors = FALSE
-    )
-  }
-  
-  # For factor variables (principal_sub)
-  substance_vars <- grep("^principal_sub", names(coefs), value = TRUE)
-  substance_vars <- substance_vars[!grepl(":", substance_vars)]
-  
-  if(length(substance_vars) > 0) {
-    substance_effects <- data.frame()
-    
-    for(var in substance_vars) {
+      # Effects for females (baseline category)
       if(effect_type == "APE") {
-        me <- mean(scale_factor) * coefs[var]
-        se <- sqrt(mean(scale_factor)^2 * vcov_matrix[var, var])
+        female_effect <- mean(scale_factor) * coefs[main_effect]
+        female_se <- sqrt(mean(scale_factor)^2 * vcov_matrix[main_effect, main_effect])
       } else {
-        # PEA
+        # PEA: effect at the average
         X_mean <- colMeans(X)
         linear_pred_mean <- sum(X_mean * coefs)
         
-        if(link_type == "logit" || model_type == "firth") {
+        if(link_type == "logit") {
           p_mean <- 1 / (1 + exp(-linear_pred_mean))
           scale_factor_mean <- p_mean * (1 - p_mean)
         } else {
           scale_factor_mean <- dnorm(linear_pred_mean)
         }
         
-        me <- scale_factor_mean * coefs[var]
-        se <- scale_factor_mean * sqrt(vcov_matrix[var, var])
+        female_effect <- scale_factor_mean * coefs[main_effect]
+        female_se <- scale_factor_mean * sqrt(vcov_matrix[main_effect, main_effect])
       }
       
-      # Standard confidence intervals
-      lower_ci <- me - 1.96 * se
-      upper_ci <- me + 1.96 * se
+      # Effects for males (main effect + interaction)
+      male_coef <- coefs[main_effect] + coefs[interaction_effect]
       
-      temp_df <- data.frame(
-        factor = var,
-        AME = me,
-        SE = se,
-        z = me / se,
-        p = 2 * pnorm(-abs(me / se)),
-        lower = lower_ci,
-        upper = upper_ci,
-        stringsAsFactors = FALSE
+      # Variance of linear combination: Var(a + b) = Var(a) + Var(b) + 2*Cov(a,b)
+      male_var <- vcov_matrix[main_effect, main_effect] + 
+                  vcov_matrix[interaction_effect, interaction_effect] + 
+                  2 * vcov_matrix[main_effect, interaction_effect]
+      
+      if(effect_type == "APE") {
+        male_effect <- mean(scale_factor) * male_coef
+        male_se <- sqrt(mean(scale_factor)^2 * male_var)
+      } else {
+        male_effect <- scale_factor_mean * male_coef
+        male_se <- scale_factor_mean * sqrt(male_var)
+      }
+      
+      # Save results
+      results <- rbind(results,
+        data.frame(
+          Substance = substance,
+          Sex = "Female",
+          Effect = female_effect,
+          SE = female_se,
+          CI_lower = female_effect - 1.96 * female_se,
+          CI_upper = female_effect + 1.96 * female_se,
+          stringsAsFactors = FALSE
+        ),
+        data.frame(
+          Substance = substance,
+          Sex = "Male",
+          Effect = male_effect,
+          SE = male_se,
+          CI_lower = male_effect - 1.96 * male_se,
+          CI_upper = male_effect + 1.96 * male_se,
+          stringsAsFactors = FALSE
+        )
       )
-      
-      substance_effects <- rbind(substance_effects, temp_df)
     }
-    results[["principal_sub"]] <- substance_effects
   }
   
-  # For retreatments
+  return(results)
+}
+
+#' Calculate retreatment effects
+calculate_retratamientos_effects <- function(model, data = BASE_ANALISIS, effect_type = "APE") {
+  
+  # Determine model type
+  if(inherits(model, "brglmFit")) {
+    link_type <- "logit"
+  } else {
+    link_type <- family(model)$link
+  }
+  
+  # Extract coefficients
+  coefs <- coef(model)
+  vcov_matrix <- vcov(model)
+  X <- model.matrix(model)
+  linear_pred <- X %*% coefs
+  
+  # Scale factor
+  if(link_type == "logit") {
+    pred_probs <- 1 / (1 + exp(-linear_pred))
+    scale_factor <- pred_probs * (1 - pred_probs)
+  } else if(link_type == "probit") {
+    pred_probs <- pnorm(linear_pred)
+    scale_factor <- dnorm(linear_pred)
+  }
+  
+  # Retreatment variables
   retreat_vars <- grep("^retratamientos_cat", names(coefs), value = TRUE)
+  results <- data.frame()
   
   if(length(retreat_vars) > 0) {
-    retreat_effects <- data.frame()
-    
     for(var in retreat_vars) {
       if(effect_type == "APE") {
         me <- mean(scale_factor) * coefs[var]
@@ -3251,7 +3262,7 @@ calculate_marginal_effects_standard <- function(model, data = BASE_ANALISIS,
         X_mean <- colMeans(X)
         linear_pred_mean <- sum(X_mean * coefs)
         
-        if(link_type == "logit" || model_type == "firth") {
+        if(link_type == "logit") {
           p_mean <- 1 / (1 + exp(-linear_pred_mean))
           scale_factor_mean <- p_mean * (1 - p_mean)
         } else {
@@ -3262,162 +3273,140 @@ calculate_marginal_effects_standard <- function(model, data = BASE_ANALISIS,
         se <- scale_factor_mean * sqrt(vcov_matrix[var, var])
       }
       
-      # Standard confidence intervals
-      lower_ci <- me - 1.96 * se
-      upper_ci <- me + 1.96 * se
-      
-      temp_df <- data.frame(
+      results <- rbind(results, data.frame(
         factor = var,
         AME = me,
         SE = se,
         z = me / se,
         p = 2 * pnorm(-abs(me / se)),
-        lower = lower_ci,
-        upper = upper_ci,
+        lower = me - 1.96 * se,
+        upper = me + 1.96 * se,
         stringsAsFactors = FALSE
-      )
-      
-      retreat_effects <- rbind(retreat_effects, temp_df)
+      ))
     }
-    results[["retratamientos_cat"]] <- retreat_effects
   }
   
   return(results)
 }
 
-################################################################################
-# CALCULATE HOSPITALIZATION EFFECTS FOR RANGE
-################################################################################
-
+#' Calculate cumulative effects of previous hospitalizations
 calculate_hosp_effects_range <- function(model, data, effect_type = "APE", max_hosp = 10) {
   
-  # Get model type
+  # Model type
   if(inherits(model, "brglmFit")) {
     link_type <- "logit"
   } else {
     link_type <- family(model)$link
   }
   
-  # Get coefficients
+  # Coefficients
   coefs <- coef(model)
   beta_hosp <- coefs["n_hosp_mental_previas"]
   vcov_matrix <- vcov(model)
   
-  # Create results for each number of hospitalizations
+  # Calculate for each number of hospitalizations
   hosp_range <- 0:max_hosp
   results <- data.frame()
   
-  for(n_hosp in hosp_range) {
-    # Get model matrix
-    X <- model.matrix(model)
-    
-    # Calculate scaling factor
-    linear_pred <- X %*% coefs
+  # Design matrix and linear predictor
+  X <- model.matrix(model)
+  linear_pred <- X %*% coefs
+  
+  # Scale factor
+  if(link_type == "logit") {
+    pred_probs <- 1 / (1 + exp(-linear_pred))
+    scale_factor <- pred_probs * (1 - pred_probs)
+  } else {
+    scale_factor <- dnorm(linear_pred)
+  }
+  
+  if(effect_type == "APE") {
+    me <- mean(scale_factor) * beta_hosp
+    se <- sqrt(mean(scale_factor)^2 * vcov_matrix["n_hosp_mental_previas", "n_hosp_mental_previas"])
+  } else {
+    # PEA
+    X_mean <- colMeans(X)
+    linear_pred_mean <- sum(X_mean * coefs)
     
     if(link_type == "logit") {
-      pred_probs <- 1 / (1 + exp(-linear_pred))
-      scale_factor <- pred_probs * (1 - pred_probs)
+      p_mean <- 1 / (1 + exp(-linear_pred_mean))
+      scale_factor_mean <- p_mean * (1 - p_mean)
     } else {
-      scale_factor <- dnorm(linear_pred)
+      scale_factor_mean <- dnorm(linear_pred_mean)
     }
     
-    if(effect_type == "APE") {
-      # Marginal effect is constant for linear terms
-      me <- mean(scale_factor) * beta_hosp
-      se <- sqrt(mean(scale_factor)^2 * vcov_matrix["n_hosp_mental_previas", "n_hosp_mental_previas"])
-    } else {
-      # PEA
-      X_mean <- colMeans(X)
-      linear_pred_mean <- sum(X_mean * coefs)
-      
-      if(link_type == "logit") {
-        p_mean <- 1 / (1 + exp(-linear_pred_mean))
-        scale_factor_mean <- p_mean * (1 - p_mean)
-      } else {
-        scale_factor_mean <- dnorm(linear_pred_mean)
-      }
-      
-      me <- scale_factor_mean * beta_hosp
-      se <- scale_factor_mean * sqrt(vcov_matrix["n_hosp_mental_previas", "n_hosp_mental_previas"])
-    }
-    
-    # Cumulative effect
+    me <- scale_factor_mean * beta_hosp
+    se <- scale_factor_mean * sqrt(vcov_matrix["n_hosp_mental_previas", "n_hosp_mental_previas"])
+  }
+  
+  # Calculate cumulative effects
+  for(n_hosp in hosp_range) {
     cumulative_effect <- me * n_hosp
     cumulative_se <- se * sqrt(n_hosp)  # Simplified - assumes independence
     
-    temp_df <- data.frame(
+    results <- rbind(results, data.frame(
       n_hosp = n_hosp,
       marginal_effect = me,
       cumulative_effect = cumulative_effect,
       se = cumulative_se,
       lower = cumulative_effect - 1.96 * cumulative_se,
       upper = cumulative_effect + 1.96 * cumulative_se
-    )
-    
-    results <- rbind(results, temp_df)
+    ))
   }
   
   return(results)
 }
 
 ################################################################################
-# CALCULATE EFFECTS 
+# CALCULATE EFFECTS FOR ALL MODELS
 ################################################################################
 
+# List of models
 models_list <- list(
   "Logit" = modelo7,
   "Probit" = modelo7_probit,
   "Firth" = modelo7_firth
 )
 
-# Initialize with proper structure
-all_effects <- data.frame(
-  factor = character(),
-  AME = numeric(),
-  SE = numeric(),
-  z = numeric(),
-  p = numeric(),
-  lower = numeric(),
-  upper = numeric(),
-  Model = character(),
-  Effect_Type = character(),
-  Variable = character(),
-  stringsAsFactors = FALSE
-)
+# Calculate interaction effects
+all_interaction_effects <- data.frame()
 
-# Calculate effects with standard CI for both APE and PEA
 for (model_name in names(models_list)) {
   model <- models_list[[model_name]]
   
-  # Calculate APE with standard CI
-  ape_results <- calculate_marginal_effects_standard(
-    model, BASE_ANALISIS, "APE"
-  )
+  # PEA
+  pea_results <- calculate_interaction_effects(model, BASE_ANALISIS, "PEA")
+  pea_results$Model <- model_name
+  pea_results$Effect_Type <- "PEA"
   
-  # Calculate PEA with standard CI
-  pea_results <- calculate_marginal_effects_standard(
-    model, BASE_ANALISIS, "PEA"
-  )
+  # APE
+  ape_results <- calculate_interaction_effects(model, BASE_ANALISIS, "APE")
+  ape_results$Model <- model_name
+  ape_results$Effect_Type <- "APE"
   
-  # Combine results
-  for(var_name in names(ape_results)) {
-    # APE
-    temp_ape <- ape_results[[var_name]]
-    temp_ape$Model <- model_name
-    temp_ape$Effect_Type <- "APE"
-    temp_ape$Variable <- var_name
-    all_effects <- rbind(all_effects, temp_ape)
-    
-    # PEA
-    temp_pea <- pea_results[[var_name]]
-    temp_pea$Model <- model_name
-    temp_pea$Effect_Type <- "PEA"
-    temp_pea$Variable <- var_name
-    all_effects <- rbind(all_effects, temp_pea)
-  }
+  all_interaction_effects <- rbind(all_interaction_effects, pea_results, ape_results)
 }
 
-# Calculate hospitalization effects for range
+# Calculate retreatment effects
+all_retreat_effects <- data.frame()
+
+for (model_name in names(models_list)) {
+  model <- models_list[[model_name]]
+  
+  # APE
+  ape_results <- calculate_retratamientos_effects(model, BASE_ANALISIS, "APE")
+  ape_results$Model <- model_name
+  ape_results$Effect_Type <- "APE"
+  
+  # PEA
+  pea_results <- calculate_retratamientos_effects(model, BASE_ANALISIS, "PEA")
+  pea_results$Model <- model_name
+  pea_results$Effect_Type <- "PEA"
+  
+  all_retreat_effects <- rbind(all_retreat_effects, ape_results, pea_results)
+}
+
+# Calculate hospitalization effects
 hosp_effects_all <- data.frame()
 
 for (model_name in names(models_list)) {
@@ -3437,29 +3426,82 @@ for (model_name in names(models_list)) {
 }
 
 ################################################################################
-# CREATE PLOTS 
+# CREATE VISUALIZATIONS
 ################################################################################
 
-# Define cool color palette
+# Color palette
 cool_colors <- c(
   "Logit" = "#2196F3",
   "Probit" = "#00BCD4",
   "Firth" = "#4CAF50"
 )
 
-# Prepare data
-plot_data <- all_effects %>%
+# Prepare data for interactions
+plot_data_interactions <- all_interaction_effects %>%
   mutate(
-    Level = case_when(
-      Variable == "principal_sub" & grepl("Marijuana", factor) ~ "Marijuana",
-      Variable == "principal_sub" & grepl("Other substances", factor) ~ "Other substances",
-      Variable == "principal_sub" & grepl("Cocaine paste", factor) ~ "Cocaine paste",
-      Variable == "principal_sub" & grepl("Cocaine", factor) & !grepl("paste", factor) ~ "Cocaine",
-      Variable == "principal_sub" & grepl("Depressants", factor) ~ "Depressants",
-      Variable == "retratamientos_cat" ~ gsub("retratamientos_cat", "", factor),
-      Variable == "n_hosp_mental_previas" ~ "Per unit increase",
-      TRUE ~ factor
-    ),
+    Effect_label = sprintf("%.3f", Effect),
+    sig_indicator = ifelse((CI_lower > 0 | CI_upper < 0), "", ""),
+    Effect_label_with_sig = paste0(Effect_label, sig_indicator),
+    Substance = factor(Substance, 
+                      levels = c("Marijuana", "Other substances", 
+                                "Cocaine", "Depressants", "Cocaine paste"))
+  )
+
+# PLOT 1: Substance-Sex Interactions with improved annotations
+p_interactions <- ggplot(plot_data_interactions, 
+                        aes(x = Effect, y = Substance, color = Model, shape = Sex)) +
+  # Points
+  geom_point(size = 4, 
+             position = position_dodge(width = 0.7),
+             alpha = 0.5) +
+  # Error bars
+  geom_errorbarh(aes(xmin = CI_lower, xmax = CI_upper),
+                 height = 0.15,
+                 position = position_dodge(width = 0.7),
+                 alpha = 0.5,
+                 size = 0.8) +
+  # Reference line
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.8) +
+  # Text annotations for each point
+  geom_text(aes(label = Effect_label_with_sig, group = interaction(Model, Sex)), 
+            position = position_dodge(width = 0.7),
+            hjust = -0.2,
+            vjust = -0.5,
+            size = 2.8,
+            show.legend = FALSE) +
+  # Facets
+  facet_grid(Sex ~ Effect_Type, scales = "free_x") +
+  # Scales and labels
+  scale_color_manual(values = cool_colors) +
+  scale_shape_manual(values = c("Female" = 16, "Male" = 17)) +
+  labs(
+    title = "Substance-Sex Interaction Effects (vs. Alcohol)",
+    x = "Change in Probability",
+    y = "Substance Type",
+    color = "Model",
+    shape = "Sex"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    strip.text = element_text(size = 10, face = "bold"),
+    strip.background = element_rect(fill = "gray95", color = NA),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "gray85"),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 9),
+    axis.text.y = element_text(margin = margin(r = 5)),
+    axis.title = element_text(size = 12, face = "bold")
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.15, 0.5)))
+
+# PLOT 2: Retreatments
+plot_data_retreat <- all_retreat_effects %>%
+  mutate(
+    Level = gsub("retratamientos_cat", "", factor),
+    Level = factor(Level, levels = c("1", "2", "3+")),
     AME_label = sprintf("%.3f", AME),
     sig_stars = case_when(
       p < 0.001 ~ "***",
@@ -3470,53 +3512,7 @@ plot_data <- all_effects %>%
     AME_label_with_sig = paste0(AME_label, sig_stars)
   )
 
-# Plot 1: Principal Substance
-p_substance <- plot_data %>%
-  filter(Variable == "principal_sub") %>%
-  ggplot(aes(x = AME, y = reorder(Level, AME))) +
-  geom_point(aes(color = Model), 
-             size = 5, 
-             position = position_dodge(width = 0.7),
-             alpha = 0.9) +
-  geom_errorbarh(aes(xmin = lower, xmax = upper, color = Model),
-                 height = 0.2,
-                 position = position_dodge(width = 0.7),
-                 alpha = 0.6,
-                 size = 0.8) +
-  geom_text(aes(label = AME_label_with_sig, color = Model), 
-            position = position_dodge(width = 0.7),
-            hjust = -0.2,
-            vjust = 0,
-            size = 3.5,
-            show.legend = FALSE) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.8) +
-  facet_wrap(~ Effect_Type, ncol = 2) +
-  scale_color_manual(values = cool_colors) +
-  labs(
-    title = "Principal Substance Effects (vs. Alcohol)",
-    x = "Change in Probability",
-    y = "",
-    color = "Model"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 14, face = "bold"),
-    strip.text = element_text(size = 11, face = "bold"),
-    strip.background = element_rect(fill = "gray95", color = NA),
-    legend.position = "bottom",
-    panel.grid.major.y = element_blank(),
-    panel.grid.major.x = element_line(color = "gray85"),
-    panel.grid.minor = element_blank(),
-    axis.text = element_text(size = 10),
-    axis.text.y = element_text(margin = margin(r = 10))
-  ) +
-  scale_x_continuous(expand = expansion(mult = c(0.1, 0.4)))
-
-# Plot 2: Retreatments
-p_retreatments <- plot_data %>%
-  filter(Variable == "retratamientos_cat") %>%
-  mutate(Level = factor(Level, levels = c("1", "2", "3+"))) %>%
-  ggplot(aes(x = AME, y = Level)) +
+p_retreatments <- ggplot(plot_data_retreat, aes(x = AME, y = Level)) +
   geom_point(aes(color = Model), 
              size = 5, 
              position = position_dodge(width = 0.6),
@@ -3538,7 +3534,7 @@ p_retreatments <- plot_data %>%
   labs(
     title = "Retreatment Effects (vs. 0 Retreatments)",
     x = "Change in Probability",
-    y = "",
+    y = "Number of Retreatments",
     color = "Model"
   ) +
   theme_minimal() +
@@ -3555,9 +3551,9 @@ p_retreatments <- plot_data %>%
   ) +
   scale_x_continuous(expand = expansion(mult = c(0.1, 0.4)))
 
-# Plot 3: Previous Hospitalizations (LINE PLOT)
-p_hosp <- hosp_effects_all %>%
-  ggplot(aes(x = n_hosp, y = cumulative_effect, color = Model, fill = Model)) +
+# PLOT 3: Previous hospitalizations
+p_hosp <- ggplot(hosp_effects_all, 
+                 aes(x = n_hosp, y = cumulative_effect, color = Model, fill = Model)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
   geom_line(size = 1.2) +
   geom_point(size = 2, alpha = 0.8) +
@@ -3587,31 +3583,41 @@ p_hosp <- hosp_effects_all %>%
 # COMBINE PLOTS
 ################################################################################
 
+# Combine the three plots
 combined_plot <- plot_grid(
-  p_substance,
+  p_interactions,
   p_retreatments,
   p_hosp,
   ncol = 1,
-  rel_heights = c(1.3, 1, 1),
+  rel_heights = c(1.5, 1, 1),
   labels = NULL
 )
 
+# Create main title
 title <- ggdraw() +
   draw_label(
     "Partial Effects on Mental Hospitalization Probability\n",
-    fontface = 'bold', size = 18
+    fontface = 'bold', 
+    size = 18
   ) +
   draw_label(
     "PEA (Partial Effect at Average) and APE (Average Partial Effect) with 95% confidence intervals",
-    y = 0.9, size = 14, colour = "gray40"
+    y = 0.9, 
+    size = 14, 
+    colour = "gray40"
   )
 
-final_plot <- plot_grid(title, combined_plot, ncol = 1, rel_heights = c(0.1, 1))
+# Final plot
+final_plot <- plot_grid(
+  title, 
+  combined_plot, 
+  ncol = 1, 
+  rel_heights = c(0.1, 1)
+)
 
+# Print
 print(final_plot)
 ```
-
-
 
 ```{r}
 #| eval: false
@@ -4241,11 +4247,13 @@ print(final_plot)
 # Discusión y Conclusiones
 ## Marco teórico planteado y resultados obtenidos
 
-El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiquiátrica depende de la severidad de la adicción, la vulnerabilidad psiquiátrica previa, las características del tratamiento y factores sociodemográficos. Estos resultados respaldan este marco y la hipótesis planteada. El historial psiquiátrico surgió como predictor dominante: cada hospitalización mental previa aumentó significativamente la probabilidad de otra hospitalización subsecuente. Asimismo, los retratamientos mostraron un marcado efecto dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron casi 10 veces mayor odds de hospitalización que aquellos sin recaídas. El tipo de tratamiento también fue significativo: la atención residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo al controlar la mayor severidad de los casos derivados a residencias (sesgo de selección). En cuanto al tipo de sustancia, el consumo de depresores del SNC tuvo el efecto más marcado, aumentando la probabilidad de hospitalización comparado con el alcohol, en línea con su mayor potencial de complicaciones psiquiátricas agudas. En conjunto, estos hallazgos sustentan el modelo de riesgo acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa sustancialmente el riesgo de descompensación mental, concordando con evidencia internacional en patología dual que vincula la comorbilidad adictiva-psiquiátrica a mayores tasas de hospitalización.
+El modelo teórico asumió un riesgo acumulativo en que la hospitalización psiquiátrica depende de sustancias depresosaras del sistema nevioso central y que interacciona con sexo. Otras variables importantes que ajsutan el modelo y previene el sesgo por omisión es el historial psiquiátrico: cada hospitalización mental previa aumentó significativamente la probabilidad de otra hospitalización subsecuente. Asimismo, los retratamientos mostraron un marcado efecto dosis-respuesta: pacientes con ≥3 reingresos a tratamiento presentaron una mayor APE de hospitalización que aquellos sin recaídas. El tipo de tratamiento también fue significativo: la atención residencial se asoció con mayor riesgo relativo a la ambulatoria, aunque parte de esta brecha se redujo al controlar la mayor severidad de los casos derivados a residencias. 
+
+En conjunto, estos hallazgos sustentan el modelo de riesgo acumulativo: la combinación de vulnerabilidad psiquiátrica previa y alta severidad adictiva incrementa sustancialmente el riesgo de descompensación mental, concordando con evidencia internacional en patología dual que vincula la comorbilidad adictiva-psiquiátrica a mayores tasas de hospitalización.
 
 ## Limitaciones del estudio
 
-Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial podría reflejar en parte la mayor gravedad clínica de sus pacientes. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Cuarto, estos factores no observados genera posibles sesgos de variables omitidas. Entre estas variables están la severidad de la adicción, comorbilidades psiquiátricas específicas, apoyo social y familiar, adherencia al tratamiento, calidad del tratamiento, entre otras. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de hospitalización.
+Este estudio observacional presenta varias limitaciones. Primero, la naturaleza no experimental impide inferir causalidad sólida, dado que pueden existir endogeneidades por variables omitidas; por ejemplo, el efecto aparente del tratamiento residencial y el numeró de retratamientos  podría reflejar en parte la mayor gravedad clínica de sus pacientes, pero que no se midió directamente. Segundo, el uso de registros administrativos conlleva posibles sesgos de medición: las recaídas podrían estar subreportadas (al considerar solo reingresos formales) y solo se registran hospitalizaciones en el sistema de salud, omitiendo episodios no atendidos o diagnósticos no consignados generando una autoselciones de los casos más graves. Tercero, el modelo predictivo mostró limitaciones de ajuste y poder explicativo: la prueba de Hosmer-Lemeshow resultó significativa (falta de calibración) y la capacidad discriminativa fue moderada (AUC ~0.78), lo que sugiere influencia de factores no observados. Cuarto, estos factores no observados genera posibles sesgos de variables omitidas. Entre estas variables están la severidad de la adicción, comorbilidades psiquiátricas específicas, apoyo social y familiar, adherencia al tratamiento, calidad del tratamiento, entre otras. Finalmente, para afianzar las relaciones causales, se recomienda emplear diseños cuasiexperimentales y datos longitudinales de seguimiento. Dichos enfoques permitirían controlar mejor la endogeneidad, examinar la secuencia temporal entre recaídas y hospitalizaciones, y aportar evidencia más sólida para guiar intervenciones que reduzcan el riesgo de hospitalización.
 
 \newpage
 
